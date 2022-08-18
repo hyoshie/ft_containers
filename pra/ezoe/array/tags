@@ -1,0 +1,44 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+ARRAY_HPP	srcs/array.hpp	/^#define ARRAY_HPP$/;"	d
+CXX	Makefile	/^CXX = c++$/;"	m
+CXXFLAGS	Makefile	/^CXXFLAGS = -Wall \\$/;"	m
+DEPS	Makefile	/^DEPS = $(OBJS:.o=.d)$/;"	m
+GTEST_DIR	Makefile	/^GTEST_DIR = $(ROOT_DIR)\/tests\/googletest-release-1.12.1$/;"	m
+INCDIR	Makefile	/^INCDIR = . \\$/;"	m
+INCS	Makefile	/^INCS = $(addprefix -I, $(INCDIR))$/;"	m
+LDFLAGS	Makefile	/^LDFLAGS = -L$(GTEST_DIR)\/lib \\$/;"	m
+LDLIBS	Makefile	/^LDLIBS = -lgtest \\$/;"	m
+NAME	Makefile	/^NAME = test.exe$/;"	m
+OBJDIR	Makefile	/^OBJDIR	= .\/objs$/;"	m
+OBJS	Makefile	/^OBJS 	= $(addprefix $(OBJDIR)\/, $(notdir $(SRCS:.cpp=.o)))$/;"	m
+ROOT_DIR	Makefile	/^ROOT_DIR = ..\/..$/;"	m
+SRCDIR	Makefile	/^SRCDIR	= .\/srcs$/;"	m
+SRCS	Makefile	/^SRCS = $(shell find $(SRCDIR) -name '*.cpp')$/;"	m
+TEST_SRCS	Makefile	/^TEST_SRCS = $(shell find gtest\/src -name '*.cpp')$/;"	m
+UTIL_HPP	srcs/util.hpp	/^#define UTIL_HPP$/;"	d
+a_	srcs/array.hpp	/^  Array &a_;$/;"	m	struct:array_iterator
+array	srcs/array.hpp	/^struct array {$/;"	s
+array_iterator	srcs/array.hpp	/^struct array_iterator {$/;"	s
+back	srcs/array.hpp	/^  const_reference back() const { return storage[N - 1]; }$/;"	f	struct:array
+back	srcs/array.hpp	/^  reference back() { return storage[N - 1]; }$/;"	f	struct:array
+begin	srcs/array.hpp	/^  iterator begin() { return array_iterator(*this, 0); }$/;"	f	struct:array
+end	srcs/array.hpp	/^  iterator end() { return array_iterator(*this, N); }$/;"	f	struct:array
+front	srcs/array.hpp	/^  const_reference front() const { return storage[0]; }$/;"	f	struct:array
+front	srcs/array.hpp	/^  reference front() { return storage[0]; }$/;"	f	struct:array
+i	srcs/array.hpp	/^  std::size_t i;$/;"	m	struct:array_iterator
+main	sample/main.cpp	/^int main() {$/;"	f
+main	srcs/main.cpp	/^int main() {$/;"	f
+operator *	srcs/array.hpp	/^  Array::reference operator*() { return a[i]; };$/;"	f	struct:array_iterator
+operator ++	srcs/array.hpp	/^  array_iterator &operator++() {$/;"	f	struct:array_iterator
+operator --	srcs/array.hpp	/^  array_iterator &operator--() {$/;"	f	struct:array_iterator
+operator []	srcs/array.hpp	/^  const_reference operator[](size_type i) const { return storage[i]; }$/;"	f	struct:array
+operator []	srcs/array.hpp	/^  reference operator[](size_type i) { return storage[i]; }$/;"	f	struct:array
+print	srcs/util.hpp	/^void print(Container const& c) {$/;"	f
+printIter	sample/main.cpp	/^void printIter() {$/;"	f
+size	srcs/array.hpp	/^typename array<T, N>::size_type array<T, N>::size() const {$/;"	f	class:array
+useIndirectionOperator	sample/main.cpp	/^void useIndirectionOperator() {$/;"	f
