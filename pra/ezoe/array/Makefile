@@ -39,6 +39,11 @@ $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
 run: $(NAME)
 	./$(NAME)
 
+.PHONY: sample
+sample:
+	$(CXX) -MMD -MP sample/main.cpp
+	./a.out
+
 .PHONY: clean
 clean:
 	$(RM) $(OBJS) $(DEPS)
