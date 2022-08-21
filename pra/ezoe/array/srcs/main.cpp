@@ -41,6 +41,15 @@ void useComparsionOperator() {
   bool is_differnt = (it1 != it2);
   PRINT(is_same);
   PRINT(is_differnt);
+  bool is_ge = (it1 >= it2);
+  bool is_gt = (++it1 > it2);
+  it2 += 2;
+  bool is_le = (it1 <= it2);
+  bool is_lt = (it1 < it2);
+  PRINT(is_ge);
+  PRINT(is_gt);
+  PRINT(is_le);
+  PRINT(is_lt);
 }
 
 void useAlgorithm() {
@@ -50,9 +59,25 @@ void useAlgorithm() {
   std::for_each(std::begin(a), std::end(a), [](auto x) { std::cout << x; });
 }
 
+void useAlismeticOperator() {
+  using array_type = array<int, 5>;
+  array_type a = {1, 2, 3, 4, 5};
+
+  auto it1 = a.begin();
+  PRINT(*it1);
+  it1 += 2;
+  PRINT(*it1);
+  PRINT(*(it1 + 2));
+  it1 -= 1;
+  PRINT(*it1);
+  PRINT(*(it1 - 1));
+  PRINT(it1[3]);
+}
+
 int main() {
   // useFrontBackSize();
   // useXXcrementOperator();
-  // useComparsionOperator();
-  useAlgorithm();
+  useComparsionOperator();
+  // useAlgorithm();
+  // useAlismeticOperator();
 }

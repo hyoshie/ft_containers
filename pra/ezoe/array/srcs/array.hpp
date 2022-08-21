@@ -64,7 +64,104 @@ struct array_iterator {
   // 写経したけどa_も同じオブジェクトか調べたほうがいい?
   bool operator==(array_iterator const &right) { return i_ == right.i_; }
   bool operator!=(array_iterator const &right) { return i_ != right.i_; }
+  bool operator>(array_iterator const &right) { return i_ > right.i_; }
+  bool operator>=(array_iterator const &right) {
+    return *this == right || *this > right;
+  }
+  bool operator<(array_iterator const &right) { return i_ < right.i_; }
+  bool operator<=(array_iterator const &right) {
+    return *this == right || *this < right;
+  }
+  // alithmetic
+  array_iterator &operator+=(std::size_t n) {
+    i_ += n;
+    return *this;
+  }
+  array_iterator operator+(std::size_t n) const {
+    auto copy = *this;
+    copy += n;
+    return copy;
+  }
+  array_iterator &operator-=(std::size_t n) {
+    i_ -= n;
+    return *this;
+  }
+  array_iterator operator-(std::size_t n) const {
+    auto copy = *this;
+    copy -= n;
+    return copy;
+  }
+  // subscript
+  typename Array::reference operator[](std::size_t n) const {
+    return *(*this + n);
+  }
   typename Array::reference operator*() { return a_[i_]; };
+};
+
+template <typename Array>
+struct array_const_iterator {
+  Array &a_;
+  std::size_t i_;
+
+  array_const_iterator(Array &a, std::size_t i) : a_(a), i_(i){};
+  array_const_iterator(typename array_iterator<Array>::iterator const &iter)
+      : a_(iter.a_), i_(iter.i_){};
+
+  // increment & decrement
+  array_const_iterator &operator++() {
+    ++i_;
+    return *this;
+  }
+  array_const_iterator operator++(int) {
+    array_const_iterator copy = *this;
+    ++*this;
+    return copy;
+  }
+  array_const_iterator &operator--() {
+    --i_;
+    return *this;
+  }
+  array_const_iterator operator--(int) {
+    array_const_iterator copy = *this;
+    --*this;
+    return copy;
+  }
+  // comparsion
+  // 写経したけどa_も同じオブジェクトか調べたほうがいい?
+  bool operator==(array_const_iterator const &right) { return i_ == right.i_; }
+  bool operator!=(array_const_iterator const &right) { return i_ != right.i_; }
+  bool operator>(array_const_iterator const &right) { return i_ > right.i_; }
+  bool operator>=(array_const_iterator const &right) {
+    return *this == right || *this > right;
+  }
+  bool operator<(array_const_iterator const &right) { return i_ < right.i_; }
+  bool operator<=(array_const_iterator const &right) {
+    return *this == right || *this < right;
+  }
+  // alithmetic
+  array_const_iterator &operator+=(std::size_t n) {
+    i_ += n;
+    return *this;
+  }
+  array_const_iterator operator+(std::size_t n) const {
+    auto copy = *this;
+    copy += n;
+    return copy;
+  }
+  array_const_iterator &operator-=(std::size_t n) {
+    i_ -= n;
+    return *this;
+  }
+  array_const_iterator operator-(std::size_t n) const {
+    auto copy = *this;
+    copy -= n;
+    return copy;
+  }
+  // subscript
+  typename Array::const_reference operator[](std::size_t n) const {
+    return *(*this + n);
+  }
+  typename Array::const_reference operator*() const { return a_[i_]; };
 };
 
 #endif /* ARRAY_HPP */
