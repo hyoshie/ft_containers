@@ -7,7 +7,7 @@ CXXFLAGS = -Wall \
 		   -Werror \
 		   -Wextra \
 		   -Wshadow \
-		   -std=c++11 \
+		   -std=c++14 \
 		   -pedantic \
 		   $(INCS) \
 		   $(NULL)

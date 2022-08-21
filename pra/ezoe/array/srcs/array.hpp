@@ -41,14 +41,29 @@ struct array_iterator {
 
   array_iterator(Array &a, std::size_t i) : a_(a), i_(i){};
 
+  // increment & decrement
   array_iterator &operator++() {
     ++i_;
     return *this;
-  };
+  }
+  array_iterator operator++(int) {
+    array_iterator copy = *this;
+    ++*this;
+    return copy;
+  }
   array_iterator &operator--() {
     --i_;
     return *this;
-  };
+  }
+  array_iterator operator--(int) {
+    array_iterator copy = *this;
+    --*this;
+    return copy;
+  }
+  // comparsion
+  // 写経したけどa_も同じオブジェクトか調べたほうがいい?
+  bool operator==(array_iterator const &right) { return i_ == right.i_; }
+  bool operator!=(array_iterator const &right) { return i_ != right.i_; }
   typename Array::reference operator*() { return a_[i_]; };
 };
 
