@@ -1,6 +1,7 @@
 #ifndef VECTOR_HPP
 #define VECTOR_HPP
 
+// #include <experimental/scope>
 #include <memory>
 #include <stdexcept>
 
@@ -21,17 +22,17 @@ class vector {
   using const_iterator = const_pointer;
   using reverse_iterator = std::reverse_iterator<iterator>;
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
-
   // コンストラクター
   vector() : vector(allocator_type()) {}
-  vector(const allocator_type &alloc_) noexcept : alloc_(alloc_) {}
-  vector(size_type size, const allocator_type &alloc_) noexcept
-      : alloc_(alloc_) {
-    // resize(size);
+  vector(const allocator_type &alloc) noexcept : alloc_(alloc) {}
+  vector(size_type size,
+         const allocator_type &alloc = allocator_type()) noexcept
+      : vector(alloc) {
+    resize(size);
   }
   vector(size_type size, const_reference value,
-         const allocator_type &alloc_) noexcept
-      : alloc_(alloc_) {
+         const allocator_type &alloc = allocator_type()) noexcept
+      : vector(alloc) {
     resize(size, value);
   }
   // デストラクター
@@ -80,9 +81,60 @@ class vector {
   size_type capacity() const noexcept {
     return std::distance(first_, reserved_last_);
   }
+  void reserve(size_type sz) {
+    if (sz <= capacity()) return;
+    // 古いストレージの情報を保存
+    auto ptr = allocate(sz);
+    auto old_first = first_;
+    auto old_last = last_;
+    // auto old_capacity = capacity();
+    // 新しいストレージに差し替え
+    first_ = ptr;
+    last_ = first_;
+    reserved_last_ = first_ + sz;
+    // 例外安全のため
+    // 信託すエラーになるのでコメントアウト
+    // std::scope_exit e(
+    //     [&] { traits::deallocate(alloc_, old_first, old_capacity); });
+    // 古いストレージから新しいストレージに要素をコピー構築
+    // 実際にはmove構築
+    for (auto old_iter = old_first; old_iter != old_last; ++old_iter, ++last_) {
+      construct(last_, std::move(*old_iter));
+    }
+    // 古いストレージの値を破棄
+    for (auto riter = reverse_iterator(old_last),
+              rend = reverse_iterator(old_first);
+         riter != rend; ++riter) {
+      destroy(&*riter);
+    }
+  }
 
   // 変更
   void clear() noexcept { destroy_until(rend()); }
+  void resize(size_type sz) {
+    if (sz < size()) {
+      auto diff = size() - sz;
+      destroy_until(rbegin() + diff);
+      last_ = first_ + sz;
+    } else if (sz > size()) {
+      reserve(sz);
+      for (; last_ != reserved_last_; ++last_) {
+        construct(last_);
+      }
+    }
+  }
+  void resize(size_type sz, const_reference value) {
+    if (sz < size()) {
+      auto diff = size() - sz;
+      destroy_until(rbegin() + diff);
+      last_ = first_ + sz;
+    } else if (sz > size()) {
+      reserve(sz);
+      for (; last_ != reserved_last_; ++last_) {
+        construct(last_, value);
+      }
+    }
+  }
 
  private:
   using traits = std::allocator_traits<allocator_type>;
@@ -93,9 +145,9 @@ class vector {
   void construct(pointer ptr, const_reference value) {
     traits::construct(alloc_, ptr, value);
   }
-  // void construct(pointer ptr, value_type &&value) {
-  //   traits::construct(allco, ptr, std::move(value));
-  // }
+  void construct(pointer ptr, value_type &&value) {
+    traits::construct(alloc_, ptr, std::move(value));
+  }
   void destroy(pointer ptr) { traits::destroy(alloc_, ptr); }
   void destroy_until(reverse_iterator rend) {
     for (auto riter = rbegin(); riter != rend; ++riter, --last_) {
