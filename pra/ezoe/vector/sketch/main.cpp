@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <array>
 #include <iostream>
 #include <vector>
 
@@ -19,7 +20,9 @@ struct X {
 };
 
 int main() {
-  std::vector<X> v(5);
-  v.resize(5);
-  std::cout << "resized!" << std::endl;
+  auto print = [](auto x) { std::cerr << x << std::endl; };
+  // std::vector<int> v(5, 42);
+  std::array<int, 5> a{1, 2, 3, 4, 5};
+  std::vector<int> v(std::begin(a), std::end(a));
+  std::for_each(v.begin(), v.end(), print);
 }

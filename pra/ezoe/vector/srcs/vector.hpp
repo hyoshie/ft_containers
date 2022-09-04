@@ -35,6 +35,19 @@ class vector {
       : vector(alloc) {
     resize(size, value);
   }
+  // enable_if
+  // template <typename InputIterator>
+  // vector(InputIterator first, InputIterator last,
+  //        const allocator_type &alloc = allocator_type()) {
+  //   reserve(std::distance(first, last));
+  //   for (auto i = first; i != last; ++i) {
+  //     push_back(i);
+  //   }
+  // }
+  // vector(std::initializer_list<value_type> init,
+  //        const allocator_type &alloc = allocator_type())
+  //     : vector(init.begin(), init.end(), alloc) {}
+
   // デストラクター
   ~vector() {
     clear();
@@ -45,7 +58,6 @@ class vector {
   vector &operator=(const vector &x);
 
   // 要素アクセス
-  void push_back(const T &x);
   reference operator[](size_type i) noexcept { return first_[i]; }
   const_reference operator[](size_type i) const noexcept { return first_[i]; }
   reference at(size_type i) noexcept {
@@ -134,6 +146,33 @@ class vector {
         construct(last_, value);
       }
     }
+  }
+  void push_back(const_reference value) {
+    if (size() + 1 > capacity()) {
+      auto c = size();
+      if (c == 0) {
+        c = 1;
+      } else {
+        c *= 2;  //オーバーフロー処理
+      }
+      reserve(c);
+    }
+    construct(last_, value);
+    ++last_;
+  }
+  void shrink_to_fit() {
+    if (size() == capacity()) return;
+    auto ptr = allocate(size());
+    auto current_size = size();
+    for (auto raw_ptr = ptr, iter = begin(), iter_end = end(); iter != iter_end;
+         ++iter, ++raw_ptr) {
+      construct(raw_ptr, *iter);
+    }
+    clear();
+    deallocate();
+    first_ = ptr;
+    last_ = ptr + current_size;
+    reserved_last_ = last_;
   }
 
  private:
