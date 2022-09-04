@@ -54,8 +54,40 @@ class vector {
     deallocate();
   }
   // コピー
-  vector(const vector &x);
-  vector &operator=(const vector &x);
+  vector(const vector &rhs)
+      : alloc_(traits::select_on_container_copy_construction(rhs.alloc_)) {
+    reserve(rhs.size());
+    for (auto dest = first_, src = rhs.begin(), last = rhs.end(); src != last;
+         ++dest, ++src) {
+      construct(dest, *src);
+    }
+    last_ = first_ + rhs.size();
+  }
+  vector &operator=(const vector &rhs) {
+    if (this == &rhs) {
+      return *this;
+    }
+    if (size() == rhs.size()) {
+      std::copy(rhs.begin(), rhs.end(), begin());
+    } else {
+      if (capacity() >= rhs.size()) {
+        std::copy(rhs.begin(), rhs.begin() + rhs.size(), begin());
+        for (auto src_iter = rhs.begin() + rhs.size(), src_end = rhs.end();
+             src_iter != src_end; ++src_iter, ++last_) {
+          construct(last_, *src_iter);
+        }
+      } else {
+        destroy_until(rend());
+        reserve(rhs.size());
+        for (auto src_iter = rhs.begin(), src_end = rhs.end(),
+                  dest_iter = begin();
+             src_iter != src_end; ++src_iter, ++dest_iter, ++last_) {
+          construct(dest_iter, *src_iter);
+        }
+      }
+    }
+    return *this;
+  }
 
   // 要素アクセス
   reference operator[](size_type i) noexcept { return first_[i]; }
