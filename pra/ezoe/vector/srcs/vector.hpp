@@ -24,13 +24,14 @@ class vector {
 
   // コンストラクター
   vector() : vector(allocator_type()) {}
-  vector(const allocator_type &alloc) noexcept : alloc_(alloc) {}
-  vector(size_type size, const allocator_type &alloc) noexcept : alloc_(alloc) {
-    resize(size);
+  vector(const allocator_type &alloc_) noexcept : alloc_(alloc_) {}
+  vector(size_type size, const allocator_type &alloc_) noexcept
+      : alloc_(alloc_) {
+    // resize(size);
   }
   vector(size_type size, const_reference value,
-         const allocator_type &alloc) noexcept
-      : alloc_(alloc) {
+         const allocator_type &alloc_) noexcept
+      : alloc_(alloc_) {
     resize(size, value);
   }
   // デストラクター
@@ -62,13 +63,13 @@ class vector {
   iterator end() noexcept { return last_; }
   iterator end() const noexcept { return last_; }
   const_iterator cend() const noexcept { return end; }
-  iterator rbegin() noexcept { return reverse_iterator{last_}; }
-  iterator rbegin() const noexcept { return reverse_iterator{last_}; }
+  reverse_iterator rbegin() noexcept { return reverse_iterator{last_}; }
+  reverse_iterator rbegin() const noexcept { return reverse_iterator{last_}; }
   const_reverse_iterator crbegin() const noexcept {
     return reverse_iterator{last_};
   }
-  iterator rend() noexcept { return reverse_iterator{first_}; }
-  iterator rend() const noexcept { return reverse_iterator{first_}; }
+  reverse_iterator rend() noexcept { return reverse_iterator{first_}; }
+  reverse_iterator rend() const noexcept { return reverse_iterator{first_}; }
   const_reverse_iterator crend() const noexcept {
     return reverse_iterator{last_};
   }
@@ -79,9 +80,6 @@ class vector {
   size_type capacity() const noexcept {
     return std::distance(first_, reserved_last_);
   }
-  size_type capacity() const noexcept {
-    return std::distance(first_, reserved_last_);
-  }
 
   // 変更
   void clear() noexcept { destroy_until(rend()); }
@@ -89,20 +87,18 @@ class vector {
  private:
   using traits = std::allocator_traits<allocator_type>;
 
-  pointer allocate(sizetype n) { return traits::allocate(alloc, n); }
-  pointer deallocate(sizetype n) {
-    return traits::deallocate(alloc, n, capacity());
-  }
-  void construct(pointer ptr) { traits::construct(allco, ptr); }
+  pointer allocate(size_type n) { return traits::allocate(alloc_, n); }
+  void deallocate() { traits::deallocate(alloc_, first_, capacity()); }
+  void construct(pointer ptr) { traits::construct(alloc_, ptr); }
   void construct(pointer ptr, const_reference value) {
-    traits::construct(alloc, ptr, value);
+    traits::construct(alloc_, ptr, value);
   }
   // void construct(pointer ptr, value_type &&value) {
   //   traits::construct(allco, ptr, std::move(value));
   // }
-  void destroy(pointer ptr) { traits::destroy(alloc, ptr); }
+  void destroy(pointer ptr) { traits::destroy(alloc_, ptr); }
   void destroy_until(reverse_iterator rend) {
-    for (auto riter = rbegin(); riter != rend; ++riter, --last) {
+    for (auto riter = rbegin(); riter != rend; ++riter, --last_) {
       destroy(&*riter);  // ?
     }
   }
