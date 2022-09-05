@@ -32,6 +32,9 @@ all: $(NAME)
 $(NAME): $(OBJDIR) $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) -o $@
 
+$(OBJDIR):
+	mkdir -p $@
+
 $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@
 
