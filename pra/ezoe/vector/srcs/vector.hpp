@@ -24,15 +24,10 @@ class vector {
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
   // コンストラクター
   vector() : vector(allocator_type()) {}
-  vector(const allocator_type &alloc) noexcept
+  explicit vector(const allocator_type &alloc) noexcept
       : first_(NULL), last_(NULL), reserved_last_(NULL), alloc_(alloc) {}
-  vector(size_type size,
-         const allocator_type &alloc = allocator_type()) noexcept
-      : vector(alloc) {
-    resize(size);
-  }
-  vector(size_type size, const_reference value,
-         const allocator_type &alloc = allocator_type()) noexcept
+  explicit vector(size_type size, const_reference value = T(),
+                  const allocator_type &alloc = allocator_type()) noexcept
       : vector(alloc) {
     resize(size, value);
   }
