@@ -10,7 +10,7 @@ struct X {
 };
 
 int main() {
-  auto print = [](auto x) { std::cerr << x << std::endl; };
+  auto print = [](int x) { std::cerr << x << std::endl; };
   std::allocator<int> alloc;
   std::array<int, 5> a{1, 2, 3, 4, 5};
   ft::vector<int> v(a.begin(), a.end());
