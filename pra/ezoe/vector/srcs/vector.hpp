@@ -37,17 +37,17 @@ class vector {
     resize(size, value);
   }
   // enable_if
-  // template <typename InputIterator>
-  // vector(InputIterator first, InputIterator last,
-  //        const allocator_type &alloc = allocator_type()) {
-  //   reserve(std::distance(first, last));
-  //   for (auto i = first; i != last; ++i) {
-  //     push_back(i);
-  //   }
-  // }
-  // vector(std::initializer_list<value_type> init,
-  //        const allocator_type &alloc = allocator_type())
-  //     : vector(init.begin(), init.end(), alloc) {}
+  template <typename InputIterator>
+  vector(InputIterator first, InputIterator last,
+         const allocator_type &alloc = allocator_type(),
+         typename std::enable_if<!std::is_integral<InputIterator>::value,
+                                 InputIterator>::type * = NULL)
+      : vector(alloc) {
+    reserve(std::distance(first, last));
+    for (auto i = first; i != last; ++i) {
+      push_back(*i);
+    }
+  }
 
   // デストラクター
   ~vector() {
@@ -102,6 +102,10 @@ class vector {
     if (i >= size()) throw std::out_of_range("index is out of range.");
     return first_[i];
   }
+  reference front() { return *first_; }
+  const_reference front() const { return *first_; }
+  reference back() { return *(last_ - 1); }
+  const_reference back() const { return *(last_ - 1); }
 
   // イテレーターアクセス
   iterator begin() noexcept { return first_; }
@@ -133,15 +137,11 @@ class vector {
     auto ptr = allocate(sz);
     auto old_first = first_;
     auto old_last = last_;
-    // auto old_capacity = capacity();
+    auto old_capacity = capacity();
     // 新しいストレージに差し替え
     first_ = ptr;
     last_ = first_;
     reserved_last_ = first_ + sz;
-    // 例外安全のため
-    // 信託すエラーになるのでコメントアウト
-    // std::scope_exit e(
-    //     [&] { traits::deallocate(alloc_, old_first, old_capacity); });
     // 古いストレージから新しいストレージに要素をコピー構築
     // 実際にはmove構築
     for (auto old_iter = old_first; old_iter != old_last; ++old_iter, ++last_) {
@@ -153,6 +153,7 @@ class vector {
          riter != rend; ++riter) {
       destroy(&*riter);
     }
+    traits::deallocate(alloc_, old_first, old_capacity);
   }
 
   // 変更
