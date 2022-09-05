@@ -16,10 +16,9 @@ int main() {
   v1.resize(5);
   v1.push_back(42);
   std::for_each(v1.begin(), v1.end(), print);
-  std::cerr << v1.capacity() << std::endl;
   ft::vector<int> v2(v1);
   std::for_each(v2.begin(), v2.end(), print);
-  // ft::vector<int> v3;
-  // v3 = v1;
-  // std::for_each(v3.begin(), v3.end(), print);
+  ft::vector<int> v3;
+  v3 = v1;
+  std::for_each(v3.begin(), v3.end(), print);
 }

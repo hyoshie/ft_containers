@@ -24,7 +24,8 @@ class vector {
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
   // コンストラクター
   vector() : vector(allocator_type()) {}
-  vector(const allocator_type &alloc) noexcept : alloc_(alloc) {}
+  vector(const allocator_type &alloc) noexcept
+      : first_(NULL), last_(NULL), reserved_last_(NULL), alloc_(alloc) {}
   vector(size_type size,
          const allocator_type &alloc = allocator_type()) noexcept
       : vector(alloc) {
@@ -55,7 +56,7 @@ class vector {
   }
   // コピー
   vector(const vector &rhs)
-      : alloc_(traits::select_on_container_copy_construction(rhs.alloc_)) {
+      : vector(traits::select_on_container_copy_construction(rhs.alloc_)) {
     reserve(rhs.size());
     for (auto dest = first_, src = rhs.begin(), last = rhs.end(); src != last;
          ++dest, ++src) {
@@ -71,6 +72,7 @@ class vector {
       std::copy(rhs.begin(), rhs.end(), begin());
     } else {
       if (capacity() >= rhs.size()) {
+        std::cerr << "[\x1b[32mPASS\x1b[39m]" << std::endl;
         std::copy(rhs.begin(), rhs.begin() + rhs.size(), begin());
         for (auto src_iter = rhs.begin() + rhs.size(), src_end = rhs.end();
              src_iter != src_end; ++src_iter, ++last_) {
