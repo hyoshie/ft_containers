@@ -106,6 +106,8 @@ class vector {
   const_reference front() const { return *first_; }
   reference back() { return *(last_ - 1); }
   const_reference back() const { return *(last_ - 1); }
+  pointer data() { return first_; }
+  const_pointer data() const noexcept { return first_; }
 
   // イテレーターアクセス
   iterator begin() noexcept { return first_; }
