@@ -104,6 +104,15 @@ struct iota_iterator {
     ++*this;
     return old;
   }
+  iota_iterator& operator--() noexcept {
+    --value_;
+    return *this;
+  }
+  iota_iterator operator--(int) noexcept {
+    auto old = *this;
+    --*this;
+    return old;
+  }
   bool operator==(iota_iterator const& i) const noexcept {
     return value_ == i.value_;
   }

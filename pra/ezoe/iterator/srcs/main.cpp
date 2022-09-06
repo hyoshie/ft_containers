@@ -75,4 +75,16 @@ int main() {
     (void)const_value;
     (void)value;
   }
+  {
+    iota_iterator<int> first(0), last(10);
+
+    first++;
+    last--;
+    std::cerr << *first << std::endl;
+    std::cerr << *last << std::endl;
+    ++first;
+    --last;
+    std::cerr << *first << std::endl;
+    std::cerr << *last << std::endl;
+  }
 }
