@@ -9,4 +9,10 @@ void print(Container const& c) {
   std::cout << std::endl;
 }
 
+template <typename InputIterator>
+void print(InputIterator iter, InputIterator end_iter) {
+  while (iter != end_iter) std::cout << *iter++;
+  std::cerr << std::endl;
+}
+
 #endif /* UTIL_HPP */

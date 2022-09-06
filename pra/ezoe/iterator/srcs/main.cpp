@@ -40,4 +40,39 @@ int main() {
     std::copy(std::begin(v), std::end(v), out);
     print(tmp);
   }
+  // {
+  //   cin_iterator<int> input, fail(true);
+  //   std::vector<int> buffer;
+  //   auto out = std::back_inserter(buffer);
+  //   std::copy(input, fail, out);
+  //   print(buffer);
+  // }
+  {
+    std::vector<int> v = {1, 2, 3, 4, 5};
+    print(std::begin(v), std::end(v));
+  }
+  // {
+  //   cin_iterator<int> iter, fail(true);
+  //   print(iter, fail);
+  // }
+  // {
+  //   std::istream_iterator<int> iter(std::cin), end_iter;
+  //   print(iter, end_iter);
+  // }
+  {
+    iota_iterator<int> i;
+    iota_iterator<int> first(0), last(10);
+
+    i = last;
+  }
+  {
+    iota_iterator<int> non_const(0);
+    int value = *non_const;
+    *non_const = 1;
+
+    const iota_iterator<int> immutable(0);
+    int const_value = *immutable;
+    (void)const_value;
+    (void)value;
+  }
 }
