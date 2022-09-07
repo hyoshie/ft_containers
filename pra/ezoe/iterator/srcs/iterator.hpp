@@ -149,7 +149,7 @@ class reverse_iterator
  protected:
   Iter current_;
   typedef ft::iterator_traits<Iter> traits_type;
-}
+};
 
 // non-member functions
 template <class Iterator1, class Iterator2>
