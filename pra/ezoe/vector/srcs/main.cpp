@@ -281,7 +281,9 @@ void tutorial_test() {
 
   {
     ft::vector<int> v;
-    for (int i = 1; i <= 5; ++i) v.push_back(i);
+    for (int i = 1; i <= 5; ++i) {
+      v.push_back(i);
+    }
     ft::vector<int> w = v;
     // wは{1,2,3,4,5}
   }
