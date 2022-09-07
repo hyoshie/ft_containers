@@ -4,6 +4,7 @@
 #include <iterator>
 #include <vector>
 
+#include "ezoe_iterator.hpp"
 #include "iterator.hpp"
 #include "util.hpp"
 
