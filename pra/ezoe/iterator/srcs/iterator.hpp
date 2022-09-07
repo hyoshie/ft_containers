@@ -90,10 +90,12 @@ class reverse_iterator
 
   template <class U>
   reverse_iterator& operator=(const reverse_iterator<U>& other) {
-    if (this == &other) return;
+    if (this == &other) return *this;
     current_ = other.current_;
     return *this;
   };
+
+  virtual ~reverse_iterator(){};
 
   iterator_type base() const { return current_; };
 
@@ -173,7 +175,7 @@ bool operator<(const ft::reverse_iterator<Iterator1>& lhs,
 template <class Iterator1, class Iterator2>
 bool operator<=(const ft::reverse_iterator<Iterator1>& lhs,
                 const ft::reverse_iterator<Iterator2>& rhs) {
-  return !(lhs < rhs);
+  return !(lhs > rhs);
 }
 
 template <class Iterator1, class Iterator2>
@@ -202,6 +204,155 @@ typename reverse_iterator<Iterator>::difference_type operator-(
   return rhs.base() - lhs.base();
 }
 
+// ----------------------------------------------------
+// random_access_iterator
+// ----------------------------------------------------
+
+template <class Iter>
+class random_access_iterator
+    : public ft::iterator<ft::random_access_iterator_tag, T> {
+  // types
+ public:
+  typedef ft::iterator<ft::random_access_iterator_tag, T>::iterator_category
+      iterator_category;
+  typedef ft::iterator<ft::random_access_iterator_tag, T>::value_type
+      value_type;
+  typedef ft::iterator<ft::random_access_iterator_tag, T>::difference_type
+      difference_type;
+  typedef ft::iterator<ft::random_access_iterator_tag, T>::pointer pointer;
+  typedef ft::iterator<ft::random_access_iterator_tag, T>::reference reference;
+
+  // method
+  random_access_iterator() : current_(NULL){};
+
+  explicit random_access_iterator(iterator_type x) : current_(x){};
+
+  template <class U>
+  random_access_iterator(const random_access_iterator<U>& other)
+      : current_(other.current_){};
+
+  template <class U>
+  random_access_iterator& operator=(const random_access_iterator<U>& other) {
+    if (this == &other) return *this;
+    current_ = other.current_;
+    return *this;
+  };
+
+  virtual ~random_access_iterator(){};
+
+  pointer base() const { return current_; };
+
+  reference operator*() const { return *current_; };
+
+  pointer operator->() const { return &(**this); };
+
+  reference operator[](difference_type n) const { return *(*this + n); };
+
+  random_access_iterator& operator++() {
+    ++current_;
+    return *this;
+  }
+
+  random_access_iterator& operator--() {
+    --current_;
+    return *this;
+  }
+
+  random_access_iterator operator++(int) {
+    random_access_iterator tmp = *this;
+    ++current_;
+    return tmp;
+  }
+
+  random_access_iterator operator--(int) {
+    random_access_iterator tmp = *this;
+    --current_;
+    return tmp;
+  }
+
+  random_access_iterator operator+(difference_type n) const {
+    return random_access_iterator(current_ + n);
+  }
+
+  random_access_iterator operator-(difference_type n) const {
+    return random_access_iterator(current_ - n);
+  }
+
+  random_access_iterator& operator+=(difference_type n) {
+    current_ += n;
+    return *this;
+  }
+
+  random_access_iterator& operator-=(difference_type n) {
+    current_ -= n;
+    return *this;
+  }
+
+  // ??
+  operator random_access_iterator<const T>() const {
+    return random_access_iterator<const T>(this->_elem);
+  }
+
+ protected:
+  pointer current_;
+};
+
+// non-member functions
+template <class Iterator1, class Iterator2>
+bool operator==(const ft::random_access_iterator<Iterator1>& lhs,
+                const ft::random_access_iterator<Iterator2>& rhs) {
+  return lhs.base() == rhs.base();
+}
+
+template <class Iterator1, class Iterator2>
+bool operator!=(const ft::random_access_iterator<Iterator1>& lhs,
+                const ft::random_access_iterator<Iterator2>& rhs) {
+  return !(lhs == rhs);
+}
+
+template <class Iterator1, class Iterator2>
+bool operator<(const ft::random_access_iterator<Iterator1>& lhs,
+               const ft::random_access_iterator<Iterator2>& rhs) {
+  return lhs.base() < rhs.base();
+}
+
+template <class Iterator1, class Iterator2>
+bool operator<=(const ft::random_access_iterator<Iterator1>& lhs,
+                const ft::random_access_iterator<Iterator2>& rhs) {
+  return !(lhs > rhs);
+}
+
+template <class Iterator1, class Iterator2>
+bool operator>(const ft::random_access_iterator<Iterator1>& lhs,
+               const ft::random_access_iterator<Iterator2>& rhs) {
+  return lhs.base() > rhs.base();
+}
+
+template <class Iterator1, class Iterator2>
+bool operator>=(const ft::random_access_iterator<Iterator1>& lhs,
+                const ft::random_access_iterator<Iterator2>& rhs) {
+  return !(lhs < rhs);
+}
+
+template <class Iter>
+random_access_iterator<Iter> operator+(
+    typename random_access_iterator<Iter>::difference_type n,
+    const random_access_iterator<Iter>& it) {
+  random_access_iterator<Iter>(it.base() + n);
+}
+
+template <class Iterator>
+typename random_access_iterator<Iterator>::difference_type operator-(
+    const random_access_iterator<Iterator>& lhs,
+    const random_access_iterator<Iterator>& rhs) {
+  return lhs.base() - rhs.base();
+}
 }  // namespace ft
+
+// ----------------------------------------------------
+// memo
+// ----------------------------------------------------
+// iterator のconst とnon-constの比較
+// const対応
 
 #endif /* ITERATOR_HPP */
