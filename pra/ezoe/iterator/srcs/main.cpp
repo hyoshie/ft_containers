@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+#include <functional>
 #include <iostream>
 #include <iterator>
 #include <vector>
@@ -87,5 +88,26 @@ int main() {
     --last;
     std::cerr << *first << std::endl;
     std::cerr << *last << std::endl;
+  }
+  {
+    std::vector<int> v;
+    for (int i = 0; i < 10; i++) {
+      v.push_back(i);
+    }
+    std::vector<int> copy(v);
+    std::cout << std::boolalpha << std::equal(v.begin(), v.end(), copy.begin())
+              << std::endl;
+  }
+  {
+    std::vector<int> v;
+    std::vector<int> squared;
+    for (int i = 0; i < 10; i++) {
+      v.push_back(i);
+      squared.push_back(i + 1);
+    }
+    std::cout << std::boolalpha
+              << std::equal(v.begin(), v.end(), squared.begin(),
+                            std::less<int>())
+              << std::endl;
   }
 }
