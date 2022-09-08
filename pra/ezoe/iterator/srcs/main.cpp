@@ -96,18 +96,54 @@ int main() {
     }
     std::vector<int> copy(v);
     std::cout << std::boolalpha << std::equal(v.begin(), v.end(), copy.begin())
+              << std::endl
+              << ft::equal(v.begin(), v.end(), copy.begin()) << std::endl;
+  }
+  {
+    std::vector<int> small;
+    std::vector<int> large;
+    for (int i = 0; i < 10; i++) {
+      small.push_back(i);
+      large.push_back(i + 1);
+    }
+    std::cout << std::boolalpha
+              << std::equal(small.begin(), small.end(), large.begin(),
+                            std::less<int>())
+              << std::endl
+              << ft::equal(small.begin(), small.end(), large.begin(),
+                           std::less<int>())
               << std::endl;
   }
   {
-    std::vector<int> v;
-    std::vector<int> squared;
+    std::vector<int> small;
+    std::vector<int> large;
     for (int i = 0; i < 10; i++) {
-      v.push_back(i);
-      squared.push_back(i + 1);
+      small.push_back(i);
+      large.push_back(i + 1);
     }
     std::cout << std::boolalpha
-              << std::equal(v.begin(), v.end(), squared.begin(),
-                            std::less<int>())
+              << std::lexicographical_compare(small.begin(), small.end(),
+                                              large.begin(), large.end())
+              << std::endl
+              << ft::lexicographical_compare(small.begin(), small.end(),
+                                             large.begin(), large.end())
+              << std::endl;
+  }
+  {
+    std::vector<int> small;
+    std::vector<int> large;
+    for (int i = 0; i < 10; i++) {
+      small.push_back(i);
+      large.push_back(i + 1);
+    }
+    std::cout << std::boolalpha
+              << std::lexicographical_compare(large.begin(), large.end(),
+                                              small.begin(), small.end(),
+                                              std::greater<int>())
+              << std::endl
+              << ft::lexicographical_compare(large.begin(), large.end(),
+                                             small.begin(), small.end(),
+                                             std::greater<int>())
               << std::endl;
   }
 }
