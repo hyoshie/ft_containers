@@ -16,14 +16,16 @@ class vector {
   typedef Allocator allocator_type;
   typedef std::size_t size_type;
   typedef std::ptrdiff_t difference_type;
-  typedef T *pointer;
-  typedef const pointer const_pointer;
-  typedef T &reference;
-  typedef const reference const_reference;
-  typedef ft::random_access_iterator< value_type > iterator;
-  typedef ft::random_access_iterator< const value_type > const_iterator;
-  typedef ft::reverse_iterator< iterator > reverse_iterator;
-  typedef ft::reverse_iterator< const_iterator > const_reverse_iterator;
+  typedef typename allocator_type::pointer pointer;
+  typedef typename allocator_type::const_pointer const_pointer;
+  typedef typename allocator_type::reference reference;
+  typedef typename allocator_type::const_reference const_reference;
+  typedef typename ft::random_access_iterator< value_type > iterator;
+  typedef typename ft::random_access_iterator< const value_type >
+      const_iterator;
+  typedef typename ft::reverse_iterator< iterator > reverse_iterator;
+  typedef typename ft::reverse_iterator< const_iterator >
+      const_reverse_iterator;
 
   // コンストラクター
   vector()
@@ -63,7 +65,7 @@ class vector {
       : first_(NULL), last_(NULL), reserved_last_(NULL), alloc_(rhs.alloc_) {
     reserve(rhs.size());
     pointer dest = first_;
-    for (iterator src = rhs.begin(), last = rhs.end(); src != last;
+    for (const_iterator src = rhs.begin(), last = rhs.end(); src != last;
          ++dest, ++src) {
       construct(dest, *src);
     }
@@ -113,38 +115,43 @@ class vector {
   const_reference back() const { return *(last_ - 1); }
 
   // イテレーターアクセス
-  iterator begin() { return first_; }
-  const_iterator begin() const { return first_; }
-  iterator end() { return last_; }
-  const_iterator end() const { return last_; }
-  reverse_iterator rbegin() { return reverse_iterator(last_); }
-  const_reverse_iterator rbegin() const { return reverse_iterator(last_); }
-  reverse_iterator rend() { return reverse_iterator(first_); }
-  const_reverse_iterator rend() const { return reverse_iterator(first_); }
+  iterator begin() { return iterator(first_); }
+  const_iterator begin() const { return const_iterator(first_); }
+  iterator end() { return iterator(last_); }
+  const_iterator end() const { return const_iterator(last_); }
+  reverse_iterator rbegin() { return reverse_iterator(end()); }
+  const_reverse_iterator rbegin() const {
+    return const_reverse_iterator(end());
+  }
+  reverse_iterator rend() { return reverse_iterator(begin()); }
+  const_reverse_iterator rend() const {
+    return const_reverse_iterator(begin());
+  }
 
   // 容量
-  size_type size() const { return std::distance(begin(), end()); }
+  size_type size() const { return size_type(last_ - first_); }
   bool empty() const { return begin() == end(); }
   size_type capacity() const { return std::distance(first_, reserved_last_); }
+
   void reserve(size_type sz) {
     if (sz <= capacity()) return;
     // 古いストレージの情報を保存
     pointer ptr = allocate(sz);
-    iterator old_first = first_;
-    iterator old_last = last_;
+    pointer old_first = first_;
+    pointer old_last = last_;
     size_type old_capacity = capacity();
     // 新しいストレージに差し替え
     first_ = ptr;
     last_ = first_;
     reserved_last_ = first_ + sz;
     // 古いストレージから新しいストレージに要素をコピー構築
-    for (iterator old_iter = old_first; old_iter != old_last;
+    for (pointer old_iter = old_first; old_iter != old_last;
          ++old_iter, ++last_) {
       construct(last_, *old_iter);
     }
     // 古いストレージの値を破棄
-    for (reverse_iterator riter = reverse_iterator(old_last),
-                          rend = reverse_iterator(old_first);
+    for (reverse_iterator riter = reverse_iterator(iterator(old_last)),
+                          rend = reverse_iterator(iterator(old_first));
          riter != rend; ++riter) {
       destroy(&*riter);
     }

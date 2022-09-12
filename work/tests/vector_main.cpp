@@ -36,16 +36,16 @@ void tutorial_test() {
   {
     ft::vector< int > v(1);
     // ft::vector<int>::iterator
-    ft_intvec_iter i = v.begin();
+    ft::vector< int >::iterator i = v.begin();
+    // ft_intvec_iter i = v.begin();
     // OK、代入可能
     *i = 0;
     // constなvectorへのリファレンス
-    // const ft::vector< int >& cv = v;
+    const ft::vector< int >& cv = v;
     // ft::vector<int>::const_iterator ここがとれない
-    // ft::vector< int >::iterator ci = cv.begin();
-    // エラー
+    ft::vector< int >::const_iterator ci = cv.begin();
     // const_iteratorを参照した先には代入できない
-    // cout << *ci << endl;
+    cout << *ci << endl;
   }
 
   {
@@ -58,6 +58,20 @@ void tutorial_test() {
 
     // リバースイテレーター
     ft_intvec_riter r = v.rbegin();
+    ft::reverse_iterator< ft::vector< int >::iterator > r2 = v.rbegin();
+    cout << *r << endl;  // 5
+  }
+  {
+    std::vector< int > v;
+    for (int i = 1; i <= 5; ++i) v.push_back(i);
+
+    // イテレーター
+    std::vector< int >::iterator i = v.begin();
+    cout << *i << endl;  // 1
+
+    // リバースイテレーター
+    std::vector< int >::reverse_iterator r = v.rbegin();
+    // std_intvec_riter r = v.rbegin();
     cout << *r << endl;  // 5
   }
 

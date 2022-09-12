@@ -92,12 +92,12 @@ class reverse_iterator
 
   template < class U >
   reverse_iterator(const reverse_iterator< U >& other)
-      : current_(other.current_) {}
+      : current_(other.base()) {}
 
   template < class U >
   reverse_iterator& operator=(const reverse_iterator< U >& other) {
     if (this == &other) return *this;
-    current_ = other.current_;
+    current_ = other.base();
     return *this;
   }
 
@@ -224,10 +224,8 @@ class random_access_iterator
       value_type;
   typedef typename ft::iterator< ft::random_access_iterator_tag,
                                  T >::difference_type difference_type;
-  typedef typename ft::iterator< ft::random_access_iterator_tag, T >::pointer
-      pointer;
-  typedef typename ft::iterator< ft::random_access_iterator_tag, T >::reference
-      reference;
+  typedef T* pointer;
+  typedef T& reference;
 
   // method
   random_access_iterator() : current_(NULL) {}
@@ -235,13 +233,14 @@ class random_access_iterator
   explicit random_access_iterator(pointer x) : current_(x) {}
 
   template < class U >
-  random_access_iterator(const random_access_iterator< U >& other)
-      : current_(other.current_) {}
+  random_access_iterator(const random_access_iterator< U >& other) {
+    current_ = other.base();
+  }
 
   template < class U >
   random_access_iterator& operator=(const random_access_iterator< U >& other) {
     if (this == &other) return *this;
-    current_ = other.current_;
+    current_ = other.base();
     return *this;
   }
 
