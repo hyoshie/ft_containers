@@ -20,8 +20,8 @@ class vector {
   typedef const pointer const_pointer;
   typedef T &reference;
   typedef const reference const_reference;
-  typedef pointer iterator;
-  typedef const_pointer const_iterator;
+  typedef ft::random_access_iterator< value_type > iterator;
+  typedef ft::random_access_iterator< const value_type > const_iterator;
   typedef ft::reverse_iterator< iterator > reverse_iterator;
   typedef ft::reverse_iterator< const_iterator > const_reverse_iterator;
 
@@ -31,14 +31,16 @@ class vector {
         last_(NULL),
         reserved_last_(NULL),
         alloc_(allocator_type()) {}
+
   explicit vector(const allocator_type &alloc)
       : first_(NULL), last_(NULL), reserved_last_(NULL), alloc_(alloc) {}
+
   explicit vector(size_type size, const T &value = T(),
                   const allocator_type &alloc = allocator_type())
       : first_(NULL), last_(NULL), reserved_last_(NULL), alloc_(alloc) {
     resize(size, value);
   }
-  // enable_if
+
   template < typename InputIterator >
   vector(InputIterator first, InputIterator last,
          const allocator_type &alloc = allocator_type(),
@@ -46,7 +48,7 @@ class vector {
                                  InputIterator >::type * = NULL)
       : first_(NULL), last_(NULL), reserved_last_(NULL), alloc_(alloc) {
     reserve(std::distance(first, last));
-    for (iterator i = first; i != last; ++i) {
+    for (InputIterator i = first; i != last; ++i) {
       push_back(*i);
     }
   }
@@ -60,8 +62,9 @@ class vector {
   vector(const vector &rhs)
       : first_(NULL), last_(NULL), reserved_last_(NULL), alloc_(rhs.alloc_) {
     reserve(rhs.size());
-    for (iterator dest = first_, src = rhs.begin(), last = rhs.end();
-         src != last; ++dest, ++src) {
+    pointer dest = first_;
+    for (iterator src = rhs.begin(), last = rhs.end(); src != last;
+         ++dest, ++src) {
       construct(dest, *src);
     }
     last_ = first_ + rhs.size();
@@ -111,13 +114,13 @@ class vector {
 
   // イテレーターアクセス
   iterator begin() { return first_; }
-  // const_iterator begin() const { return first_; }
+  const_iterator begin() const { return first_; }
   iterator end() { return last_; }
-  // const_iterator end() const { return last_; }
+  const_iterator end() const { return last_; }
   reverse_iterator rbegin() { return reverse_iterator(last_); }
-  // const_reverse_iterator rbegin() const { return reverse_iterator{last_}; }
+  const_reverse_iterator rbegin() const { return reverse_iterator(last_); }
   reverse_iterator rend() { return reverse_iterator(first_); }
-  // const_reverse_iterator rend() const { return reverse_iterator{first_}; }
+  const_reverse_iterator rend() const { return reverse_iterator(first_); }
 
   // 容量
   size_type size() const { return std::distance(begin(), end()); }
