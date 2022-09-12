@@ -1,14 +1,14 @@
 #include <algorithm>
 #include <exception>
 #include <iostream>
+#include <list>
+
+#if USE_STL
+#define ft std
 #include <vector>
-
+#else
 #include "vector.hpp"
-
-struct X {
-  X() { std::cout << "default constructed.\n"; }
-  ~X() { std::cout << "default destructed.\n"; }
-};
+#endif
 
 typedef ft::vector< int >::iterator ft_intvec_iter;
 typedef ft::vector< int >::reverse_iterator ft_intvec_riter;
@@ -59,26 +59,27 @@ void tutorial_test() {
     // リバースイテレーター
     ft_intvec_riter r = v.rbegin();
     ft::reverse_iterator< ft::vector< int >::iterator > r2 = v.rbegin();
-    cout << *r << endl;  // 5
+    cout << *r << endl;   // 5
+    cout << *r2 << endl;  // 5
   }
-  {
-    std::vector< int > v;
-    for (int i = 1; i <= 5; ++i) v.push_back(i);
+  // {
+  //   std::vector< int > v;
+  //   for (int i = 1; i <= 5; ++i) v.push_back(i);
 
-    // イテレーター
-    std::vector< int >::iterator i = v.begin();
-    cout << *i << endl;  // 1
+  //   // イテレーター
+  //   std::vector< int >::iterator i = v.begin();
+  //   cout << *i << endl;  // 1
 
-    // リバースイテレーター
-    std::vector< int >::reverse_iterator r = v.rbegin();
-    // std_intvec_riter r = v.rbegin();
-    cout << *r << endl;  // 5
-  }
-
+  //   // リバースイテレーター
+  //   std::vector< int >::reverse_iterator r = v.rbegin();
+  //   // std_intvec_riter r = v.rbegin();
+  //   cout << *r << endl;  // 5
+  // }
   {
     ft::vector< int > v;
     // true、要素数0
     bool a = v.empty();
+    cout << std::boolalpha;
     cout << a << endl;
     v.push_back(0);
     // false、要素数非ゼロ
@@ -89,7 +90,7 @@ void tutorial_test() {
     cout << s << endl;
     // 実装依存、追加の動的メモリー確保をせずに格納できる要素の最大数
     size_t c = v.capacity();
-    cout << c << endl;
+    cout << "size:" << c << endl;
   }
 
   {
@@ -267,8 +268,8 @@ void tutorial_test() {
   }
 
   {
-    std::vector< int > stl_v(5, 42);
-    ft::vector< int > v(stl_v.begin(), stl_v.end());
+    std::list< int > l(5, 42);
+    ft::vector< int > v(l.begin(), l.end());
     // vは{1,2,3,4,5}
   }
 

@@ -1,8 +1,8 @@
-NAME = vector_test
+NAME_FT = vector_test_ft
+NAME_STL = vector_test_stl
 
 CXX = c++
-# -std=c++98
-#
+
 CXXFLAGS = -Wall \
 		   -Werror \
 		   -Wextra \
@@ -19,28 +19,40 @@ INCS = $(addprefix -I, $(INCDIR))
 TESTDIR	= ./tests
 VECTOR_SRCS = $(shell find $(TESTDIR) -name '*.cpp')
 
-OBJDIR	= ./objs
-VECTOR_OBJS = $(addprefix $(OBJDIR)/, $(notdir $(VECTOR_SRCS:.cpp=.o)))
+OBJDIR_FT	= ./objs_ft
+OBJDIR_STL	= ./objs_stl
+VECTOR_OBJS_FT = $(addprefix $(OBJDIR_FT)/, $(notdir $(VECTOR_SRCS:.cpp=.o)))
+VECTOR_OBJS_STL = $(addprefix $(OBJDIR_STL)/, $(notdir $(VECTOR_SRCS:.cpp=.o)))
 
-DEPS = $(VECTOR_OBJS:.o=.d)
+DEPS_FT = $(VECTOR_OBJS_FT:.o=.d)
+DEPS_STL = $(VECTOR_OBJS_STL:.o=.d)
 
 .PHONY: all
-all: $(NAME)
+all: $(NAME_FT) $(NAME_STL)
 
--include $(DEPS)
+-include $(DEPS_FT) $(DEPS_STL)
 
-$(NAME): $(OBJDIR) $(VECTOR_OBJS)
-	$(CXX) $(CXXFLAGS) $(VECTOR_OBJS) -o $@
+$(NAME_FT): $(OBJDIR_FT) $(VECTOR_OBJS_FT)
+	$(CXX) $(CXXFLAGS) $(VECTOR_OBJS_FT) -o $@
 
-$(OBJDIR):
+$(NAME_STL): $(OBJDIR_STL) $(VECTOR_OBJS_STL)
+	$(CXX) $(CXXFLAGS) -D USE_STL=1 $(VECTOR_OBJS_STL) -o $@
+
+$(OBJDIR_FT):
 	mkdir -p $@
 
-$(OBJDIR)/%.o : $(TESTDIR)/%.cpp
+$(OBJDIR_STL):
+	mkdir -p $@
+
+$(OBJDIR_FT)/%.o : $(TESTDIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@
 
+$(OBJDIR_STL)/%.o : $(TESTDIR)/%.cpp
+	$(CXX) $(CXXFLAGS) -D USE_STL=1 -MMD -MP -c $< -o $@
+
 .PHONY: run
-run: $(NAME)
-	./$(NAME)
+run: $(NAME_FT) $(NAME_STL)
+	./grademe.sh $(NAME_FT) $(NAME_STL)
 
 .PHONY: sketch
 sketch:
@@ -49,11 +61,11 @@ sketch:
 
 .PHONY: clean
 clean:
-	$(RM) $(VECTOR_OBJS) $(DEPS)
+	$(RM) $(VECTOR_OBJS_FT) $(VECTOR_OBJS_STL) $(DEPS_FT) $(DEPS_STL)
 
 .PHONY: fclean
 fclean: clean
-	$(RM) $(NAME)
+	$(RM) $(NAME_FT) $(NAME_STL) a.out
 
 .PHONY: re
 re: fclean all
