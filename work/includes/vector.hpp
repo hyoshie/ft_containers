@@ -79,19 +79,18 @@ class vector {
       std::copy(rhs.begin(), rhs.end(), begin());
     } else {
       if (capacity() >= rhs.size()) {
-        std::cerr << "[\x1b[32mPASS\x1b[39m]" << std::endl;
-        std::copy(rhs.begin(), rhs.begin() + rhs.size(), begin());
-        for (iterator src_iter = rhs.begin() + rhs.size(), src_end = rhs.end();
+        destroy_until(rend());
+        for (const_iterator src_iter = rhs.begin(),
+                            src_end = rhs.begin() + rhs.size();
              src_iter != src_end; ++src_iter, ++last_) {
           construct(last_, *src_iter);
         }
       } else {
         destroy_until(rend());
         reserve(rhs.size());
-        for (iterator src_iter = rhs.begin(), src_end = rhs.end(),
-                      dest_iter = begin();
-             src_iter != src_end; ++src_iter, ++dest_iter, ++last_) {
-          construct(dest_iter, *src_iter);
+        for (const_iterator src_iter = rhs.begin(), src_end = rhs.end();
+             src_iter != src_end; ++src_iter, ++last_) {
+          construct(last_, *src_iter);
         }
       }
     }

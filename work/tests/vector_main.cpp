@@ -283,7 +283,210 @@ void tutorial_test() {
   }
 }
 
+void test_constructor() {
+  pout("constructer");
+  std::allocator< int > allocator;
+  std::list< int > list(5, 219);
+
+  ft::vector< int > default_v;
+  ft::vector< int > alloc_v(allocator);
+  ft::vector< int > value_v(5, 219);
+  ft::vector< int > iter_v(list.begin(), list.end());
+  ft::vector< int > copy_v(value_v);
+  vdebug(default_v);
+  vdebug(alloc_v);
+  vdebug(value_v);
+  vdebug(iter_v);
+  vdebug(copy_v);
+}
+
+void test_op_equal() {
+  pout("op_equal");
+  ft::vector< int > small_v(1, 219);
+  ft::vector< int > large_v(5, 42);
+  ft::vector< int > copy;
+  copy = large_v;
+  vdebug(copy);
+  copy = small_v;
+  vdebug(copy);
+}
+
+void test_at() {
+  pout("at");
+  ft::vector< int > v;
+  for (int i = 0; i < 5; i++) {
+    v.push_back(i);
+  }
+  cout << v.at(0) << endl;
+  try {
+    cout << v.at(5) << endl;
+  } catch (const std::out_of_range& e) {
+    cout << "catch std::out_of_range" << endl;
+  }
+  // const
+  const ft::vector< int > cv(v);
+  cout << cv.at(4) << endl;
+  try {
+    cout << cv.at(5) << endl;
+  } catch (const std::out_of_range& e) {
+    cout << "catch std::out_of_range" << endl;
+  }
+}
+
+void test_op_subscript() {
+  pout("op_subscript");
+  ft::vector< int > v;
+  for (int i = 0; i < 5; i++) {
+    v.push_back(i);
+  }
+  cout << v[0] << endl;
+  // const
+  const ft::vector< int > cv(v);
+  cout << cv[4] << endl;
+}
+
+void test_front() {
+  pout("front");
+  ft::vector< int > v;
+  for (int i = 0; i < 5; i++) {
+    v.push_back(i);
+  }
+  cout << v.front() << endl;
+  // const
+  const ft::vector< int > cv(v);
+  cout << cv.front() << endl;
+}
+
+void test_back() {
+  pout("back");
+  ft::vector< int > v;
+  for (int i = 0; i < 5; i++) {
+    v.push_back(i);
+  }
+  cout << v.back() << endl;
+  // const
+  const ft::vector< int > cv(v);
+  cout << cv.back() << endl;
+}
+
+void test_begin() {
+  pout("begin");
+  ft::vector< int > v;
+  for (int i = 0; i < 5; i++) {
+    v.push_back(i);
+  }
+  cout << *(v.begin()) << endl;
+  // const
+  const ft::vector< int > cv(v);
+  cout << *(cv.begin()) << endl;
+}
+
+void test_end() {
+  pout("end");
+  ft::vector< int > v;
+  for (int i = 0; i < 5; i++) {
+    v.push_back(i);
+  }
+  cout << *--(v.end()) << endl;
+  // const
+  const ft::vector< int > cv(v);
+  cout << *--(cv.end()) << endl;
+}
+
+void test_rbegin() {
+  pout("rbegin");
+  ft::vector< int > v;
+  for (int i = 0; i < 5; i++) {
+    v.push_back(i);
+  }
+  cout << *(v.rbegin()) << endl;
+  // const
+  const ft::vector< int > cv(v);
+  cout << *(cv.rbegin()) << endl;
+}
+
+void test_rend() {
+  pout("rend");
+  ft::vector< int > v;
+  for (int i = 0; i < 5; i++) {
+    v.push_back(i);
+  }
+  cout << *--(v.rend()) << endl;
+  // const
+  const ft::vector< int > cv(v);
+  cout << *--(cv.rend()) << endl;
+}
+
+void test_empty() {
+  pout("empty");
+  ft::vector< int > nocontent_v;
+  ft::vector< int > content_v;
+  for (int i = 0; i < 5; i++) {
+    content_v.push_back(i);
+  }
+  cout << std::boolalpha;
+  cout << nocontent_v.empty() << endl;
+  cout << content_v.empty() << endl;
+  // const
+  const ft::vector< int > nocontent_cv(nocontent_v);
+  const ft::vector< int > content_cv(content_v);
+  cout << nocontent_cv.empty() << endl;
+  cout << content_cv.empty() << endl;
+}
+
+void test_size() {
+  pout("size");
+  ft::vector< int > nocontent_v;
+  ft::vector< int > content_v;
+  for (int i = 0; i < 5; i++) {
+    content_v.push_back(i);
+  }
+  cout << std::boolalpha;
+  cout << nocontent_v.size() << endl;
+  cout << content_v.size() << endl;
+  // const
+  const ft::vector< int > nocontent_cv(nocontent_v);
+  const ft::vector< int > content_cv(content_v);
+  cout << nocontent_cv.size() << endl;
+  cout << content_cv.size() << endl;
+}
+
+// void test_reserve() {
+//   pout("reserve");
+
+//   ft::vector< int > default_v;
+//   ft::vector< int > alloc_v(allocator);
+//   ft::vector< int > value_v(5, 219);
+//   ft::vector< int > iter_v(list.begin(), list.end());
+//   ft::vector< int > copy_v(value_v);
+//   vdebug(default_v);
+//   vdebug(alloc_v);
+//   vdebug(value_v);
+//   vdebug(iter_v);
+//   vdebug(copy_v);
+// }
+
 int main() {
-  tutorial_test();
+  // tutorial_test();
+  test_constructor();
+  test_op_equal();
+  // test_assign();
+  // test_getallocator();
+  // 要素アクセス
+  test_at();
+  test_op_subscript();
+  test_front();
+  test_back();
+  // イテレーター
+  test_begin();
+  test_end();
+  test_rbegin();
+  test_rend();
+  // 容量
+  test_empty();
+  test_size();
+  // test_maxsize();
+  // test_reserve();
+  // 変更
   return 0;
 }
