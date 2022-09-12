@@ -1,0 +1,211 @@
+#ifndef VECTOR_HPP
+#define VECTOR_HPP
+
+#include <memory>
+#include <stdexcept>
+
+#include "iterator.hpp"
+#include "util.hpp"
+
+namespace ft {
+template < typename T, typename Allocator = std::allocator< T > >
+class vector {
+ public:
+  // ネストされた型名
+  typedef T value_type;
+  typedef Allocator allocator_type;
+  typedef std::size_t size_type;
+  typedef std::ptrdiff_t difference_type;
+  typedef T *pointer;
+  typedef const pointer const_pointer;
+  typedef T &reference;
+  typedef const reference const_reference;
+  typedef pointer iterator;
+  typedef const_pointer const_iterator;
+  typedef ft::reverse_iterator< iterator > reverse_iterator;
+  typedef ft::reverse_iterator< const_iterator > const_reverse_iterator;
+
+  // コンストラクター
+  vector()
+      : first_(NULL),
+        last_(NULL),
+        reserved_last_(NULL),
+        alloc_(allocator_type()) {}
+  explicit vector(const allocator_type &alloc)
+      : first_(NULL), last_(NULL), reserved_last_(NULL), alloc_(alloc) {}
+  explicit vector(size_type size, const T &value = T(),
+                  const allocator_type &alloc = allocator_type())
+      : first_(NULL), last_(NULL), reserved_last_(NULL), alloc_(alloc) {
+    resize(size, value);
+  }
+  // enable_if
+  template < typename InputIterator >
+  vector(InputIterator first, InputIterator last,
+         const allocator_type &alloc = allocator_type(),
+         typename ft::enable_if< !ft::is_integral< InputIterator >::value,
+                                 InputIterator >::type * = NULL)
+      : first_(NULL), last_(NULL), reserved_last_(NULL), alloc_(alloc) {
+    reserve(std::distance(first, last));
+    for (iterator i = first; i != last; ++i) {
+      push_back(*i);
+    }
+  }
+
+  // デストラクター
+  ~vector() {
+    clear();
+    deallocate();
+  }
+  // コピー
+  vector(const vector &rhs)
+      : first_(NULL), last_(NULL), reserved_last_(NULL), alloc_(rhs.alloc_) {
+    reserve(rhs.size());
+    for (iterator dest = first_, src = rhs.begin(), last = rhs.end();
+         src != last; ++dest, ++src) {
+      construct(dest, *src);
+    }
+    last_ = first_ + rhs.size();
+  }
+  vector &operator=(const vector &rhs) {
+    if (this == &rhs) {
+      return *this;
+    }
+    if (size() == rhs.size()) {
+      std::copy(rhs.begin(), rhs.end(), begin());
+    } else {
+      if (capacity() >= rhs.size()) {
+        std::cerr << "[\x1b[32mPASS\x1b[39m]" << std::endl;
+        std::copy(rhs.begin(), rhs.begin() + rhs.size(), begin());
+        for (iterator src_iter = rhs.begin() + rhs.size(), src_end = rhs.end();
+             src_iter != src_end; ++src_iter, ++last_) {
+          construct(last_, *src_iter);
+        }
+      } else {
+        destroy_until(rend());
+        reserve(rhs.size());
+        for (iterator src_iter = rhs.begin(), src_end = rhs.end(),
+                      dest_iter = begin();
+             src_iter != src_end; ++src_iter, ++dest_iter, ++last_) {
+          construct(dest_iter, *src_iter);
+        }
+      }
+    }
+    return *this;
+  }
+
+  // 要素アクセス
+  reference operator[](size_type i) { return first_[i]; }
+  const_reference operator[](size_type i) const { return first_[i]; }
+  reference at(size_type i) {
+    if (i >= size()) throw std::out_of_range("index is out of range.");
+    return first_[i];
+  }
+  const_reference at(size_type i) const {
+    if (i >= size()) throw std::out_of_range("index is out of range.");
+    return first_[i];
+  }
+  reference front() { return *first_; }
+  const_reference front() const { return *first_; }
+  reference back() { return *(last_ - 1); }
+  const_reference back() const { return *(last_ - 1); }
+
+  // イテレーターアクセス
+  iterator begin() { return first_; }
+  // const_iterator begin() const { return first_; }
+  iterator end() { return last_; }
+  // const_iterator end() const { return last_; }
+  reverse_iterator rbegin() { return reverse_iterator(last_); }
+  // const_reverse_iterator rbegin() const { return reverse_iterator{last_}; }
+  reverse_iterator rend() { return reverse_iterator(first_); }
+  // const_reverse_iterator rend() const { return reverse_iterator{first_}; }
+
+  // 容量
+  size_type size() const { return std::distance(begin(), end()); }
+  bool empty() const { return begin() == end(); }
+  size_type capacity() const { return std::distance(first_, reserved_last_); }
+  void reserve(size_type sz) {
+    if (sz <= capacity()) return;
+    // 古いストレージの情報を保存
+    pointer ptr = allocate(sz);
+    iterator old_first = first_;
+    iterator old_last = last_;
+    size_type old_capacity = capacity();
+    // 新しいストレージに差し替え
+    first_ = ptr;
+    last_ = first_;
+    reserved_last_ = first_ + sz;
+    // 古いストレージから新しいストレージに要素をコピー構築
+    for (iterator old_iter = old_first; old_iter != old_last;
+         ++old_iter, ++last_) {
+      construct(last_, *old_iter);
+    }
+    // 古いストレージの値を破棄
+    for (reverse_iterator riter = reverse_iterator(old_last),
+                          rend = reverse_iterator(old_first);
+         riter != rend; ++riter) {
+      destroy(&*riter);
+    }
+    alloc_.deallocate(old_first, old_capacity);
+  }
+
+  // 変更
+  void clear() { destroy_until(rend()); }
+  // void resize(size_type sz) {
+  //   if (sz < size()) {
+  //     size_type diff = size() - sz;
+  //     destroy_until(rbegin() + diff);
+  //     last_ = first_ + sz;
+  //   } else if (sz > size()) {
+  //     reserve(sz);
+  //     for (; last_ != reserved_last_; ++last_) {
+  //       construct(last_);
+  //     }
+  //   }
+  // }
+  void resize(size_type sz, T value = T()) {
+    if (sz < size()) {
+      size_type diff = size() - sz;
+      destroy_until(rbegin() + diff);
+      last_ = first_ + sz;
+    } else if (sz > size()) {
+      reserve(sz);
+      for (; last_ != reserved_last_; ++last_) {
+        construct(last_, value);
+      }
+    }
+  }
+  void push_back(const T &value) {
+    if (size() + 1 > capacity()) {
+      size_type c = size();
+      if (c == 0) {
+        c = 1;
+      } else {
+        c *= 2;  //オーバーフロー処理
+      }
+      reserve(c);
+    }
+    construct(last_, value);
+    ++last_;
+  }
+
+ private:
+  pointer allocate(size_type n) { return alloc_.allocate(n); }
+  void deallocate() { alloc_.deallocate(first_, capacity()); }
+  void construct(pointer ptr) { alloc_.construct(ptr, 0); }
+  void construct(pointer ptr, const T &value) { alloc_.construct(ptr, value); }
+  void destroy(pointer ptr) { alloc_.destroy(ptr); }
+  void destroy_until(reverse_iterator rend) {
+    for (reverse_iterator riter = rbegin(); riter != rend; ++riter, --last_) {
+      destroy(&*riter);  // ?
+    }
+  }
+
+  pointer first_;
+  pointer last_;
+  pointer reserved_last_;
+  allocator_type alloc_;
+};
+
+}  // namespace ft
+
+#endif /* VECTOR_HPP */
