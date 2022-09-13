@@ -311,6 +311,18 @@ void test_op_equal() {
   vdebug(copy);
 }
 
+void test_get_allocator() {
+  pout("get_allocator");
+  std::allocator< int > allocator;
+
+  ft::vector< int > alloc_v(allocator);
+  cout << std::boolalpha;
+  cout << (allocator == alloc_v.get_allocator()) << endl;
+  // const
+  const ft::vector< int > cv(alloc_v);
+  cout << (allocator == cv.get_allocator()) << endl;
+}
+
 void test_at() {
   pout("at");
   ft::vector< int > v;
@@ -451,27 +463,91 @@ void test_size() {
   cout << content_cv.size() << endl;
 }
 
-// void test_reserve() {
-//   pout("reserve");
+void test_max_size() {
+  pout("max_size");
 
-//   ft::vector< int > default_v;
-//   ft::vector< int > alloc_v(allocator);
-//   ft::vector< int > value_v(5, 219);
-//   ft::vector< int > iter_v(list.begin(), list.end());
-//   ft::vector< int > copy_v(value_v);
-//   vdebug(default_v);
-//   vdebug(alloc_v);
-//   vdebug(value_v);
-//   vdebug(iter_v);
-//   vdebug(copy_v);
-// }
+  ft::vector< int > v(5, 42);
+  cout << v.max_size() << endl;
+}
+
+void test_reserve() {
+  pout("reserve");
+
+  ft::vector< int > v(5, 42);
+  v.reserve(1);
+  vdebug(v);
+  v.reserve(5);
+  vdebug(v);
+  v.reserve(100);
+  vdebug(v);
+}
+
+void test_capacity() {
+  pout("capacity");
+
+  ft::vector< int > default_v;
+  ft::vector< int > v(5, 42);
+  cout << default_v.capacity() << endl;
+  cout << v.capacity() << endl;
+  // const
+  const ft::vector< int > default_cv(default_v);
+  const ft::vector< int > cv(v);
+  cout << default_cv.size() << endl;
+  cout << cv.size() << endl;
+}
+
+void test_clear() {
+  pout("clear");
+
+  ft::vector< int > default_v;
+  ft::vector< int > v(5, 42);
+  default_v.clear();
+  v.clear();
+  vdebug(default_v);
+  vdebug(v);
+}
+
+void test_push_back() {
+  pout("push_back");
+
+  ft::vector< int > default_v;
+  ft::vector< int > v(5, 42);
+  default_v.push_back(219);
+  v.push_back(219);
+  vdebug(default_v);
+  vdebug(v);
+}
+
+void test_pop_back() {
+  pout("pop_back");
+
+  // segv
+  // ft::vector< int > default_v;
+  //  default_v.pop_back();
+  // vdebug(default_v);
+  ft::vector< int > v(5, 42);
+  v.pop_back();
+  vdebug(v);
+}
+
+void test_resize() {
+  pout("resize");
+
+  ft::vector< int > v(5, 42);
+  v.resize(5);
+  vdebug(v);
+  v.resize(4);
+  vdebug(v);
+  v.resize(6);
+  vdebug(v);
+}
 
 int main() {
   // tutorial_test();
   test_constructor();
   test_op_equal();
   // test_assign();
-  // test_getallocator();
+  test_get_allocator();
   // 要素アクセス
   test_at();
   test_op_subscript();
@@ -485,8 +561,17 @@ int main() {
   // 容量
   test_empty();
   test_size();
-  // test_maxsize();
-  // test_reserve();
+  test_max_size();
+  test_reserve();
+  test_capacity();
   // 変更
+  test_clear();
+  // test_insert();
+  // test_erase();
+  test_push_back();
+  test_pop_back();
+  // test_resize();
   return 0;
 }
+
+// get_allocatorに自作allocator入れる

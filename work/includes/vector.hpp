@@ -1,6 +1,7 @@
 #ifndef VECTOR_HPP
 #define VECTOR_HPP
 
+#include <limits>
 #include <memory>
 #include <stdexcept>
 
@@ -97,6 +98,8 @@ class vector {
     return *this;
   }
 
+  allocator_type get_allocator() const { return alloc_; }
+
   // 要素アクセス
   reference operator[](size_type i) { return first_[i]; }
   const_reference operator[](size_type i) const { return first_[i]; }
@@ -129,7 +132,9 @@ class vector {
 
   // 容量
   size_type size() const { return size_type(last_ - first_); }
+
   bool empty() const { return begin() == end(); }
+
   size_type capacity() const { return std::distance(first_, reserved_last_); }
 
   void reserve(size_type sz) {
@@ -157,32 +162,14 @@ class vector {
     alloc_.deallocate(old_first, old_capacity);
   }
 
+  size_type max_size() const {
+    return std::min< size_type >(alloc_.max_size(),
+                                 std::numeric_limits< difference_type >::max());
+  }
+
   // 変更
   void clear() { destroy_until(rend()); }
-  // void resize(size_type sz) {
-  //   if (sz < size()) {
-  //     size_type diff = size() - sz;
-  //     destroy_until(rbegin() + diff);
-  //     last_ = first_ + sz;
-  //   } else if (sz > size()) {
-  //     reserve(sz);
-  //     for (; last_ != reserved_last_; ++last_) {
-  //       construct(last_);
-  //     }
-  //   }
-  // }
-  void resize(size_type sz, T value = T()) {
-    if (sz < size()) {
-      size_type diff = size() - sz;
-      destroy_until(rbegin() + diff);
-      last_ = first_ + sz;
-    } else if (sz > size()) {
-      reserve(sz);
-      for (; last_ != reserved_last_; ++last_) {
-        construct(last_, value);
-      }
-    }
-  }
+
   void push_back(const T &value) {
     if (size() + 1 > capacity()) {
       size_type c = size();
@@ -197,12 +184,32 @@ class vector {
     ++last_;
   }
 
+  void pop_back() { destroy(--last_); }
+
+  void resize(size_type sz, T value = T()) {
+    if (sz < size()) {
+      size_type diff = size() - sz;
+      destroy_until(rbegin() + diff);
+      last_ = first_ + sz;
+    } else if (sz > size()) {
+      reserve(sz);
+      for (; last_ != reserved_last_; ++last_) {
+        construct(last_, value);
+      }
+    }
+  }
+
  private:
   pointer allocate(size_type n) { return alloc_.allocate(n); }
+
   void deallocate() { alloc_.deallocate(first_, capacity()); }
+
   void construct(pointer ptr) { alloc_.construct(ptr, 0); }
+
   void construct(pointer ptr, const T &value) { alloc_.construct(ptr, value); }
+
   void destroy(pointer ptr) { alloc_.destroy(ptr); }
+
   void destroy_until(reverse_iterator rend) {
     for (reverse_iterator riter = rbegin(); riter != rend; ++riter, --last_) {
       destroy(&*riter);  // ?
