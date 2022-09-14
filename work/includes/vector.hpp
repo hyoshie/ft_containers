@@ -41,7 +41,10 @@ class vector {
   explicit vector(size_type size, const T &value = T(),
                   const allocator_type &alloc = allocator_type())
       : first_(NULL), last_(NULL), reserved_last_(NULL), alloc_(alloc) {
-    resize(size, value);
+    reserve(size);
+    for (; last_ != reserved_last_; ++last_) {
+      construct(last_, value);
+    }
   }
 
   template < typename InputIterator >
@@ -96,6 +99,50 @@ class vector {
       }
     }
     return *this;
+  }
+
+  void assign(size_type count, const T &value) {
+    if (count > capacity()) {
+      clear();
+      deallocate();
+      first_ = allocate(count);
+      last_ = first_;
+      reserved_last_ = first_ + count;
+      for (; last_ != reserved_last_; ++last_) {
+        construct(last_, value);
+      }
+    } else {
+      clear();
+      last_ = first_;
+      for (size_type i = 0; i < count; ++i, ++last_) {
+        construct(last_, value);
+      }
+    }
+  }
+
+  template < class InputIt >
+  void assign(InputIt first, InputIt last,
+              typename ft::enable_if< !ft::is_integral< InputIt >::value,
+                                      InputIt >::type * = NULL)
+
+  {
+    size_type count = std::distance(first, last);
+    if (count > capacity()) {
+      clear();
+      deallocate();
+      first_ = allocate(count);
+      last_ = first_;
+      reserved_last_ = first_ + count;
+      for (; last_ != reserved_last_; ++last_, ++first) {
+        construct(last_, *first);
+      }
+    } else {
+      clear();
+      last_ = first_;
+      for (size_type i = 0; i < count; ++i, ++last_, ++first) {
+        construct(last_, *first);
+      }
+    }
   }
 
   allocator_type get_allocator() const { return alloc_; }
@@ -285,11 +332,7 @@ class vector {
       destroy_until(rbegin() + diff);
       last_ = first_ + sz;
     } else if (sz > size()) {
-      reserve(sz);
-      // expand_capacity(sz);
-      for (; last_ != reserved_last_; ++last_) {
-        construct(last_, value);
-      }
+      insert(end(), sz - size(), value);
     }
   }
 
