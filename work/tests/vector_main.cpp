@@ -680,6 +680,36 @@ void test_resize() {
   // vdebug(v);
 }
 
+void test_op_compare() {
+  pout("op_compare");
+
+  ft::vector< int > v(5, 42);
+  ft::vector< int > copy(v);
+  ft::vector< int > large_v(v);
+  large_v[2] = 43;
+
+  cout << (v == copy) << endl;
+  cout << (v != copy) << endl;
+  cout << (v < large_v) << endl;
+  cout << (v <= large_v) << endl;
+  cout << (v <= copy) << endl;
+  cout << (large_v >= v) << endl;
+  cout << (v >= copy) << endl;
+}
+
+void test_swap() {
+  pout("swap");
+
+  ft::vector< int > v(5, 42);
+  ft::vector< int > v2(2, 21);
+
+  vdebug(v);
+  vdebug(v2);
+  std::swap(v, v2);
+  vdebug(v);
+  vdebug(v2);
+}
+
 void create_base_vec() {
   for (int i = 0; i < 5; i++) {
     base_v.push_back(i);
@@ -689,6 +719,8 @@ void create_base_vec() {
 int main() {
   // tutorial_test();
   create_base_vec();
+  // test_type();
+  // test_iterator();
   test_constructor();
   test_op_equal();
   test_assign();
@@ -716,6 +748,9 @@ int main() {
   test_push_back();
   test_pop_back();
   test_resize();
+  // 非メンバ関数
+  test_op_compare();
+  test_swap();
   return 0;
 }
 
