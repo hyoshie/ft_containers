@@ -172,21 +172,7 @@ class vector {
 
   iterator insert(iterator pos, const T &value) {
     size_type offset = pos - begin();
-    size_type c = capacity();
-    size_type new_size = size() + 1;
-    if (new_size > c) {
-      if (c == 0) {
-        c = 1;
-      } else {
-        c *= 2;  //オーバーフロー処理
-      }
-      reserve(c);
-    }
-    for (; first_ + new_size != last_; ++last_) {
-      construct(last_);
-    }
-    move_elements(begin(), 1);
-    *(begin() + offset) = value;
+    insert(pos, 1, value);
     return begin() + offset;
   }
 
@@ -199,29 +185,83 @@ class vector {
     }
   }
 
-  void insert(iterator pos, size_type count, const T &value) {
-    size_type offset = pos - begin();
+  void move_elements_backward(iterator first, size_type offset) {
+    iterator src = first + offset;
+    iterator dst = first;
+    for (; src != end(); src++, dst++) {
+      *dst = *src;
+    }
+  }
+
+  void expand_capacity(size_type sz) {
+    if (sz <= capacity()) {
+      return;
+    }
     size_type c = capacity();
-    size_type new_size = size() + count;
-    if (new_size > c) {
+    while (sz > c) {
       if (c == 0) {
         c = 1;
       } else {
         c *= 2;  //オーバーフロー処理
       }
-      reserve(c);
     }
-    for (; first_ + new_size != last_; ++last_) {
+    reserve(c);
+  }
+
+  void insert(iterator pos, size_type count, const T &value) {
+    size_type offset = pos - begin();
+    size_type new_size = size() + count;
+
+    expand_capacity(new_size);
+    for (pointer new_last = first_ + new_size; last_ != new_last; ++last_) {
       construct(last_);
     }
-    move_elements(begin(), count);
     iterator it = begin() + offset;
+    move_elements(it, count);
     for (size_type i = 0; i < count; i++, it++) {
       *it = value;
     }
   }
-  // template< class InputIt >
-  // void insert( iterator pos, InputIt first, InputIt last);
+
+  template < class InputIterator >
+  void insert(iterator pos, InputIterator first, InputIterator last,
+              typename ft::enable_if< !ft::is_integral< InputIterator >::value,
+                                      InputIterator >::type * = NULL) {
+    size_type offset = std::distance(begin(), pos);
+    size_type count = std::distance(first, last);
+    size_type new_size = size() + count;
+
+    expand_capacity(new_size);
+    for (pointer new_last = first_ + new_size; last_ != new_last; ++last_) {
+      construct(last_);
+    }
+    iterator it = begin() + offset;
+    move_elements(it, count);
+    for (; first != last; first++, it++) {
+      *it = *first;
+    }
+  }
+
+  iterator erase(iterator pos) {
+    size_type offset = std::distance(begin(), pos);
+    move_elements_backward(pos, 1);
+    destroy(--last_);
+    return begin() + offset;
+  }
+
+  iterator erase(iterator first, iterator last) {
+    size_type offset = std::distance(begin(), first);
+    size_type count = std::distance(first, last);
+
+    if (first == last) {
+      return last;
+    }
+    move_elements_backward(first, count);
+    for (size_type i = 0; i < count; i++) {
+      destroy(--last_);
+    }
+    return begin() + offset;
+  }
 
   void push_back(const T &value) {
     if (size() + 1 > capacity()) {
@@ -246,6 +286,7 @@ class vector {
       last_ = first_ + sz;
     } else if (sz > size()) {
       reserve(sz);
+      // expand_capacity(sz);
       for (; last_ != reserved_last_; ++last_) {
         construct(last_, value);
       }
@@ -257,7 +298,7 @@ class vector {
 
   void deallocate() { alloc_.deallocate(first_, capacity()); }
 
-  void construct(pointer ptr) { alloc_.construct(ptr, 0); }  // T()?
+  void construct(pointer ptr) { alloc_.construct(ptr, T()); }  // T()?
 
   void construct(pointer ptr, const T &value) { alloc_.construct(ptr, value); }
 

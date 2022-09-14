@@ -283,6 +283,8 @@ void tutorial_test() {
   }
 }
 
+ft::vector< int > base_v;
+
 void test_constructor() {
   pout("constructer");
   std::allocator< int > allocator;
@@ -510,18 +512,88 @@ void test_clear() {
 void test_insert() {
   pout("insert");
 
-  ft::vector< int > v(5, 42);
+  ft::vector< int > v(base_v);
   ft_intvec_iter it = v.begin();
   it = v.insert(it, 100);
   cout << *it << endl;
   vdebug(v);
-  it = v.begin() + 1;
+  it = v.begin() + 4;
   it = v.insert(it, 200);
   vdebug(v);
   cout << *it << endl;
-  it = v.begin() + 1;
-  v.insert(it, 5, 300);
+
+  // void insert(iterator pos, size_type count, const T& value) {
+  //   guacamoleだとokなので一旦コメントアウト
+  // it = v.begin() + 4;
+  // v.insert(it, 500, 300);
+  // vdebug(v);
+  // it = v.begin() + 4;
+  // v.insert(it, 0, 400);
+  // vdebug(v);
+
+  // void insert(iterator pos, InputIterator first, InputIterator last,
+  //             typename ft::enable_if< !ft::is_integral< InputIterator
+  //             >::value,
+  //                                     InputIterator >::type* = NULL);
+  std::list< int > list;
+  for (int i = 0; i < 5; i++) {
+    list.push_back(i * 10);
+  }
+  std::list< int >::iterator l_it = list.begin();
+  std::list< int >::iterator l_ite = list.end();
+  l_it++;
+  l_ite--;
+  it = v.begin() + 4;
+  v.insert(it, l_it, l_ite);
   vdebug(v);
+}
+
+void test_erase_one() {
+  pout("erase_one");
+  ft::vector< int > v(base_v);
+
+  ft_intvec_iter it = v.begin() + 1;
+  it = v.erase(it);
+  vdebug(v);
+  cout << *it << endl;
+  // stlでcrash
+  // it = v.end();
+  // it = v.erase(it);
+  // vdebug(v);
+  // cout << *it << endl;
+
+  // pos が最後の要素を参照する場合は、 end() イテレータが返されます。
+  it = --v.end();
+  cout << *it << endl;
+  it = v.erase(it);
+  vdebug(v);
+  cout << (it == v.end()) << endl;
+}
+
+void test_erase_range() {
+  pout("erase_range");
+  ft::vector< int > v(base_v);
+
+  ft_intvec_iter it = v.begin() + 1;
+  ft_intvec_iter ite = v.begin() + 3;
+  it = v.erase(it, ite);
+  vdebug(v);
+  cout << *it << endl;
+  // 削除前に last==end() であった場合は、更新後の end() イテレータが返されます
+  ite = v.end();
+  it = v.erase(it, ite);
+  vdebug(v);
+  cout << (*it != *ite) << endl << (*it == *v.end()) << endl;
+  // [first, last) が空範囲の場合は、 last が返されます。
+  it = v.begin();
+  it = v.erase(it, it);
+  vdebug(v);
+  cout << (it == v.begin()) << endl;
+}
+
+void test_erase() {
+  test_erase_one();
+  test_erase_range();
 }
 
 void test_push_back() {
@@ -558,8 +630,15 @@ void test_resize() {
   vdebug(v);
 }
 
+void create_base_vec() {
+  for (int i = 0; i < 5; i++) {
+    base_v.push_back(i);
+  }
+}
+
 int main() {
   // tutorial_test();
+  create_base_vec();
   test_constructor();
   test_op_equal();
   // test_assign();
@@ -583,10 +662,10 @@ int main() {
   // 変更
   test_clear();
   test_insert();
-  // test_erase();
+  test_erase();
   test_push_back();
   test_pop_back();
-  // test_resize();
+  test_resize();
   return 0;
 }
 

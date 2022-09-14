@@ -9,12 +9,12 @@ namespace ft {
 // tag
 // ----------------------------------------------------
 
-struct input_iterator_tag {};
-struct output_iterator_tag {};
-struct forward_iterator_tag : public input_iterator_tag {};
-struct bidirectional_iterator_tag : public forward_iterator_tag {};
-struct random_access_iterator_tag : public bidirectional_iterator_tag {};
-struct contiguous_iterator_tag : public random_access_iterator_tag {};
+// struct input_iterator_tag {};
+// struct output_iterator_tag {};
+// struct forward_iterator_tag : public input_iterator_tag {};
+// struct bidirectional_iterator_tag : public forward_iterator_tag {};
+// struct random_access_iterator_tag : public bidirectional_iterator_tag {};
+// struct contiguous_iterator_tag : public random_access_iterator_tag {};
 
 // ----------------------------------------------------
 // iterator_traits
@@ -32,7 +32,7 @@ struct iterator_traits {
 // specialization for pointer types
 template < typename Tp >
 struct iterator_traits< Tp* > {
-  typedef ft::random_access_iterator_tag iterator_category;
+  typedef std::random_access_iterator_tag iterator_category;
   typedef Tp value_type;
   typedef ptrdiff_t difference_type;
   typedef Tp* pointer;
@@ -42,7 +42,7 @@ struct iterator_traits< Tp* > {
 // specialization for const pointer types
 template < typename Tp >
 struct iterator_traits< const Tp* > {
-  typedef ft::random_access_iterator_tag iterator_category;
+  typedef std::random_access_iterator_tag iterator_category;
   typedef Tp value_type;
   typedef ptrdiff_t difference_type;
   typedef const Tp* pointer;
@@ -215,14 +215,15 @@ typename reverse_iterator< Iterator >::difference_type operator-(
 
 template < class T >
 class random_access_iterator
-    : public ft::iterator< ft::random_access_iterator_tag, T > {
+    : public ft::iterator< std::random_access_iterator_tag, T > {
   // types
  public:
-  typedef typename ft::iterator< ft::random_access_iterator_tag,
+  typedef typename ft::iterator< std::random_access_iterator_tag,
                                  T >::iterator_category iterator_category;
-  typedef typename ft::iterator< ft::random_access_iterator_tag, T >::value_type
-      value_type;
-  typedef typename ft::iterator< ft::random_access_iterator_tag,
+  typedef
+      typename ft::iterator< std::random_access_iterator_tag, T >::value_type
+          value_type;
+  typedef typename ft::iterator< std::random_access_iterator_tag,
                                  T >::difference_type difference_type;
   typedef T* pointer;
   typedef T& reference;
