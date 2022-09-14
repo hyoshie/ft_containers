@@ -507,9 +507,25 @@ void test_clear() {
   vdebug(v);
 }
 
+void test_insert() {
+  pout("insert");
+
+  ft::vector< int > v(5, 42);
+  ft_intvec_iter it = v.begin();
+  it = v.insert(it, 100);
+  cout << *it << endl;
+  vdebug(v);
+  it = v.begin() + 1;
+  it = v.insert(it, 200);
+  vdebug(v);
+  cout << *it << endl;
+  it = v.begin() + 1;
+  v.insert(it, 5, 300);
+  vdebug(v);
+}
+
 void test_push_back() {
   pout("push_back");
-
   ft::vector< int > default_v;
   ft::vector< int > v(5, 42);
   default_v.push_back(219);
@@ -566,7 +582,7 @@ int main() {
   test_capacity();
   // 変更
   test_clear();
-  // test_insert();
+  test_insert();
   // test_erase();
   test_push_back();
   test_pop_back();

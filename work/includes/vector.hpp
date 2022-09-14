@@ -170,6 +170,59 @@ class vector {
   // 変更
   void clear() { destroy_until(rend()); }
 
+  iterator insert(iterator pos, const T &value) {
+    size_type offset = pos - begin();
+    size_type c = capacity();
+    size_type new_size = size() + 1;
+    if (new_size > c) {
+      if (c == 0) {
+        c = 1;
+      } else {
+        c *= 2;  //オーバーフロー処理
+      }
+      reserve(c);
+    }
+    for (; first_ + new_size != last_; ++last_) {
+      construct(last_);
+    }
+    move_elements(begin(), 1);
+    *(begin() + offset) = value;
+    return begin() + offset;
+  }
+
+  void move_elements(iterator first, size_type offset) {
+    reverse_iterator end = reverse_iterator(first);
+    reverse_iterator src = reverse_iterator(iterator(last_ - offset));
+    reverse_iterator dst = rbegin();
+    for (; src != end; src++, dst++) {
+      *dst = *src;
+    }
+  }
+
+  void insert(iterator pos, size_type count, const T &value) {
+    size_type offset = pos - begin();
+    size_type c = capacity();
+    size_type new_size = size() + count;
+    if (new_size > c) {
+      if (c == 0) {
+        c = 1;
+      } else {
+        c *= 2;  //オーバーフロー処理
+      }
+      reserve(c);
+    }
+    for (; first_ + new_size != last_; ++last_) {
+      construct(last_);
+    }
+    move_elements(begin(), count);
+    iterator it = begin() + offset;
+    for (size_type i = 0; i < count; i++, it++) {
+      *it = value;
+    }
+  }
+  // template< class InputIt >
+  // void insert( iterator pos, InputIt first, InputIt last);
+
   void push_back(const T &value) {
     if (size() + 1 > capacity()) {
       size_type c = size();
@@ -204,7 +257,7 @@ class vector {
 
   void deallocate() { alloc_.deallocate(first_, capacity()); }
 
-  void construct(pointer ptr) { alloc_.construct(ptr, 0); }
+  void construct(pointer ptr) { alloc_.construct(ptr, 0); }  // T()?
 
   void construct(pointer ptr, const T &value) { alloc_.construct(ptr, value); }
 
