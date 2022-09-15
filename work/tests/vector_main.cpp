@@ -520,6 +520,16 @@ int main() {
   // 非メンバ関数
   test_op_compare();
   test_swap();
+  ft::vector< int > v2(5, 42);
+  // const ft::vector< int > cv2(v2);
+  ft::vector< int >::iterator it2 = v2.begin();
+  ft::vector< int >::const_iterator cit = v2.begin();
+  // ft::vector< int >::const_iterator cit = cv2.begin();
+  // std::cout << std::boolalpha;
+  cout << (it2 == cit) << endl;
+  // ft::reverse_iterator< ft::vector< int >::const_iterator > it1 =
+  // v2.rbegin();
+  // cout << *(--it1) << endl;
   return 0;
 }
 
