@@ -251,7 +251,7 @@ class random_access_iterator
 
   reference operator*() const { return *current_; }
 
-  pointer operator->() const { return &(**this); }
+  pointer operator->() const { return current_; }
 
   reference operator[](difference_type n) const { return *(*this + n); }
 
