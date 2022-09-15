@@ -280,13 +280,17 @@ class vector {
 
   void push_back(const T& value) {
     if (size() + 1 > capacity()) {
-      size_type c = size();
-      if (c == 0) {
-        c = 1;
+      size_type cap = capacity();
+      size_type prev_cap = cap;
+      if (cap == 0) {
+        cap = 1;
       } else {
-        c *= 2;  //オーバーフロー処理
+        cap *= 2;
+        if (prev_cap != cap / 2) {
+          cap = prev_cap + 1;
+        }
       }
-      reserve(c);
+      reserve(cap);
     }
     construct(last_, value);
     ++last_;
@@ -348,15 +352,20 @@ class vector {
     if (sz <= capacity()) {
       return;
     }
-    size_type c = capacity();
-    while (sz > c) {
-      if (c == 0) {
-        c = 1;
+    size_type cap = capacity();
+    size_type prev_cap = cap;
+    while (sz > cap) {
+      if (cap == 0) {
+        cap = 1;
       } else {
-        c *= 2;  //オーバーフロー処理
+        cap *= 2;
+        if (prev_cap != cap / 2) {
+          throw std::overflow_error("expand_capacity");
+        }
       }
+      prev_cap = cap;
     }
-    reserve(c);
+    reserve(cap);
   }
 
   template < typename U >
