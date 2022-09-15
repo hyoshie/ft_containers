@@ -301,6 +301,11 @@ void test_reserve() {
   vdebug(v);
   v.reserve(100);
   vdebug(v);
+  try {
+    v.reserve(v.max_size() + 1);
+  } catch (const std::length_error& e) {
+    cout << "catch std::out_of_range" << endl;
+  }
 }
 
 void test_capacity() {
@@ -328,8 +333,8 @@ void test_clear() {
   vdebug(v);
 }
 
-void test_insert() {
-  pout("insert");
+void test_insert_one() {
+  pout("insert_one");
 
   ft::vector< int > v(base_v);
   ft_intvec_iter it = v.begin();
@@ -340,20 +345,30 @@ void test_insert() {
   it = v.insert(it, 200);
   vdebug(v);
   cout << *it << endl;
+}
+
+void test_insert_multi() {
+  pout("insert_multi");
 
   // void insert(iterator pos, size_type count, const T& value) {
-  //   guacamoleだとokなので一旦コメントアウト
-  // it = v.begin() + 4;
-  // v.insert(it, 500, 300);
-  // vdebug(v);
-  // it = v.begin() + 4;
-  // v.insert(it, 0, 400);
-  // vdebug(v);
+  ft::vector< int > v(base_v);
+  ft_intvec_iter it = v.begin() + 4;
+  v.insert(it, 500, 300);
+  vdebug(v);
+  it = v.begin() + 4;
+  v.insert(it, 0, 400);
+  vdebug(v);
+}
+
+void test_insert_range() {
+  pout("insert_range");
 
   // void insert(iterator pos, InputIterator first, InputIterator last,
   //             typename ft::enable_if< !ft::is_integral< InputIterator
   //             >::value,
   //                                     InputIterator >::type* = NULL);
+
+  ft::vector< int > v(base_v);
   std::list< int > list;
   for (int i = 0; i < 5; i++) {
     list.push_back(i * 10);
@@ -362,9 +377,16 @@ void test_insert() {
   std::list< int >::iterator l_ite = list.end();
   l_it++;
   l_ite--;
-  it = v.begin() + 4;
+  ft_intvec_iter it = v.begin() + 4;
   v.insert(it, l_it, l_ite);
   vdebug(v);
+}
+
+void test_insert() {
+  test_insert_one();
+  //   guacamoleだとokなので一旦コメントアウト
+  // test_insert_multi();
+  test_insert_range();
 }
 
 void test_erase_one() {

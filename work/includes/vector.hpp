@@ -64,6 +64,7 @@ class vector {
     clear();
     deallocate();
   }
+
   // コピー
   vector(const vector& rhs)
       : first_(NULL), last_(NULL), reserved_last_(NULL), alloc_(rhs.alloc_) {
@@ -75,6 +76,7 @@ class vector {
     }
     last_ = first_ + rhs.size();
   }
+
   vector& operator=(const vector& rhs) {
     if (this == &rhs) {
       return *this;
@@ -123,9 +125,7 @@ class vector {
   template < class InputIt >
   void assign(InputIt first, InputIt last,
               typename ft::enable_if< !ft::is_integral< InputIt >::value,
-                                      InputIt >::type* = NULL)
-
-  {
+                                      InputIt >::type* = NULL) {
     size_type count = std::distance(first, last);
     if (count > capacity()) {
       clear();
@@ -148,44 +148,62 @@ class vector {
   allocator_type get_allocator() const { return alloc_; }
 
   // 要素アクセス
-  reference operator[](size_type i) { return first_[i]; }
-  const_reference operator[](size_type i) const { return first_[i]; }
   reference at(size_type i) {
-    if (i >= size()) throw std::out_of_range("index is out of range.");
+    if (i >= size()) {
+      throw std::out_of_range("index is out of range.");
+    }
     return first_[i];
   }
   const_reference at(size_type i) const {
-    if (i >= size()) throw std::out_of_range("index is out of range.");
+    if (i >= size()) {
+      throw std::out_of_range("index is out of range.");
+    }
     return first_[i];
   }
+
+  reference operator[](size_type i) { return first_[i]; }
+  const_reference operator[](size_type i) const { return first_[i]; }
+
   reference front() { return *first_; }
   const_reference front() const { return *first_; }
+
   reference back() { return *(last_ - 1); }
   const_reference back() const { return *(last_ - 1); }
 
   // イテレーターアクセス
   iterator begin() { return iterator(first_); }
   const_iterator begin() const { return const_iterator(first_); }
+
   iterator end() { return iterator(last_); }
   const_iterator end() const { return const_iterator(last_); }
+
   reverse_iterator rbegin() { return reverse_iterator(end()); }
   const_reverse_iterator rbegin() const {
     return const_reverse_iterator(end());
   }
+
   reverse_iterator rend() { return reverse_iterator(begin()); }
   const_reverse_iterator rend() const {
     return const_reverse_iterator(begin());
   }
 
   // 容量
-  size_type size() const { return size_type(last_ - first_); }
-
   bool empty() const { return begin() == end(); }
 
-  size_type capacity() const { return std::distance(first_, reserved_last_); }
+  size_type size() const { return std::distance(first_, last_); }
+
+  size_type max_size() const {
+    return std::min< size_type >(alloc_.max_size(),
+                                 std::numeric_limits< difference_type >::max());
+  }
 
   void reserve(size_type sz) {
-    if (sz <= capacity()) return;
+    if (sz > max_size()) {
+      throw std::length_error("reserve: longer than max_size()");
+    }
+    if (sz <= capacity()) {
+      return;
+    }
     // 古いストレージの情報を保存
     pointer ptr = allocate(sz);
     pointer old_first = first_;
@@ -209,10 +227,7 @@ class vector {
     alloc_.deallocate(old_first, old_capacity);
   }
 
-  size_type max_size() const {
-    return std::min< size_type >(alloc_.max_size(),
-                                 std::numeric_limits< difference_type >::max());
-  }
+  size_type capacity() const { return std::distance(first_, reserved_last_); }
 
   // 変更
   void clear() { destroy_until(rend()); }
@@ -224,7 +239,7 @@ class vector {
   }
 
   void insert(iterator pos, size_type count, const T& value) {
-    size_type offset = pos - begin();
+    size_type offset = std::distance(begin(), pos);
     size_type new_size = size() + count;
 
     expand_capacity(new_size);
