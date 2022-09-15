@@ -295,10 +295,6 @@ class random_access_iterator
     return *this;
   }
 
-  // operator random_access_iterator< const T >() {
-  //   return random_access_iterator< const T >(current_);
-  // }
-
  protected:
   pointer current_;
 };
