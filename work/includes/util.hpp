@@ -1,6 +1,8 @@
 #ifndef UTIL_HPP
 #define UTIL_HPP
 
+#include <iostream>
+
 template < typename Container >
 void print(Container const& c) {
   for (std::size_t i = 0; i < c.size(); i++) {

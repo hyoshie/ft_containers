@@ -508,7 +508,7 @@ void create_base_vec() {
   }
 }
 
-int main() {
+void test_vector() {
   create_base_vec();
 
   test_type();
@@ -542,7 +542,6 @@ int main() {
   // 非メンバ関数
   test_op_compare();
   test_swap();
-  return 0;
 }
 
 // get_allocatorに自作allocator入れる

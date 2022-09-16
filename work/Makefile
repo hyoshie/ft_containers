@@ -1,5 +1,5 @@
-NAME_FT = vector_test_ft
-NAME_STL = vector_test_stl
+NAME_FT = test_ft
+NAME_STL = test_stl
 
 CXX = c++
 
