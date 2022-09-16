@@ -22,10 +22,16 @@ void test_stack() {
     l_list.push_back(i);
   }
 
+  StackDefaultTester< long > default_tester;
   StackTester< long, ft::vector< long > > vec_tester(l_vector);
   StackTester< long, std::deque< long > > deq_tester(l_deque);
   StackTester< long, std::list< long > > list_tester(l_list);
 
+  std::cout << std::endl
+            << "----- "
+            << "stack(default)"
+            << " -----" << std::endl;
+  default_tester.run();
   std::cout << std::endl
             << "----- "
             << "stack(from vector)"

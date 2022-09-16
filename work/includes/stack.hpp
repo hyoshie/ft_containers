@@ -43,11 +43,56 @@ class stack {
 
   void pop() { c_.pop_back(); }
 
+  template < class T1, class Container1 >
+  friend bool operator==(const ft::stack< T1, Container1 >& lhs,
+                         const ft::stack< T1, Container1 >& rhs);
+
+  template < class T1, class Container1 >
+  friend bool operator<(const ft::stack< T1, Container1 >& lhs,
+                        const ft::stack< T1, Container1 >& rhs);
+
  protected:
   Container c_;
-
- private:
 };
+
+template < class T, class Container >
+bool operator==(const ft::stack< T, Container >& lhs,
+                const ft::stack< T, Container >& rhs) {
+  return lhs.c_ == rhs.c_;
+}
+
+template < class T, class Container >
+bool operator!=(const ft::stack< T, Container >& lhs,
+                const ft::stack< T, Container >& rhs) {
+  return !(lhs == rhs);
+}
+
+template < class T, class Container >
+bool operator<(const ft::stack< T, Container >& lhs,
+               const ft::stack< T, Container >& rhs) {
+  return lhs.c_ < rhs.c_;
+}
+
+template < class T, class Container >
+bool operator<=(const ft::stack< T, Container >& lhs,
+                const ft::stack< T, Container >& rhs) {
+  return !(lhs > rhs);
+}
+
+template < class T, class Container >
+bool operator>(const ft::stack< T, Container >& lhs,
+               const ft::stack< T, Container >& rhs) {
+  return rhs < lhs;
+}
+
+template < class T, class Container >
+bool operator>=(const ft::stack< T, Container >& lhs,
+                const ft::stack< T, Container >& rhs) {
+  return !(lhs < rhs);
+}
+
 }  // namespace ft
+
+namespace std {}  // namespace std
 
 #endif /* STACK_HPP */
