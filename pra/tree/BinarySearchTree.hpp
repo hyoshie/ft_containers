@@ -3,16 +3,18 @@
 
 #include <algorithm>
 
+template < typename T >
 struct Node {
-  Node(double item = 0) : left(NULL), right(NULL), parent(NULL), item_(item) {}
+  Node(T item = 0) : left(NULL), right(NULL), parent(NULL), item_(item) {}
 
   Node *left;
   Node *right;
   Node *parent;
-  double item_;
+  T item_;
 };
 
-int depth(Node *node) {
+template < typename T >
+int depth(Node< T > *node) {
   int depth = 0;
   while (node) {
     node = node->parent;
@@ -21,42 +23,82 @@ int depth(Node *node) {
   return depth;
 }
 
-int size(Node *node) {
+template < typename T >
+int size(Node< T > *node) {
   if (!node) {
     return 0;
   }
   return 1 + size(node->left) + size(node->right);
 }
 
-int height(Node *node) {
+template < typename T >
+int height(Node< T > *node) {
   if (!node) {
     return -1;
   }
   return 1 + std::max(height(node->left), height(node->right));
 }
 
-void print_node(Node *node) {
+template < typename T >
+void print_node(Node< T > *node) {
   if (!node) {
     return;
   }
-  std::cout << "node  : " << node << std::endl;
+  // std::cout << "Node  : " << node << std::endl;
   std::cout << "item  : " << node->item_ << std::endl;
-  std::cout << "left  : " << node->left << std::endl;
-  std::cout << "right : " << node->right << std::endl;
-  std::cout << "parent: " << node->parent << std::endl;
+  if (node->left) {
+    std::cout << "left  : " << node->left->item_ << std::endl;
+  } else {
+    std::cout << "left  : "
+              << "NULL" << std::endl;
+  }
+  if (node->right) {
+    std::cout << "right : " << node->right->item_ << std::endl;
+  } else {
+    std::cout << "right : "
+              << "NULL" << std::endl;
+  }
+  if (node->parent) {
+    std::cout << "parent: " << node->parent->item_ << std::endl;
+  } else {
+    std::cout << "parent: "
+              << "NULL" << std::endl;
+  }
   std::cout << std::endl;
 }
 
-void traverse(Node *node) {
+template < typename T >
+void pre_order_print(Node< T > *node) {
   if (!node) {
     return;
   }
   print_node(node);
-  traverse(node->left);
-  traverse(node->right);
+  pre_order_print(node->left);
+  pre_order_print(node->right);
 }
 
-void destroy_node(Node *node) {
+template < typename T >
+void in_order_print(Node< T > *node) {
+  if (!node) {
+    return;
+  }
+  in_order_print(node->left);
+  print_node(node);
+  in_order_print(node->right);
+}
+
+template < typename T >
+void post_order_print(Node< T > *node) {
+  if (!node) {
+    return;
+  }
+  post_order_print(node->left);
+  post_order_print(node->right);
+  print_node(node);
+}
+
+template < typename T >
+void destroy_node(Node< T > *node) {
   if (node) {
     destroy_node(node->left);
     destroy_node(node->right);
@@ -77,6 +119,7 @@ void destroy_node(Node *node) {
 //   return NULL;
 // }
 
+template < typename T >
 class BinarySearchTree {
  public:
   BinarySearchTree() : root_(NULL), n_(0) {}
@@ -85,8 +128,8 @@ class BinarySearchTree {
     destroy_node(root_);
   }
 
-  Node *search(double x) {
-    Node *tmp = root_;
+  Node< T > *search(T x) {
+    Node< T > *tmp = root_;
     while (tmp) {
       if (tmp->item_ == x) {
         return tmp;
@@ -99,9 +142,9 @@ class BinarySearchTree {
     return NULL;
   }
 
-  bool add(double x) {
-    Node *parent = find_last(x);
-    Node *child = new Node(x);
+  bool add(T x) {
+    Node< T > *parent = find_last(x);
+    Node< T > *child = new Node< T >(x);
 
     bool result = add_child(parent, child);
     if (!result) {
@@ -110,9 +153,9 @@ class BinarySearchTree {
     return result;
   }
 
-  Node *find_last(double x) {
-    Node *current = root_;
-    Node *prev = NULL;
+  Node< T > *find_last(T x) {
+    Node< T > *current = root_;
+    Node< T > *prev = NULL;
     while (current) {
       prev = current;
       if (current->item_ == x) {
@@ -126,7 +169,7 @@ class BinarySearchTree {
     return prev;
   }
 
-  bool add_child(Node *parent, Node *child) {
+  bool add_child(Node< T > *parent, Node< T > *child) {
     if (!parent) {
       root_ = child;
     } else {
@@ -144,11 +187,11 @@ class BinarySearchTree {
   }
 
   void print_all() {
-    traverse(root_);
+    in_order_print(root_);
     ;
   }
 
-  void remove(Node *node) {
+  void remove(Node< T > *node) {
     if (!node) {
       return;
     }
@@ -156,7 +199,7 @@ class BinarySearchTree {
       splice(node);
       delete node;
     } else {
-      Node *w = node->right;
+      Node< T > *w = node->right;
       while (w->left) {
         w = w->left;
       }
@@ -166,9 +209,9 @@ class BinarySearchTree {
     }
   }
 
-  void splice(Node *node) {
-    Node *s;
-    Node *p;
+  void splice(Node< T > *node) {
+    Node< T > *s;
+    Node< T > *p;
 
     if (!node) {
       return;
@@ -197,10 +240,10 @@ class BinarySearchTree {
     n_--;
   }
 
-  Node *root() const { return root_; }
+  Node< T > *root() const { return root_; }
 
  private:
-  Node *root_;
+  Node< T > *root_;
   int n_;
 };
 
