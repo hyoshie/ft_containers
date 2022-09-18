@@ -4,5 +4,6 @@ int main() {
   // test_vector();
   // test_stack();
   // test_pair();
-  test_tree();
+  // test_tree();
+  test_tree2();
 }

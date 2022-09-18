@@ -80,7 +80,10 @@ void destroy_node(Node *node) {
 class BinarySearchTree {
  public:
   BinarySearchTree() : root_(NULL), n_(0) {}
-  ~BinarySearchTree() { destroy_node(root_); }
+  ~BinarySearchTree() {
+    std::cout << "size:" << size(root_) << std::endl;
+    destroy_node(root_);
+  }
 
   Node *search(double x) {
     Node *tmp = root_;
@@ -99,9 +102,12 @@ class BinarySearchTree {
   bool add(double x) {
     Node *parent = find_last(x);
     Node *child = new Node(x);
-    // print_node(parent);
-    // print_node(child);
-    return add_child(parent, child);
+
+    bool result = add_child(parent, child);
+    if (!result) {
+      delete child;
+    }
+    return result;
   }
 
   Node *find_last(double x) {
@@ -143,6 +149,9 @@ class BinarySearchTree {
   }
 
   void remove(Node *node) {
+    if (!node) {
+      return;
+    }
     if (!node->left || !node->right) {
       splice(node);
       delete node;
@@ -161,6 +170,9 @@ class BinarySearchTree {
     Node *s;
     Node *p;
 
+    if (!node) {
+      return;
+    }
     if (node->left) {
       s = node->left;
     } else {
