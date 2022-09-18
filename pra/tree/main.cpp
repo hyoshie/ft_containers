@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 
-#include "tree.hpp"
+#include "BinarySearchTree.hpp"
 
 void test_tree() {
   BinarySearchTree btree;
@@ -51,4 +51,9 @@ void test_tree2(void) {
     printf("探索+削除時間 %.3f\n", (double)(clock() - s) / CLOCKS_PER_SEC);
     delete tree;
   }
+}
+
+int main() {
+  test_tree();
+  test_tree2();
 }
