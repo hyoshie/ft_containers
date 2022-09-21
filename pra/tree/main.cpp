@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 
+#include "BSTreeWithNum.hpp"
 #include "BinarySearchTree.hpp"
 
 void test_tree() {
@@ -97,9 +98,20 @@ void test_is_balanced() {
   }
 }
 
+void test_node_with_num() {
+  NodeWithNum< int > n_node;
+  std::cout << std::boolalpha;
+  std::cout << n_node.item << std::endl;
+  std::cout << n_node.left << std::endl;
+  std::cout << is_balanced(&n_node) << std::endl;
+  std::cout << size(&n_node) << std::endl;
+  std::cout << height(&n_node) << std::endl;
+}
+
 int main() {
-  // test_tree();
+  test_tree();
   // test_tree2();
   // test_traverse();
-  test_is_balanced();
+  // test_is_balanced();
+  // test_node_with_num();
 }

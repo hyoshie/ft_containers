@@ -389,8 +389,10 @@ bool is_balanced(Node< T > *node) {
 
 template < typename T >
 class BinarySearchTree {
- public:
+ private:
   typedef Node< T > node_type;
+
+ public:
   BinarySearchTree() : root_(NULL), n_(0) {}
   ~BinarySearchTree() { destroy_node(root_); }
 
@@ -437,7 +439,7 @@ class BinarySearchTree {
     return prev;
   }
 
-  bool add_child(node_type *parent, Node< T > *child) {
+  bool add_child(node_type *parent, node_type *child) {
     if (!parent) {
       root_ = child;
     } else {
@@ -525,7 +527,7 @@ class BinarySearchTree {
 
   node_type *root() const { return root_; }
 
- private:
+ protected:
   node_type *root_;
   int n_;
 };
