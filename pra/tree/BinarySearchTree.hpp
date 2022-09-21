@@ -525,6 +525,62 @@ class BinarySearchTree {
     n_--;
   }
 
+  void rotate_left(node_type *node) {
+    node_type *pivot = node->right;
+    if (!pivot) {
+      return;
+    }
+    pivot->parent = node->parent;
+    // nodeの親の情報を更新
+    if (pivot->parent) {
+      if (pivot->parent->left == node) {
+        pivot->parent->left = pivot;
+      } else {
+        pivot->parent->right = pivot;
+      }
+    }
+    node->right = pivot->left;
+    // nodeの右の子の情報を更新
+    if (node->right) {
+      node->right->parent = node;
+    }
+    node->parent = pivot;
+    pivot->left = node;
+
+    if (node == root_) {
+      root_ = pivot;
+      root_->parent = NULL;
+    }
+  }
+
+  void rotate_right(node_type *node) {
+    node_type *pivot = node->left;
+    if (!pivot) {
+      return;
+    }
+    pivot->parent = node->parent;
+    // nodeの親の情報を更新
+    if (pivot->parent) {
+      if (pivot->parent->left == node) {
+        pivot->parent->left = pivot;
+      } else {
+        pivot->parent->right = pivot;
+      }
+    }
+    node->left = pivot->right;
+    // nodeの右の子の情報を更新
+    if (node->left) {
+      node->left->parent = node;
+    }
+    node->parent = pivot;
+    pivot->right = node;
+
+    if (node == root_) {
+      root_ = pivot;
+      root_->parent = NULL;
+    }
+  }
+
   node_type *root() const { return root_; }
 
  protected:

@@ -59,7 +59,7 @@ void test_tree2(void) {
 
 void test_traverse() {
   BinarySearchTree< int > btree;
-  double array[] = {5, 8, 2, 7, 10, 9, 3, 6, 4, 1};
+  int array[] = {5, 8, 2, 7, 10, 9, 3, 6, 4, 1};
 
   for (int i = 0; i < sizeof(array) / sizeof(array[0]); i++) {
     btree.add(array[i]);
@@ -108,10 +108,32 @@ void test_node_with_num() {
   std::cout << height(&n_node) << std::endl;
 }
 
+void test_rotate() {
+  BinarySearchTree< int > btree;
+  int array[] = {5, 8, 2, 7, 10, 9, 3, 6, 4, 1};
+
+  for (int i = 0; i < sizeof(array) / sizeof(array[0]); i++) {
+    btree.add(array[i]);
+  }
+
+  Node< int > *root = btree.root();
+  print_graph(root, 0);
+  btree.rotate_left(root);
+  // btree.rotate_right(btree.search(3));
+  root = btree.root();
+  print_graph(root, 0);
+  btree.rotate_right(root);
+  root = btree.root();
+  print_graph(root, 0);
+  // btree.print_all();
+  // pre_order_print(root);
+}
+
 int main() {
-  test_tree();
+  // test_tree();
   // test_tree2();
   // test_traverse();
   // test_is_balanced();
   // test_node_with_num();
+  test_rotate();
 }
