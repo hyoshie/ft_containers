@@ -270,24 +270,24 @@ void print_node(Node *node) {
     return;
   }
 
-  std::string node_item = std::to_string(node->x);
-  std::string parent_item =
-      (node->parent) ? std::to_string(node->parent->x) : "NULL";
-  std::string left_item = (node->left) ? std::to_string(node->left->x) : "NULL";
-  std::string right_item =
-      (node->right) ? std::to_string(node->right->x) : "NULL";
+  // std::string node_item = std::to_string(node->x);
+  // std::string parent_item =
+  //     (node->parent) ? std::to_string(node->parent->x) : "NULL";
+  // std::string left_item = (node->left) ? std::to_string(node->left->x) :
+  // "NULL"; std::string right_item =
+  //     (node->right) ? std::to_string(node->right->x) : "NULL";
 
-  // std::cout << "x  : " << node->x << std::endl
-  //           << "this  : " << node << std::endl
-  //           << "left  : " << node->left << std::endl
-  //           << "right : " << node->right << std::endl
-  //           << "parent: " << node->parent << std::endl
-  // << std::endl;
-  std::cout << "x  : " << node_item << std::endl
-            << "left  : " << left_item << std::endl
-            << "right : " << right_item << std::endl
-            << "parent: " << parent_item << std::endl
+  std::cout << "x  : " << node->x << std::endl
+            << "this  : " << node << std::endl
+            << "left  : " << node->left->x << std::endl
+            << "right : " << node->right->x << std::endl
+            << "parent: " << node->parent->x << std::endl
             << std::endl;
+  // std::cout << "x  : " << node_item << std::endl
+  //           << "left  : " << left_item << std::endl
+  //           << "right : " << right_item << std::endl
+  //           << "parent: " << parent_item << std::endl
+  //           << std::endl;
 }
 
 template < class Node, class T >
@@ -303,15 +303,15 @@ void RedBlackTree< Node, T >::print_graph(Node *node, int depth) {
   if (node == nil) {
     return;
   }
-  // print_node(node);
+  print_node(node);
 
   print_graph(node->left, depth + 1);
 
-  for (int i = 0; i < depth * 2; i++) {
-    std::cout << " ";
-  }
-  std::string color = (node->colour == red) ? "\x1b[31m" : "";
-  std::cout << "+" << color << node->x << "\x1b[39m" << std::endl;
+  // for (int i = 0; i < depth * 2; i++) {
+  //   std::cout << " ";
+  // }
+  // std::string color = (node->colour == red) ? "\x1b[31m" : "";
+  // std::cout << "+" << color << node->x << "\x1b[39m" << std::endl;
 
   print_graph(node->right, depth + 1);
 }
