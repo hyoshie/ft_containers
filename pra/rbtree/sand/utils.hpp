@@ -1,23 +1,8 @@
-#ifndef TREE_HPP
-#define TREE_HPP
+#ifndef UTILS_HPP
+#define UTILS_HPP
 
-#include <algorithm>
-#include <cassert>
-#include <iomanip>
-#include <string>
-
-template < typename T >
-struct Node {
-  Node(T given = 0) : left(NULL), right(NULL), parent(NULL), item(given) {}
-
-  Node *left;
-  Node *right;
-  Node *parent;
-  T item;
-};
-
-template < typename T >
-int depth(Node< T > *node) {
+template < typename NodeType >
+int depth(NodeType *node) {
   int depth = 0;
   // node != root_
   while (node && node->parent) {
@@ -27,16 +12,16 @@ int depth(Node< T > *node) {
   return depth;
 }
 
-template < typename T >
-int size(Node< T > *node) {
+template < typename NodeType >
+int size(NodeType *node) {
   if (!node) {
     return 0;
   }
   return 1 + size(node->left) + size(node->right);
 }
 
-template < typename T >
-int height(Node< T > *node) {
+template < typename NodeType >
+int height(NodeType *node) {
   if (!node) {
     return -1;
   }
@@ -44,8 +29,8 @@ int height(Node< T > *node) {
 }
 
 // わかりにくい
-template < typename T >
-bool has_travarsed(Node< T > *node, Node< T > *current, Node< T > *prev) {
+template < typename NodeType >
+bool has_travarsed(NodeType *node, NodeType *current, NodeType *prev) {
   if (current == node) {
     if (node->left && node->right) {
       return prev == node->right;
@@ -73,14 +58,14 @@ bool has_travarsed(Node< T > *node, Node< T > *current, Node< T > *prev) {
   // return false;
 }
 
-template < typename T >
-int size_no_recursive(Node< T > *node) {
+template < typename NodeType >
+int size_no_recursive(NodeType *node) {
   if (!node) {
     return 0;
   }
-  Node< T > *current = node;
-  Node< T > *prev = node->parent;
-  Node< T > *next = NULL;
+  NodeType *current = node;
+  NodeType *prev = node->parent;
+  NodeType *next = NULL;
   int size = 0;
 
   while (current && !has_travarsed(node, current, prev)) {
@@ -111,19 +96,19 @@ int size_no_recursive(Node< T > *node) {
   return size;
 }
 
-template < typename T >
-bool is_leaf(Node< T > *node) {
+template < typename NodeType >
+bool is_leaf(NodeType *node) {
   return (node && (!node->left && !node->right));
 }
 
-template < typename T >
-int height_no_recursive(Node< T > *node) {
+template < typename NodeType >
+int height_no_recursive(NodeType *node) {
   if (!node) {
     return -1;
   }
-  Node< T > *current = node;
-  Node< T > *prev = node->parent;
-  Node< T > *next = NULL;
+  NodeType *current = node;
+  NodeType *prev = node->parent;
+  NodeType *next = NULL;
   int height = 0;
   int tmp_height = 0;
 
@@ -163,8 +148,8 @@ int height_no_recursive(Node< T > *node) {
   return height;
 }
 
-template < typename T >
-void print_node(Node< T > *node) {
+template < typename NodeType >
+void print_node(NodeType *node) {
   if (!node) {
     return;
   }
@@ -184,8 +169,8 @@ void print_node(Node< T > *node) {
             << std::endl;
 }
 
-template < typename T >
-void print_node_graph(Node< T > *node) {
+template < typename NodeType >
+void print_node_graph(NodeType *node) {
   if (!node) {
     return;
   }
@@ -206,8 +191,8 @@ void print_node_graph(Node< T > *node) {
   std::cout << std::endl;
 }
 
-template < typename T >
-void pre_order_print(Node< T > *node) {
+template < typename NodeType >
+void pre_order_print(NodeType *node) {
   if (!node) {
     return;
   }
@@ -216,14 +201,14 @@ void pre_order_print(Node< T > *node) {
   pre_order_print(node->right);
 }
 
-template < typename T >
-void pre_order_print_nore(Node< T > *node) {
+template < typename NodeType >
+void pre_order_print_nore(NodeType *node) {
   if (!node) {
     return;
   }
-  Node< T > *current = node;
-  Node< T > *prev = node->parent;
-  Node< T > *next = NULL;
+  NodeType *current = node;
+  NodeType *prev = node->parent;
+  NodeType *next = NULL;
 
   while (current && !has_travarsed(node, current, prev)) {
     if (prev == current->parent) {
@@ -252,8 +237,8 @@ void pre_order_print_nore(Node< T > *node) {
   }
 }
 
-template < typename T >
-void in_order_print(Node< T > *node) {
+template < typename NodeType >
+void in_order_print(NodeType *node) {
   if (!node) {
     return;
   }
@@ -262,14 +247,14 @@ void in_order_print(Node< T > *node) {
   in_order_print(node->right);
 }
 
-template < typename T >
-void in_order_print_nore(Node< T > *node) {
+template < typename NodeType >
+void in_order_print_nore(NodeType *node) {
   if (!node) {
     return;
   }
-  Node< T > *current = node;
-  Node< T > *prev = node->parent;
-  Node< T > *next = NULL;
+  NodeType *current = node;
+  NodeType *prev = node->parent;
+  NodeType *next = NULL;
 
   // std::cout << std::endl;
   while (current && !has_travarsed(node, current, prev)) {
@@ -301,8 +286,8 @@ void in_order_print_nore(Node< T > *node) {
   }
 }
 
-template < typename T >
-void post_order_print(Node< T > *node) {
+template < typename NodeType >
+void post_order_print(NodeType *node) {
   if (!node) {
     return;
   }
@@ -311,14 +296,14 @@ void post_order_print(Node< T > *node) {
   print_node(node);
 }
 
-template < typename T >
-void post_order_print_nore(Node< T > *node) {
+template < typename NodeType >
+void post_order_print_nore(NodeType *node) {
   if (!node) {
     return;
   }
-  Node< T > *current = node;
-  Node< T > *prev = node->parent;
-  Node< T > *next = NULL;
+  NodeType *current = node;
+  NodeType *prev = node->parent;
+  NodeType *next = NULL;
 
   while (current && !has_travarsed(node, current, prev)) {
     if (prev == current->parent) {
@@ -350,8 +335,8 @@ void post_order_print_nore(Node< T > *node) {
   print_node(node);
 }
 
-template < typename T >
-void print_graph(Node< T > *node, int depth) {
+template < typename NodeType >
+void print_graph(NodeType *node, int depth) {
   if (!node) {
     return;
   }
@@ -368,8 +353,8 @@ void print_graph(Node< T > *node, int depth) {
   depth++;
 }
 
-template < typename T >
-void destroy_node(Node< T > *node) {
+template < typename NodeType >
+void destroy_node(NodeType *node) {
   if (node) {
     destroy_node(node->left);
     destroy_node(node->right);
@@ -377,8 +362,8 @@ void destroy_node(Node< T > *node) {
   }
 }
 
-template < typename T >
-bool is_balanced(Node< T > *node) {
+template < typename NodeType >
+bool is_balanced(NodeType *node) {
   if (!node) {
     return true;
   }
@@ -387,233 +372,4 @@ bool is_balanced(Node< T > *node) {
   return roughly_same && is_balanced(node->left) && is_balanced(node->right);
 }
 
-template < typename T >
-Node< T > *next_pre_order(Node< T > *node) {
-  if (!node) {
-    std::cerr << "[\x1b[32mPASS1\x1b[39m]" << std::endl;
-    return NULL;
-  }
-  if (!is_leaf(node)) {
-    return (node->left) ? node->left : node->right;
-  }
-  if (node->parent->left == node && node->parent->right) {
-    return node->parent->right;
-  }
-  Node< T > *prev = node;
-  while (node) {
-    printf("[\x1b[32mPASS\x1b[39m]\n");
-    if (node->parent && prev == node->left && node->right) {
-      return node->right;
-    }
-    // if (prev == node->right && node->parent && node->parent->left == node) {
-    //   return node->parent->right;
-    // }
-    prev = node;
-    node = node->parent;
-    std::cout << node->item << std::endl;
-  }
-  return NULL;
-}
-
-template < typename T >
-class BinarySearchTree {
- private:
-  typedef Node< T > node_type;
-
- public:
-  BinarySearchTree() : root_(NULL), n_(0) {}
-  ~BinarySearchTree() { destroy_node(root_); }
-
-  node_type *search(T x) {
-    node_type *tmp = root_;
-    while (tmp) {
-      if (tmp->item == x) {
-        return tmp;
-      } else if (x < tmp->item) {
-        tmp = tmp->left;
-      } else {
-        tmp = tmp->right;
-      }
-    }
-    return NULL;
-  }
-
-  bool add(T x) {
-    node_type *parent = find_last(x);
-    node_type *child = new Node< T >(x);
-
-    bool result = add_child(parent, child);
-    if (!result) {
-      delete child;
-    }
-    return result;
-  }
-
-  // xを保持しているノードを探す
-  // 見つからないときは最後に出会ったノードを返す
-  node_type *find_last(T x) {
-    node_type *current = root_;
-    node_type *prev = NULL;
-    while (current) {
-      prev = current;
-      if (current->item == x) {
-        return current;
-      } else if (x < current->item) {
-        current = current->left;
-      } else {
-        current = current->right;
-      }
-    }
-    return prev;
-  }
-
-  bool add_child(node_type *parent, node_type *child) {
-    if (!parent) {
-      root_ = child;
-    } else {
-      if (child->item == parent->item) {
-        return false;
-      } else if (child->item < parent->item) {
-        parent->left = child;
-      } else {
-        parent->right = child;
-      }
-      child->parent = parent;
-    }
-    n_++;
-    return true;
-  }
-
-  void print_all() {
-    in_order_print(root_);
-    ;
-  }
-
-  void remove(node_type *node) {
-    if (!node) {
-      return;
-    }
-    if (!node->left || !node->right) {
-      // 葉か子を1つ持つノードのとき
-      splice(node);
-      delete node;
-    } else {
-      // 子を2つ持つノードのとき
-      // node->rightを根とする部分木の最小値を保持するノードを見つける
-      // そのノードとnodeの値を交換する
-      // そのノードを削除する
-      node_type *w = node->right;
-      while (w->left) {
-        w = w->left;
-      }
-      node->item = w->item;
-      splice(w);
-      delete w;
-    }
-  }
-
-  // ノードを木から削除する
-  // 葉のとき->ノードを親から切り離す
-  // 子を1つ持つノードのとき->ノードを親から切り離す
-  void splice(node_type *node) {
-    node_type *grandchild;
-    node_type *parent;
-
-    if (!node) {
-      return;
-    }
-
-    // 子を1つ持つノードのとき
-    if (node->left) {
-      grandchild = node->left;
-    } else {
-      grandchild = node->right;
-    }
-
-    if (node == root_) {
-      // 根を削除するとき
-      root_ = grandchild;
-      parent = NULL;
-    } else {
-      // 根以外のノードを削除するとき
-      parent = node->parent;
-      if (parent->left == node) {
-        // ノードがその親の左の子のとき
-        parent->left = grandchild;
-      } else {
-        // ノードがその親の右の子のとき
-        parent->right = grandchild;
-      }
-    }
-
-    // 葉でないときは親とつなげる
-    if (grandchild) {
-      grandchild->parent = parent;
-    }
-    n_--;
-  }
-
-  void rotate_left(node_type *node) {
-    node_type *pivot = node->right;
-    if (!pivot) {
-      return;
-    }
-    pivot->parent = node->parent;
-    // nodeの親の情報を更新
-    if (pivot->parent) {
-      if (pivot->parent->left == node) {
-        pivot->parent->left = pivot;
-      } else {
-        pivot->parent->right = pivot;
-      }
-    }
-    node->right = pivot->left;
-    // nodeの右の子の情報を更新
-    if (node->right) {
-      node->right->parent = node;
-    }
-    node->parent = pivot;
-    pivot->left = node;
-
-    if (node == root_) {
-      root_ = pivot;
-      root_->parent = NULL;
-    }
-  }
-
-  void rotate_right(node_type *node) {
-    node_type *pivot = node->left;
-    if (!pivot) {
-      return;
-    }
-    pivot->parent = node->parent;
-    // nodeの親の情報を更新
-    if (pivot->parent) {
-      if (pivot->parent->left == node) {
-        pivot->parent->left = pivot;
-      } else {
-        pivot->parent->right = pivot;
-      }
-    }
-    node->left = pivot->right;
-    // nodeの右の子の情報を更新
-    if (node->left) {
-      node->left->parent = node;
-    }
-    node->parent = pivot;
-    pivot->right = node;
-
-    if (node == root_) {
-      root_ = pivot;
-      root_->parent = NULL;
-    }
-  }
-
-  node_type *root() const { return root_; }
-
- protected:
-  node_type *root_;
-  int n_;
-};
-
-#endif /* TREE_HPP */
+#endif /* UTILS_HPP */
