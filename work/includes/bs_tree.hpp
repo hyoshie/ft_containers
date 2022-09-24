@@ -17,6 +17,13 @@ template < class Key, class Value, class Compare,
            class Allocator = std::allocator< Value > >
 class bs_tree {
   // 型
+ private:
+  // 型
+  typedef bs_tree_node< Value >* link_type;
+  typedef const bs_tree_node< Value >* const_link_type;
+  typedef typename Allocator::template rebind< bs_tree_node< Value > >::other
+      node_allocator;
+
  public:
   typedef Key key_type;
   typedef Value value_type;
@@ -44,6 +51,32 @@ class bs_tree {
     // std::cout << u->item.first << std::endl;
     return addChild(ptr, u);
   }
+
+  bool remove(const_reference x) {
+    link_type ptr = findLast(x);
+    if (ptr != nil_ && x.first == ptr->item.first) {
+      remove(ptr);
+      return true;
+    }
+    return false;
+  }
+
+  link_type most_left() {
+    link_type most_left = root_;
+    while (most_left != nil_ && most_left->left != nil_) {
+      most_left = most_left->left;
+    }
+    return most_left;
+  }
+
+  link_type most_right() {
+    link_type most_right = root_;
+    while (most_right != nil_ && most_right->right != nil_) {
+      most_right = most_right->right;
+    }
+    return most_right;
+  }
+
   // debug
   void print() {
     ;
@@ -53,12 +86,6 @@ class bs_tree {
   }
 
  private:
-  // 型
-  typedef bs_tree_node< Value >* link_type;
-  typedef const bs_tree_node< Value >* const_link_type;
-  typedef typename Allocator::template rebind< bs_tree_node< Value > >::other
-      node_allocator;
-
   // メンバ関数
   link_type allocate(size_type n) { return node_alloc_.allocate(n); }
 
@@ -105,6 +132,46 @@ class bs_tree {
     }
     // n++;
     return true;
+  }
+
+  void remove(link_type ptr) {
+    if (ptr->left == nil_ || ptr->right == nil_) {
+      splice(ptr);
+      delete ptr;
+    } else {
+      link_type target = ptr->right;
+      while (target->left != nil_) {
+        target = target->left;
+      }
+      ptr->item = target->item;
+      splice(target);
+      delete target;
+    }
+  }
+
+  void splice(link_type ptr) {
+    link_type child;
+    link_type new_parent;
+    if (ptr->left != nil_) {
+      child = ptr->left;
+    } else {
+      child = ptr->right;
+    }
+    if (ptr == root_) {
+      root_ = child;
+      new_parent = nil_;
+    } else {
+      new_parent = ptr->parent;
+      if (new_parent->left == ptr) {
+        new_parent->left = child;
+      } else {
+        new_parent->right = child;
+      }
+    }
+    if (child != nil_) {
+      child->parent = new_parent;
+    }
+    // n--;
   }
 
   void print_graph(link_type node, int depth) {

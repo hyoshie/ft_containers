@@ -33,3 +33,33 @@ TEST(TreeTest, AddTest) {
   ASSERT_FALSE(tree.add(testpair(10, 'e')));
   tree.print();
 }
+
+TEST(TreeTest, RemoveTest) {
+  bs_tree< int, testpair, std::less< int > > tree;
+  ASSERT_FALSE(tree.remove(testpair(10, 'd')));
+  ASSERT_TRUE(tree.add(testpair(1, 'a')));
+  ASSERT_TRUE(tree.add(testpair(15, 'b')));
+  ASSERT_TRUE(tree.add(testpair(-1, 'c')));
+  ASSERT_TRUE(tree.add(testpair(10, 'd')));
+  ASSERT_TRUE(tree.remove(testpair(10, 'd')));
+  ASSERT_TRUE(tree.remove(testpair(1, 'a')));
+  ASSERT_FALSE(tree.remove(testpair(1, 'a')));
+  // ASSERT_FALSE(tree.remove(testpair(15, 'z')));
+  // 現在true。引数を後で考える
+  tree.print();
+}
+
+TEST(TreeTest, MostLeftRightTest) {
+  bs_tree< int, testpair, std::less< int > > tree;
+  ASSERT_EQ(tree.most_left(), nullptr);
+  ASSERT_EQ(tree.most_right(), nullptr);
+  tree.add(testpair(1, 'a'));
+  tree.add(testpair(15, 'b'));
+  tree.add(testpair(-1, 'c'));
+  tree.add(testpair(10, 'd'));
+  tree.add(testpair(0, 'e'));
+  tree.add(testpair(-5, 'f'));
+  ASSERT_EQ(tree.most_left()->item.first, -5);
+  ASSERT_EQ(tree.most_right()->item.first, 15);
+  tree.print();
+}
