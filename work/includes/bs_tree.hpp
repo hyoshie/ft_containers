@@ -118,8 +118,6 @@ class bs_tree {
   // メンバ関数
   bs_tree()
       : nil_(NULL), comp_func_(key_compare()), node_alloc_(node_allocator()) {
-    // header_ = allocate(1);
-    // construct(header_);
     header_ = create_node(value_type());
     header_->left = header_;
     header_->right = header_;
@@ -140,28 +138,53 @@ class bs_tree {
     return false;
   }
 
+  //テスト用
   node_ptr header() { return header_; }
 
   node_ptr next(node_ptr node) {
+    // only dummy, size = 0
     if (node->right == node) {
       return node;
     }
     if (node->right != nil_) {
-      node = node->right;
-      while (node->left) {
-        node = node->left;
-      }
+      node = most_left(node->right);
     } else {
       node_ptr next = node->parent;
       while (next->right == node) {
         node = next;
         next = next->parent;
       }
-      node = next->parent;
+      if (node->right != next) {
+        node = next;
+      }
     }
     return node;
   }
-  // node_ptr prev() { return header_; }
+
+  node_ptr prev(node_ptr node) {
+    // only dummy, size = 0
+    if (node->right == node) {
+      return node;
+    }
+    // node ==  dummy
+    // if (node->parent->parent == node) {
+    //   return node->right;
+    // }
+    if (node->left != nil_) {
+      node = most_right(node->left);
+    } else {
+      node_ptr next = node->parent;
+      while (next->left == node) {
+        node = next;
+        next = next->parent;
+      }
+      node = next;
+      // if (node->right != next) {
+      // node = next;
+      // }
+    }
+    return node;
+  }
 
   // debug
   void print() {
@@ -182,33 +205,50 @@ class bs_tree {
   key_type key(const_reference value) { return value.first; }
   key_type key(const_reference value) const { return value.first; }
 
+  //テスト用
+ public:
   node_ptr root() { return header_->parent; }
   node_ptr root() const { return header_->parent; }
 
+ private:
   void connect_root_to_header(node_ptr new_root) {
     header_->parent = new_root;
     new_root->parent = header_;
   }
 
   void update_header() {
-    header_->left = most_left();
-    header_->right = most_right();
+    header_->left = most_left(root());
+    header_->right = most_right(root());
   }
 
-  node_ptr most_left() {
-    node_ptr most_left = root();
-    while (most_left != nil_ && most_left->left != nil_) {
-      most_left = most_left->left;
+  // node_ptr most_left() {
+  //   node_ptr most_left = root();
+  //   while (most_left != nil_ && most_left->left != nil_) {
+  //     most_left = most_left->left;
+  //   }
+  //   return most_left;
+  // }
+
+  // node_ptr most_right() {
+  //   node_ptr most_right = root();
+  //   while (most_right != nil_ && most_right->right != nil_) {
+  //     most_right = most_right->right;
+  //   }
+  //   return most_right;
+  // }
+
+  node_ptr most_left(node_ptr node) {
+    while (node != nil_ && node->left != nil_) {
+      node = node->left;
     }
-    return most_left;
+    return node;
   }
 
-  node_ptr most_right() {
-    node_ptr most_right = root();
-    while (most_right != nil_ && most_right->right != nil_) {
-      most_right = most_right->right;
+  node_ptr most_right(node_ptr node) {
+    while (node != nil_ && node->right != nil_) {
+      node = node->right;
     }
-    return most_right;
+    return node;
   }
 
   // メモリ関連
@@ -291,10 +331,7 @@ class bs_tree {
       splice(ptr);
       delete ptr;
     } else {
-      node_ptr target = ptr->right;
-      while (target->left != nil_) {
-        target = target->left;
-      }
+      node_ptr target = most_left(ptr->right);
       ptr->item = target->item;
       splice(target);
       delete target;
