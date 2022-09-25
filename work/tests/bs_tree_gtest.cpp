@@ -67,8 +67,8 @@ TEST(TreeTest, RemoveTest) {
 TEST(TreeTest, HeaderTest) {
   bs_tree< int, testpair, std::less< int > > tree;
 
-  ASSERT_EQ(tree.header()->left, nullptr);
-  ASSERT_EQ(tree.header()->right, nullptr);
+  ASSERT_EQ(tree.header()->left, tree.header());
+  ASSERT_EQ(tree.header()->right, tree.header());
   tree.add(testpair(1, 'a'));
   tree.add(testpair(15, 'b'));
   tree.add(testpair(-1, 'c'));
@@ -83,3 +83,14 @@ TEST(TreeTest, HeaderTest) {
   ASSERT_EQ(tree.header()->right->item.first, 10);
   tree.print();
 }
+
+// TEST(TreeTest, NextTest) {
+//   bs_tree< int, testpair, std::less< int > > tree;
+//   tree.add(testpair(1, 'a'));
+//   tree.add(testpair(15, 'b'));
+//   tree.add(testpair(-1, 'c'));
+//   tree.add(testpair(10, 'd'));
+//   tree.add(testpair(0, 'e'));
+//   tree.add(testpair(-5, 'f'));
+//   tree.print();
+// }

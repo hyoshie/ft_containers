@@ -1,25 +1,105 @@
 #ifndef BS_TREE_HPP
 #define BS_TREE_HPP
 
+#include "iterator.hpp"
+
 template < typename T >
 struct bs_tree_node {
-  typedef bs_tree_node< T >* link_type;
-  link_type parent;
-  link_type left;
-  link_type right;
+  typedef bs_tree_node< T >* node_ptr;
+  node_ptr parent;
+  node_ptr left;
+  node_ptr right;
   T item;
   bs_tree_node() : parent(NULL), left(NULL), right(NULL) {}
   bs_tree_node(const T& given)
       : parent(NULL), left(NULL), right(NULL), item(given) {}
 };
 
+template < class T >
+struct bs_tree_iterator
+    : public ft::iterator< std::bidirectional_iterator_tag, T > {
+  // types
+ private:
+  typedef typename ft::iterator< std::bidirectional_iterator_tag, T >
+      base_iterator;
+
+ public:
+  typedef typename base_iterator::iterator_category iterator_category;
+  typedef typename base_iterator::value_type value_type;
+  typedef typename base_iterator::difference_type difference_type;
+  typedef T* pointer;
+  typedef T& reference;
+  typedef bs_tree_iterator< T > self;
+  typedef typename bs_tree_node< T >::node_ptr node_ptr;
+
+  // method
+  bs_tree_iterator() : current_() {}
+
+  explicit bs_tree_iterator(node_ptr x) : current_(x) {}
+
+  // template < class U >
+  // bs_tree_iterator(const bs_tree_iterator< U >& other) {
+  //   current_ = other.base();
+  // }
+
+  // template < class U >
+  // bs_tree_iterator& operator=(const bs_tree_iterator< U >& other) {
+  //   if (this == &other) return *this;
+  //   current_ = other.base();
+  //   return *this;
+  // }
+
+  virtual ~bs_tree_iterator() {}
+
+  reference operator*() const { return current_->item; }
+
+  pointer operator->() const { return &current_->item; }
+
+  // bs_tree_iterator& operator++() {
+  //   current_ = bs_tree_increment(current_);
+  //   return *this;
+  // }
+
+  // bs_tree_iterator& operator--() {
+  //   current_ = bs_tree_decrement(current_);
+  //   return *this;
+  // }
+
+  // bs_tree_iterator operator++(int) {
+  //   bs_tree_iterator tmp = *this;
+  //   ++current_;
+  //   return tmp;
+  // }
+
+  // bs_tree_iterator operator--(int) {
+  //   bs_tree_iterator tmp = *this;
+  //   --current_;
+  //   return tmp;
+  // }
+
+  bool operator==(const self& rhs) const { return current_ == rhs.current_; }
+
+  bool operator!=(const self& rhs) const { return current_ != rhs.current_; }
+
+ protected:
+  node_ptr current_;
+};
+
+// template < typename T >
+// static bs_tree_node< T >* bs_tree_increment(bs_tree_node< T >* node) {
+//   ;
+
+//   return node;
+// }
+
 template < class Key, class Value, class Compare,
            class Allocator = std::allocator< Value > >
 class bs_tree {
   // 型
  private:
-  typedef bs_tree_node< Value >* link_type;
-  typedef const bs_tree_node< Value >* const_link_type;
+  typedef bs_tree_node< Value > node;
+  typedef bs_tree_node< Value >* node_ptr;
+  typedef const bs_tree_node< Value >* const_node_ptr;
   typedef typename Allocator::template rebind< bs_tree_node< Value > >::other
       node_allocator;
 
@@ -38,44 +118,50 @@ class bs_tree {
   // メンバ関数
   bs_tree()
       : nil_(NULL), comp_func_(key_compare()), node_alloc_(node_allocator()) {
-    header_ = allocate(1);
-    construct(header_);
+    // header_ = allocate(1);
+    // construct(header_);
+    header_ = create_node(value_type());
+    header_->left = header_;
+    header_->right = header_;
   }
 
   bool add(const_reference x) {
-    link_type ptr = findLast(x);
-    link_type u = new bs_tree_node< Value >;
-    u->item = x;
-    // std::cout << u->item.first << std::endl;
+    node_ptr ptr = find_last(key(x));
+    node_ptr u = create_node(x);
     return addChild(ptr, u);
   }
 
   bool remove(const_reference x) {
-    link_type ptr = findLast(x);
-    if (ptr != nil_ && x.first == ptr->item.first) {
+    node_ptr ptr = find_last(key(x));
+    if (ptr != nil_ && key(x) == key(ptr)) {
       remove(ptr);
       return true;
     }
     return false;
   }
 
-  link_type header() { return header_; }
+  node_ptr header() { return header_; }
 
-  link_type most_left() {
-    link_type most_left = root();
-    while (most_left != nil_ && most_left->left != nil_) {
-      most_left = most_left->left;
+  node_ptr next(node_ptr node) {
+    if (node->right == node) {
+      return node;
     }
-    return most_left;
-  }
-
-  link_type most_right() {
-    link_type most_right = root();
-    while (most_right != nil_ && most_right->right != nil_) {
-      most_right = most_right->right;
+    if (node->right != nil_) {
+      node = node->right;
+      while (node->left) {
+        node = node->left;
+      }
+    } else {
+      node_ptr next = node->parent;
+      while (next->right == node) {
+        node = next;
+        next = next->parent;
+      }
+      node = next->parent;
     }
-    return most_right;
+    return node;
   }
+  // node_ptr prev() { return header_; }
 
   // debug
   void print() {
@@ -90,25 +176,67 @@ class bs_tree {
 
  private:
   // メンバ関数
-  link_type allocate(size_type n) { return node_alloc_.allocate(n); }
+  // 木やノードの特定の値を取り出す
+  key_type key(node_ptr node) { return node->item.first; }
+  key_type key(const_node_ptr node) const { return node->item.first; }
+  key_type key(const_reference value) { return value.first; }
+  key_type key(const_reference value) const { return value.first; }
 
-  void construct(link_type ptr) {
-    node_alloc_.construct(ptr, bs_tree_node< Value >());
+  node_ptr root() { return header_->parent; }
+  node_ptr root() const { return header_->parent; }
+
+  void connect_root_to_header(node_ptr new_root) {
+    header_->parent = new_root;
+    new_root->parent = header_;
   }
 
-  void construct(link_type ptr, const Value& value) {
+  void update_header() {
+    header_->left = most_left();
+    header_->right = most_right();
+  }
+
+  node_ptr most_left() {
+    node_ptr most_left = root();
+    while (most_left != nil_ && most_left->left != nil_) {
+      most_left = most_left->left;
+    }
+    return most_left;
+  }
+
+  node_ptr most_right() {
+    node_ptr most_right = root();
+    while (most_right != nil_ && most_right->right != nil_) {
+      most_right = most_right->right;
+    }
+    return most_right;
+  }
+
+  // メモリ関連
+  node_ptr allocate(size_type n) { return node_alloc_.allocate(n); }
+
+  void construct(node_ptr ptr) { node_alloc_.construct(ptr, node()); }
+
+  void construct(node_ptr ptr, const_reference value) {
     node_alloc_.construct(ptr, value);
   }
 
-  link_type findLast(const_reference x) {
-    link_type current = root();
-    link_type prev = nil_;
+  node_ptr create_node(const_reference value) {
+    node_ptr new_node = allocate(1);
+    construct(new_node, value);
+    return new_node;
+  }
+
+  // add, remove, findのヘルパー
+
+  node_ptr find_last(const key_type& search_key) {
+    node_ptr current = root();
+    node_ptr prev = nil_;
     while (current != nil_) {
       prev = current;
-      if (x.first == current->item.first) {
+      if (search_key == key(current)) {
         return current;  // x.item はすでに木に含まれている
       }
-      bool comp = comp_func_(x.first, current->item.first);
+      bool comp = comp_func_(search_key, key(current));
       if (comp) {
         current = current->left;
       } else {
@@ -118,42 +246,52 @@ class bs_tree {
     return prev;
   }
 
-  bool addChild(link_type ptr, link_type to_insert) {
+ public:
+  node_ptr find_equal(const key_type& search_key) {
+    node_ptr current = root();
+    node_ptr prev = nil_;
+    while (current != nil_) {
+      prev = current;
+      if (search_key == key(current)) {
+        return current;  // x.item はすでに木に含まれている
+      }
+      bool comp = comp_func_(search_key, key(current));
+      if (comp) {
+        current = current->left;
+      } else {
+        current = current->right;
+      }
+    }
+    return NULL;
+  }
+
+ private:
+  bool addChild(node_ptr ptr, node_ptr to_insert) {
     if (ptr == nil_) {
-      // root() = to_insert;  // 空っぽの木に挿入する
-      update_root(to_insert);
-      header_->left = to_insert;
-      header_->right = to_insert;
+      connect_root_to_header(to_insert);
     } else {
-      if (to_insert->item.first == ptr->item.first) {
+      if (key(to_insert) == key(ptr)) {
         return false;  // to_insert.item はすでに木に含まれている
       }
-      bool comp = comp_func_(to_insert->item.first, ptr->item.first);
+      bool comp = comp_func_(key(to_insert), key(ptr));
       if (comp) {
         ptr->left = to_insert;
-        // if (comp_func_(to_insert->item.first, header_->left->item.first)) {
-        //   header_->left = to_insert;
-        // }
       } else {
         ptr->right = to_insert;
-        // if (!comp_func_(to_insert->item.first, header_->right->item.first)) {
-        //   header_->right = to_insert;
-        // }
       }
       to_insert->parent = ptr;
     }
     // n++;
-    header_->left = most_left();
-    header_->right = most_right();
+    update_header();
     return true;
   }
 
-  void remove(link_type ptr) {
+  void remove(node_ptr ptr) {
     if (ptr->left == nil_ || ptr->right == nil_) {
       splice(ptr);
       delete ptr;
     } else {
-      link_type target = ptr->right;
+      node_ptr target = ptr->right;
       while (target->left != nil_) {
         target = target->left;
       }
@@ -161,21 +299,19 @@ class bs_tree {
       splice(target);
       delete target;
     }
-    header_->left = most_left();
-    header_->right = most_right();
+    update_header();
   }
 
-  void splice(link_type ptr) {
-    link_type child;
-    link_type new_parent;
+  void splice(node_ptr ptr) {
+    node_ptr child;
+    node_ptr new_parent;
     if (ptr->left != nil_) {
       child = ptr->left;
     } else {
       child = ptr->right;
     }
     if (ptr == root()) {
-      // root() = child;
-      update_root(child);
+      connect_root_to_header(child);
       new_parent = nil_;
     } else {
       new_parent = ptr->parent;
@@ -191,15 +327,8 @@ class bs_tree {
     // n--;
   }
 
-  link_type root() { return header_->parent; }
-
-  void update_root(link_type new_root) {
-    header_->parent = new_root;
-    new_root->parent = header_;
-  }
-
   // debug
-  void print_graph(link_type node, int depth) {
+  void print_graph(node_ptr node, int depth) {
     if (node == nil_) {
       return;
     }
@@ -215,8 +344,8 @@ class bs_tree {
   }
 
   // メンバ変数
-  link_type header_;
-  link_type nil_;
+  node_ptr header_;
+  node_ptr nil_;
   key_compare comp_func_;
   node_allocator node_alloc_;
 };
