@@ -119,8 +119,11 @@ class bs_tree {
   bs_tree()
       : nil_(NULL), comp_func_(key_compare()), node_alloc_(node_allocator()) {
     header_ = create_node(value_type());
-    header_->left = header_;
-    header_->right = header_;
+    header_->parent = nil_;
+    header_->left = nil_;
+    header_->right = nil_;
+    most_left_ = nil_;
+    most_right_ = nil_;
   }
 
   bool add(const_reference x) {
@@ -140,6 +143,8 @@ class bs_tree {
 
   //テスト用
   node_ptr header() { return header_; }
+  node_ptr mostLeft() { return most_left_; }
+  node_ptr mostRight() { return most_right_; }
 
   node_ptr next(node_ptr node) {
     // only dummy, size = 0
@@ -150,11 +155,12 @@ class bs_tree {
       node = most_left(node->right);
     } else {
       node_ptr next = node->parent;
-      while (next->right == node) {
+      while (next != nil_ && next->right == node) {
         node = next;
         next = next->parent;
       }
-      if (node->right != next) {
+      // dummy->nextのsegv対策
+      if (next) {
         node = next;
       }
     }
@@ -166,30 +172,23 @@ class bs_tree {
     if (node->right == node) {
       return node;
     }
-    // node ==  dummy
-    // if (node->parent->parent == node) {
-    //   return node->right;
-    // }
     if (node->left != nil_) {
       node = most_right(node->left);
     } else {
       node_ptr next = node->parent;
-      while (next->left == node) {
+      while (next->left == node && next->parent != nil_) {
         node = next;
         next = next->parent;
       }
       node = next;
-      // if (node->right != next) {
-      // node = next;
-      // }
     }
     return node;
   }
 
   // debug
   void print() {
-    value_type left_item = header()->left->item;
-    value_type right_item = header()->right->item;
+    value_type left_item = most_left_->item;
+    value_type right_item = most_right_->item;
     std::cout << "most_left :(" << left_item.first << ", " << left_item.second
               << ")" << std::endl;
     std::cout << "most_right:(" << right_item.first << ", " << right_item.second
@@ -207,18 +206,18 @@ class bs_tree {
 
   //テスト用
  public:
-  node_ptr root() { return header_->parent; }
-  node_ptr root() const { return header_->parent; }
+  node_ptr root() { return header_->left; }
+  node_ptr root() const { return header_->left; }
 
  private:
   void connect_root_to_header(node_ptr new_root) {
-    header_->parent = new_root;
+    header_->left = new_root;
     new_root->parent = header_;
   }
 
   void update_header() {
-    header_->left = most_left(root());
-    header_->right = most_right(root());
+    most_left_ = most_left(root());
+    most_right_ = most_right(root());
   }
 
   // node_ptr most_left() {
@@ -238,7 +237,12 @@ class bs_tree {
   // }
 
   node_ptr most_left(node_ptr node) {
+    // std::cout << header() << std::endl;
+    // std::cout << node << std::endl;
+    // std::cout << key(node) << std::endl;
+    // std::cout << node->item.second << std::endl;
     while (node != nil_ && node->left != nil_) {
+      // std::cerr << "[\x1b[32mmost\x1b[39m]" << std::endl;
       node = node->left;
     }
     return node;
@@ -308,6 +312,7 @@ class bs_tree {
  private:
   bool addChild(node_ptr ptr, node_ptr to_insert) {
     if (ptr == nil_) {
+      // std::cerr << "[\x1b[32m1\x1b[39m]" << std::endl;
       connect_root_to_header(to_insert);
     } else {
       if (key(to_insert) == key(ptr)) {
@@ -321,6 +326,7 @@ class bs_tree {
       }
       to_insert->parent = ptr;
     }
+    // std::cerr << "[\x1b[32m2\x1b[39m]" << std::endl;
     // n++;
     update_header();
     return true;
@@ -382,6 +388,8 @@ class bs_tree {
 
   // メンバ変数
   node_ptr header_;
+  node_ptr most_left_;
+  node_ptr most_right_;
   node_ptr nil_;
   key_compare comp_func_;
   node_allocator node_alloc_;

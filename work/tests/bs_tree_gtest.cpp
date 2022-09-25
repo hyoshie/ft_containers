@@ -69,17 +69,17 @@ TEST(TreeTest, RemoveTest) {
 TEST(TreeTest, HeaderEmptyTest) {
   test_tree empty;
 
-  ASSERT_EQ(empty.header()->left, empty.header());
-  ASSERT_EQ(empty.header()->right, empty.header());
+  ASSERT_EQ(empty.header()->left, nullptr);
+  ASSERT_EQ(empty.header()->right, nullptr);
 }
 
-TEST_F(TreeTestF, HeaderTest) {
-  ASSERT_EQ(tree.header()->left->item.first, -5);
-  ASSERT_EQ(tree.header()->right->item.first, 15);
+TEST_F(TreeTestF, MostLeftRightTest) {
+  ASSERT_EQ(tree.mostLeft()->item.first, -5);
+  ASSERT_EQ(tree.mostRight()->item.first, 15);
   tree.remove(test_pair(-5, 'f'));
   tree.remove(test_pair(15, 'b'));
-  ASSERT_EQ(tree.header()->left->item.first, -1);
-  ASSERT_EQ(tree.header()->right->item.first, 10);
+  ASSERT_EQ(tree.mostLeft()->item.first, -1);
+  ASSERT_EQ(tree.mostRight()->item.first, 10);
 }
 
 TEST_F(TreeTestF, FindEqualTest) {
@@ -115,6 +115,7 @@ TEST_F(TreeTestF, NextTest) {
   ASSERT_EQ(tree.next(node_1)->item.second, node_10->item.second);
   ASSERT_EQ(tree.next(node_10)->item.second, node_15->item.second);
   ASSERT_EQ(tree.next(node_15), header);
+  ASSERT_EQ(tree.next(header), header);
 }
 
 TEST(TreeTest, NextTestWithSize0) {
@@ -123,7 +124,7 @@ TEST(TreeTest, NextTestWithSize0) {
   test_node *header = tree.header();
   // segv 、header->parentはデフォルトでnullのため
   // mapのメソッド実行時に確認する
-  // bs_tree_node< test_pair > *root_next = tree.next(root);
+  // test_node *root_next = tree.next(root);
 }
 
 TEST(TreeTest, NextTestWithSize1) {
@@ -137,7 +138,6 @@ TEST(TreeTest, NextTestWithSize1) {
 }
 
 TEST_F(TreeTestF, PrevTest) {
-  tree.print();
   test_node *node_m5 = tree.find_equal(-5);
   test_node *node_m1 = tree.find_equal(-1);
   test_node *node_0 = tree.find_equal(0);
@@ -146,12 +146,31 @@ TEST_F(TreeTestF, PrevTest) {
   test_node *node_15 = tree.find_equal(15);
   test_node *header = tree.header();
 
-  // ASSERT_EQ(tree.prev(node_m5)->item.second, node_m1->item.second);
   ASSERT_EQ(tree.prev(node_m1)->item.second, node_m5->item.second);
   ASSERT_EQ(tree.prev(node_0)->item.second, node_m1->item.second);
   ASSERT_EQ(tree.prev(node_1)->item.second, node_0->item.second);
   ASSERT_EQ(tree.prev(node_10)->item.second, node_1->item.second);
   ASSERT_EQ(tree.prev(node_15)->item.second, node_10->item.second);
-  // ASSERT_EQ(tree.prev(header)->item.second, node_15->item.second);
-  // ASSERT_EQ(tree.prev(node_15), header);
+  ASSERT_EQ(tree.prev(header)->item.second, node_15->item.second);
+  // beginのprev
+  ASSERT_EQ(tree.prev(node_m5)->item.second, header->item.second);
+}
+
+TEST(TreeTest, PrevTestWithSize0) {
+  test_tree tree;
+  test_node *root = tree.root();
+  test_node *header = tree.header();
+  // segv
+  // mapのメソッド実行時に確認する
+  // test_node *root_prev = tree.prev(root);
+}
+
+TEST(TreeTest, PrevTestWithSize1) {
+  test_tree tree;
+  tree.add(test_pair(1, 'a'));
+
+  test_node *node_1 = tree.root();
+  test_node *header = tree.header();
+
+  ASSERT_EQ(tree.prev(node_1), header);
 }

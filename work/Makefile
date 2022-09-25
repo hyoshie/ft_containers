@@ -17,7 +17,7 @@ INCDIR = ./includes \
 INCS = $(addprefix -I, $(INCDIR))
 
 TESTDIR	= ./tests
-VECTOR_SRCS = $(shell find $(TESTDIR) -name '*.cpp')
+VECTOR_SRCS = $(shell find $(TESTDIR) -name '*.cpp' | grep -v 'gtest')
 
 OBJDIR_FT	= ./objs_ft
 OBJDIR_STL	= ./objs_stl
