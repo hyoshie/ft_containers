@@ -2,6 +2,7 @@
 #define BS_TREE_HPP
 
 #include "iterator.hpp"
+#include "pair.hpp"
 
 template < typename T >
 struct bs_tree_node {
@@ -15,6 +16,56 @@ struct bs_tree_node {
       : parent(NULL), left(NULL), right(NULL), item(given) {}
 };
 
+template < class Node >
+static Node* next(Node* node, Node* nil) {
+  // only dummy, size = 0
+  if (node->right == node) {
+    return node;
+  }
+  if (node->right != nil) {
+    node = node->right;
+    while (node != nil && node->left != nil) {
+      node = node->left;
+    }
+  } else {
+    Node* next = node->parent;
+    while (next != nil && next->right == node) {
+      node = next;
+      next = next->parent;
+    }
+    // dummy->nextのsegv対策
+    if (next) {
+      node = next;
+    }
+  }
+  return node;
+}
+
+template < class Node >
+static Node* prev(Node* node, Node* nil) {
+  // only dummy, size = 0
+  if (node->right == node) {
+    return node;
+  }
+  if (node->left != nil) {
+    node = node->left;
+    while (node != nil && node->right != nil) {
+      node = node->right;
+    }
+  } else {
+    Node* next = node->parent;
+    while (next->left == node && next->parent != nil) {
+      node = next;
+      next = next->parent;
+    }
+    node = next;
+  }
+  return node;
+}
+
+template < class T >
+struct bs_tree_const_iterator;
+
 template < class T >
 struct bs_tree_iterator
     : public ft::iterator< std::bidirectional_iterator_tag, T > {
@@ -22,6 +73,7 @@ struct bs_tree_iterator
  private:
   typedef typename ft::iterator< std::bidirectional_iterator_tag, T >
       base_iterator;
+  typedef bs_tree_const_iterator< T > const_iterator;
 
  public:
   typedef typename base_iterator::iterator_category iterator_category;
@@ -33,21 +85,9 @@ struct bs_tree_iterator
   typedef typename bs_tree_node< T >::node_ptr node_ptr;
 
   // method
-  bs_tree_iterator() : current_() {}
+  bs_tree_iterator() : current_(node_ptr()), nil_(NULL) {}
 
-  explicit bs_tree_iterator(node_ptr x) : current_(x) {}
-
-  // template < class U >
-  // bs_tree_iterator(const bs_tree_iterator< U >& other) {
-  //   current_ = other.base();
-  // }
-
-  // template < class U >
-  // bs_tree_iterator& operator=(const bs_tree_iterator< U >& other) {
-  //   if (this == &other) return *this;
-  //   current_ = other.base();
-  //   return *this;
-  // }
+  bs_tree_iterator(node_ptr x, node_ptr nil) : current_(x), nil_(nil) {}
 
   virtual ~bs_tree_iterator() {}
 
@@ -55,42 +95,108 @@ struct bs_tree_iterator
 
   pointer operator->() const { return &current_->item; }
 
-  // bs_tree_iterator& operator++() {
-  //   current_ = bs_tree_increment(current_);
-  //   return *this;
+  self& operator++() {
+    current_ = next(current_, nil_);
+    return *this;
+  }
+
+  self& operator--() {
+    current_ = prev(current_, nil_);
+    return *this;
+  }
+
+  self operator++(int) {
+    bs_tree_iterator tmp = *this;
+    operator++();
+    return tmp;
+  }
+
+  self operator--(int) {
+    bs_tree_iterator tmp = *this;
+    operator--();
+    return tmp;
+  }
+
+  bool operator==(const self& rhs) const { return current_ == rhs.current_; }
+  bool operator==(const const_iterator& rhs) const {
+    return current_ == rhs.current_;
+  }
+
+  bool operator!=(const self& rhs) const { return !(current_ == rhs.current_); }
+  bool operator!=(const const_iterator& rhs) const {
+    return !(current_ == rhs.current_);
+  }
+
+  node_ptr current_;
+  node_ptr nil_;
+};
+
+template < class T >
+struct bs_tree_const_iterator
+    : public ft::iterator< std::bidirectional_iterator_tag, T > {
+  // types
+ private:
+  typedef typename ft::iterator< std::bidirectional_iterator_tag, T >
+      base_iterator;
+  typedef bs_tree_iterator< T > iterator;
+
+ public:
+  typedef typename base_iterator::iterator_category iterator_category;
+  typedef typename base_iterator::value_type value_type;
+  typedef typename base_iterator::difference_type difference_type;
+  typedef const T* pointer;
+  typedef const T& reference;
+  typedef bs_tree_const_iterator< T > self;
+  typedef typename bs_tree_node< T >::node_ptr node_ptr;
+
+  // method
+  bs_tree_const_iterator() : current_(node_ptr()), nil_(NULL) {}
+
+  bs_tree_const_iterator(node_ptr x, node_ptr nil) : current_(x), nil_(nil) {}
+
+  bs_tree_const_iterator(const iterator& it)
+      : current_(it.current_), nil_(it.nil_) {}
+
+  virtual ~bs_tree_const_iterator() {}
+
+  // いつ使う？標準ライブラリにあった
+  // iterator m_const_cast() const {
+  //   return iterator(const_cast< typename iterator::node_ptr >(current_));
   // }
 
-  // bs_tree_iterator& operator--() {
-  //   current_ = bs_tree_decrement(current_);
-  //   return *this;
-  // }
+  reference operator*() const { return current_->item; }
 
-  // bs_tree_iterator operator++(int) {
-  //   bs_tree_iterator tmp = *this;
-  //   ++current_;
-  //   return tmp;
-  // }
+  pointer operator->() const { return &current_->item; }
 
-  // bs_tree_iterator operator--(int) {
-  //   bs_tree_iterator tmp = *this;
-  //   --current_;
-  //   return tmp;
-  // }
+  self& operator++() {
+    current_ = next(current_, nil_);
+    return *this;
+  }
+
+  self& operator--() {
+    current_ = prev(current_, nil_);
+    return *this;
+  }
+
+  self operator++(int) {
+    bs_tree_const_iterator tmp = *this;
+    operator++();
+    return tmp;
+  }
+
+  self operator--(int) {
+    bs_tree_const_iterator tmp = *this;
+    operator--();
+    return tmp;
+  }
 
   bool operator==(const self& rhs) const { return current_ == rhs.current_; }
 
   bool operator!=(const self& rhs) const { return current_ != rhs.current_; }
 
- protected:
   node_ptr current_;
+  node_ptr nil_;
 };
-
-// template < typename T >
-// static bs_tree_node< T >* bs_tree_increment(bs_tree_node< T >* node) {
-//   ;
-
-//   return node;
-// }
 
 template < class Key, class Value, class Compare,
            class Allocator = std::allocator< Value > >
@@ -115,16 +221,48 @@ class bs_tree {
   typedef Allocator allocator_type;
   typedef Compare key_compare;
 
+  typedef bs_tree_iterator< value_type > iterator;
+  typedef bs_tree_const_iterator< value_type > const_iterator;
+  typedef ft::reverse_iterator< iterator > reverse_iterator;
+  typedef ft::reverse_iterator< const_iterator > const_reverse_iterator;
+
   // メンバ関数
   bs_tree()
-      : nil_(NULL), comp_func_(key_compare()), node_alloc_(node_allocator()) {
+      : nil_(NULL),
+        comp_func_(key_compare()),
+        node_alloc_(node_allocator()),
+        count_(0) {
     header_ = create_node(value_type());
     header_->parent = nil_;
     header_->left = nil_;
     header_->right = nil_;
+    count_--;  // headerは数えない
     most_left_ = nil_;
     most_right_ = nil_;
   }
+
+  iterator begin() { return iterator(most_left_, nil_); }
+  const_iterator begin() const { return const_iterator(most_left_, nil_); }
+
+  iterator end() { return iterator(header_, nil_); }
+  const_iterator end() const { return const_iterator(header_, nil_); }
+
+  reverse_iterator rbegin() { return reverse_iterator(end()); }
+  const_reverse_iterator rbegin() const {
+    return const_reverse_iterator(end());
+  }
+
+  reverse_iterator rend() { return reverse_iterator(begin()); }
+  const_reverse_iterator rend() const {
+    return const_reverse_iterator(begin());
+  }
+
+  bool empty() const { return (count_ == 0); }
+
+  size_type size() const { return count_; }
+
+  // テストしてない
+  size_type max_size() const { return node_alloc_.max_size(); }
 
   bool add(const_reference x) {
     node_ptr ptr = find_last(key(x));
@@ -267,6 +405,7 @@ class bs_tree {
   node_ptr create_node(const_reference value) {
     node_ptr new_node = allocate(1);
     construct(new_node, value);
+    count_++;
     return new_node;
   }
 
@@ -393,6 +532,7 @@ class bs_tree {
   node_ptr nil_;
   key_compare comp_func_;
   node_allocator node_alloc_;
+  size_type count_;
 };
 
 #endif /* BS_TREE_HPP */
