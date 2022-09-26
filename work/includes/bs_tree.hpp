@@ -1,6 +1,8 @@
 #ifndef BS_TREE_HPP
 #define BS_TREE_HPP
 
+#include <cassert>
+
 #include "iterator.hpp"
 #include "pair.hpp"
 
@@ -107,13 +109,13 @@ struct bs_tree_iterator
 
   self operator++(int) {
     bs_tree_iterator tmp = *this;
-    operator++();
+    current_ = next(current_, nil_);
     return tmp;
   }
 
   self operator--(int) {
     bs_tree_iterator tmp = *this;
-    operator--();
+    current_ = prev(current_, nil_);
     return tmp;
   }
 
@@ -180,13 +182,13 @@ struct bs_tree_const_iterator
 
   self operator++(int) {
     bs_tree_const_iterator tmp = *this;
-    operator++();
+    current_ = next(current_, nil_);
     return tmp;
   }
 
   self operator--(int) {
     bs_tree_const_iterator tmp = *this;
-    operator--();
+    current_ = prev(current_, nil_);
     return tmp;
   }
 
@@ -291,6 +293,44 @@ class bs_tree {
     }
   }
 
+  void erase(iterator pos) { erase(pos->first); }
+
+  void print_itr(iterator iter) {
+    std::cerr << "[\x1b[32mSTART_PRINT\x1b[39m]" << std::endl;
+    std::cerr << "(" << iter.current_ << "):" << iter->first << ", "
+              << iter->second << std::endl;
+    std::cerr << "(" << iter.current_->parent << "):parent" << std::endl;
+    std::cerr << "(" << iter.current_->left << "):left" << std::endl;
+    std::cerr << "(" << iter.current_->right << "):right" << std::endl;
+    std::cerr << std::endl;
+    std::cerr << "[\x1b[32mEND_PRINT\x1b[39m]" << std::endl;
+  }
+
+  // void erase(iterator first, iterator last) {
+  //   // print_with_itr();
+
+  //   node_ptr next_node = find_equal(first->first);
+  //   if (!next_node) {
+  //     return;
+  //   }
+  //   key_type next_key = key(next_node);
+  //   node_ptr current_node = next_node;
+  //   while (end() != last && current_node != last) {
+  //     next_node = next(next_node, nil_);
+  //     erase(first);
+  //     first = iterator(next, nil_);
+  //     std::cout << std::boolalpha;
+  //     std::cout << (first == last) << std::endl;
+  //     // print_with_itr();
+  //   }
+  //   std::cout << std::boolalpha;
+  //   std::cout << (first == last) << std::endl;
+  //   // first++;
+  //   // print_with_itr();
+  // }
+
+  size_type erase(const key_type& key) { return remove(key); }
+
   bool add(const_reference x) {
     node_ptr ptr = find_last(key(x));
     node_ptr u = create_node(x);
@@ -299,7 +339,18 @@ class bs_tree {
 
   bool remove(const_reference x) {
     node_ptr ptr = find_last(key(x));
+    // std::cout << "delete key:" << key(x) << std::endl;
     if (ptr != nil_ && key(x) == key(ptr)) {
+      remove(ptr);
+      return true;
+    }
+    return false;
+  }
+
+  bool remove(const key_type& search_key) {
+    node_ptr ptr = find_last(search_key);
+    // std::cout << "delete key:" << key(x) << std::endl;
+    if (ptr != nil_ && search_key == key(ptr)) {
       remove(ptr);
       return true;
     }
@@ -321,6 +372,19 @@ class bs_tree {
     std::cout << "most_right:(" << right_item.first << ", " << right_item.second
               << ")" << std::endl;
     print_graph(root(), 0);
+  }
+
+  void print_with_itr() {
+    std::cerr << "[\x1b[32mPRINT_WITH_ITR\x1b[39m]" << std::endl;
+    for (iterator it = begin(); it != end(); it++) {
+      std::cerr << "(" << it.current_ << "):" << it->first << ", " << it->second
+                << std::endl;
+      std::cerr << "(" << it.current_->parent << "):parent" << std::endl;
+      std::cerr << "(" << it.current_->left << "):left" << std::endl;
+      std::cerr << "(" << it.current_->right << "):right" << std::endl;
+      std::cerr << std::endl;
+    }
+    std::cerr << "[\x1b[32mEND_ITR\x1b[39m]" << std::endl;
   }
 
  private:
@@ -447,6 +511,7 @@ class bs_tree {
       splice(target);
       delete target;
     }
+    count_--;
     update_header();
   }
 
@@ -485,7 +550,7 @@ class bs_tree {
     for (int i = 0; i < depth * 2; i++) {
       std::cout << " ";
     }
-    std::cout << "+" << node->item.first << ", " << node->item.second
+    std::cout << "+(" << node->item.first << ", " << node->item.second << ")"
               << std::endl;
 
     print_graph(node->right, depth + 1);

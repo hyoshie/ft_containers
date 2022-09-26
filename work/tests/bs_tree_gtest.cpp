@@ -379,3 +379,47 @@ TEST_F(TreeTestF, InsertRangeTest) {
     ASSERT_EQ(tree.find_equal(i)->item.second, 'x');
   }
 }
+
+TEST_F(TreeTestF, Erase1Test) {
+  tree.erase(test_itr(node_3rd, node_nil));
+  test_node *deleted = tree.find_equal(0);
+  ASSERT_EQ(deleted, nullptr);
+  ASSERT_EQ(tree.size(), 5);
+}
+
+TEST_F(TreeTestF, EraseKeySuccessTest) {
+  test_tree::size_type ret = tree.erase(node_3rd->item.first);
+  test_node *deleted = tree.find_equal(0);
+  ASSERT_EQ(ret, 1);
+  ASSERT_EQ(deleted, nullptr);
+  ASSERT_EQ(tree.size(), 5);
+}
+
+TEST_F(TreeTestF, EraseKeyFailTest) {
+  test_tree::size_type ret = tree.erase(42);
+  ASSERT_EQ(ret, 0);
+  ASSERT_EQ(tree.size(), 6);
+}
+
+// TEST_F(TreeTestF, EraseRangeOneElementTest) {
+//   test_itr itr_2nd(node_2nd, node_nil);  //-1
+//   test_itr itr_3rd(node_3rd, node_nil);  // 0
+//   tree.erase(itr_2nd, itr_3rd);
+//   ASSERT_EQ(tree.size(), 5);
+//   // tree.print();
+// }
+
+// TEST_F(TreeTestF, EraseRangeTwoElementTest) {
+//   test_itr itr_3rd(node_3rd, node_nil);  // 0
+//   test_itr itr_5th(node_5th, node_nil);  // 10
+//   tree.erase(itr_3rd, itr_5th);
+//   ASSERT_EQ(tree.size(), 4);
+//   tree.print();
+// }
+
+// TEST_F(TreeTestF, EraseRangeTwoElement2Test) {
+//   test_itr itr_2nd(node_2nd, node_nil);  //-1
+//   test_itr itr_4th(node_4th, node_nil);  // 1
+//   tree.erase(itr_2nd, itr_4th);
+//   ASSERT_EQ(tree.size(), 4);
+// }
