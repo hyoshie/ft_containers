@@ -19,10 +19,26 @@ class TreeTestF : public ::testing::Test {
     tree.add(test_pair(10, 'd'));
     tree.add(test_pair(0, 'e'));
     tree.add(test_pair(-5, 'f'));
+    node_nil = tree.nil();
+    node_1st = tree.find_equal(-5);
+    node_2nd = tree.find_equal(-1);
+    node_3rd = tree.find_equal(0);
+    node_4th = tree.root();
+    node_5th = tree.find_equal(10);
+    node_6th = tree.find_equal(15);
+    node_header = tree.header();
   }
   virtual void TearDown() {}
 
   test_tree tree;
+  test_node *node_nil;
+  test_node *node_1st;
+  test_node *node_2nd;
+  test_node *node_3rd;
+  test_node *node_4th;
+  test_node *node_5th;
+  test_node *node_6th;
+  test_node *node_header;
 };
 
 TEST(NodeTest, DefaultConstructTest) {
@@ -77,56 +93,42 @@ TEST(TreeTest, HeaderEmptyTest) {
   ASSERT_EQ(empty.header()->right, nullptr);
 }
 
-TEST_F(TreeTestF, MostLeftRightTest) {
-  ASSERT_EQ(tree.mostLeft()->item.first, -5);
-  ASSERT_EQ(tree.mostRight()->item.first, 15);
-  tree.remove(test_pair(-5, 'f'));
-  tree.remove(test_pair(15, 'b'));
-  ASSERT_EQ(tree.mostLeft()->item.first, -1);
-  ASSERT_EQ(tree.mostRight()->item.first, 10);
-}
+// TEST_F(TreeTestF, MostLeftRightTest) {
+//   ASSERT_EQ(tree.mostLeft()->item.first, -5);
+//   ASSERT_EQ(tree.mostRight()->item.first, 15);
+//   tree.remove(test_pair(-5, 'f'));
+//   tree.remove(test_pair(15, 'b'));
+//   ASSERT_EQ(tree.mostLeft()->item.first, -1);
+//   ASSERT_EQ(tree.mostRight()->item.first, 10);
+// }
 
 TEST_F(TreeTestF, FindEqualTest) {
-  test_node *node_m5 = tree.find_equal(-5);
-  test_node *node_m1 = tree.find_equal(-1);
-  test_node *node_0 = tree.find_equal(0);
-  test_node *node_1 = tree.root();
-  test_node *node_10 = tree.find_equal(10);
-  test_node *node_15 = tree.find_equal(15);
   test_node *node_null = tree.find_equal(4242);
-  ASSERT_EQ(node_m5->item.second, 'f');
-  ASSERT_EQ(node_m1->item.second, 'c');
-  ASSERT_EQ(node_0->item.second, 'e');
-  ASSERT_EQ(node_1->item.second, 'a');
-  ASSERT_EQ(node_10->item.second, 'd');
-  ASSERT_EQ(node_15->item.second, 'b');
+  ASSERT_EQ(node_1st->item.second, 'f');
+  ASSERT_EQ(node_2nd->item.second, 'c');
+  ASSERT_EQ(node_3rd->item.second, 'e');
+  ASSERT_EQ(node_4th->item.second, 'a');
+  ASSERT_EQ(node_5th->item.second, 'd');
+  ASSERT_EQ(node_6th->item.second, 'b');
   ASSERT_EQ(node_null, nullptr);
 }
 
 TEST_F(TreeTestF, NextTest) {
   tree.print();
-  test_node *node_m5 = tree.find_equal(-5);
-  test_node *node_m1 = tree.find_equal(-1);
-  test_node *node_0 = tree.find_equal(0);
-  test_node *node_1 = tree.root();
-  test_node *node_10 = tree.find_equal(10);
-  test_node *node_15 = tree.find_equal(15);
-  test_node *header = tree.header();
-
-  ASSERT_EQ(tree.next(node_m5)->item.second, node_m1->item.second);
-  ASSERT_EQ(tree.next(node_m1)->item.second, node_0->item.second);
-  ASSERT_EQ(tree.next(node_0)->item.second, node_1->item.second);
-  ASSERT_EQ(tree.next(node_1)->item.second, node_10->item.second);
-  ASSERT_EQ(tree.next(node_10)->item.second, node_15->item.second);
-  ASSERT_EQ(tree.next(node_15), header);
-  ASSERT_EQ(tree.next(header), header);
+  ASSERT_EQ(next(node_1st, node_nil)->item.second, node_2nd->item.second);
+  ASSERT_EQ(next(node_2nd, node_nil)->item.second, node_3rd->item.second);
+  ASSERT_EQ(next(node_3rd, node_nil)->item.second, node_4th->item.second);
+  ASSERT_EQ(next(node_4th, node_nil)->item.second, node_5th->item.second);
+  ASSERT_EQ(next(node_5th, node_nil)->item.second, node_6th->item.second);
+  ASSERT_EQ(next(node_6th, node_nil), node_header);
+  ASSERT_EQ(next(node_header, node_nil), node_header);
 }
 
 TEST(TreeTest, NextTestWithSize0) {
   test_tree tree;
   test_node *root = tree.root();
-  test_node *header = tree.header();
-  // segv 、header->parentはデフォルトでnullのため
+  test_node *node_header = tree.header();
+  // segv 、node_header->parentはデフォルトでnullのため
   // mapのメソッド実行時に確認する
   // test_node *root_next = tree.next(root);
 }
@@ -135,35 +137,28 @@ TEST(TreeTest, NextTestWithSize1) {
   test_tree tree;
   tree.add(test_pair(1, 'a'));
 
-  test_node *node_1 = tree.root();
-  test_node *header = tree.header();
+  test_node *node_4th = tree.root();
+  test_node *node_header = tree.header();
+  test_node *node_nil = tree.nil();
 
-  ASSERT_EQ(tree.next(node_1), header);
+  ASSERT_EQ(next(node_4th, node_nil), node_header);
 }
 
 TEST_F(TreeTestF, PrevTest) {
-  test_node *node_m5 = tree.find_equal(-5);
-  test_node *node_m1 = tree.find_equal(-1);
-  test_node *node_0 = tree.find_equal(0);
-  test_node *node_1 = tree.root();
-  test_node *node_10 = tree.find_equal(10);
-  test_node *node_15 = tree.find_equal(15);
-  test_node *header = tree.header();
-
-  ASSERT_EQ(tree.prev(node_m1)->item.second, node_m5->item.second);
-  ASSERT_EQ(tree.prev(node_0)->item.second, node_m1->item.second);
-  ASSERT_EQ(tree.prev(node_1)->item.second, node_0->item.second);
-  ASSERT_EQ(tree.prev(node_10)->item.second, node_1->item.second);
-  ASSERT_EQ(tree.prev(node_15)->item.second, node_10->item.second);
-  ASSERT_EQ(tree.prev(header)->item.second, node_15->item.second);
+  ASSERT_EQ(prev(node_2nd, node_nil)->item.second, node_1st->item.second);
+  ASSERT_EQ(prev(node_3rd, node_nil)->item.second, node_2nd->item.second);
+  ASSERT_EQ(prev(node_4th, node_nil)->item.second, node_3rd->item.second);
+  ASSERT_EQ(prev(node_5th, node_nil)->item.second, node_4th->item.second);
+  ASSERT_EQ(prev(node_6th, node_nil)->item.second, node_5th->item.second);
+  ASSERT_EQ(prev(node_header, node_nil)->item.second, node_6th->item.second);
   // beginのprev
-  ASSERT_EQ(tree.prev(node_m5)->item.second, header->item.second);
+  ASSERT_EQ(prev(node_1st, node_nil)->item.second, node_header->item.second);
 }
 
 TEST(TreeTest, PrevTestWithSize0) {
   test_tree tree;
   test_node *root = tree.root();
-  test_node *header = tree.header();
+  test_node *node_header = tree.header();
   // segv
   // mapのメソッド実行時に確認する
   // test_node *root_prev = tree.prev(root);
@@ -173,35 +168,33 @@ TEST(TreeTest, PrevTestWithSize1) {
   test_tree tree;
   tree.add(test_pair(1, 'a'));
 
-  test_node *node_1 = tree.root();
-  test_node *header = tree.header();
+  test_node *node_4th = tree.root();
+  test_node *node_header = tree.header();
+  test_node *node_nil = tree.nil();
 
-  ASSERT_EQ(tree.prev(node_1), header);
+  ASSERT_EQ(prev(node_4th, node_nil), node_header);
 }
 
 TEST_F(TreeTestF, BeginTest) {
   test_itr it = tree.begin();
   test_const_itr c_it = tree.begin();
-  test_node *node_m5 = tree.find_equal(-5);
-  ASSERT_EQ(*it, node_m5->item);
-  ASSERT_EQ(*c_it, node_m5->item);
-  // *c_it = node_m5->item;
+  ASSERT_EQ(*it, node_1st->item);
+  ASSERT_EQ(*c_it, node_1st->item);
+  // *c_it = node_1st->item;
 }
 
 TEST_F(TreeTestF, RBeginTest) {
   test_rev_itr it = tree.rbegin();
   test_const_rev_itr c_it = tree.rbegin();
-  test_node *node_15 = tree.find_equal(15);
-  ASSERT_EQ(*it, node_15->item);
-  ASSERT_EQ(*c_it, node_15->item);
+  ASSERT_EQ(*it, node_6th->item);
+  ASSERT_EQ(*c_it, node_6th->item);
 }
 
 TEST_F(TreeTestF, EndTest) {
   test_itr it = tree.end();
   test_const_itr c_it = tree.end();
-  test_node *header = tree.header();
-  ASSERT_EQ(*it, header->item);
-  ASSERT_EQ(*c_it, header->item);
+  ASSERT_EQ(*it, node_header->item);
+  ASSERT_EQ(*c_it, node_header->item);
 }
 
 TEST_F(TreeTestF, REndTest) {
@@ -209,25 +202,21 @@ TEST_F(TreeTestF, REndTest) {
   test_const_rev_itr c_it = tree.rend();
   --it;
   --c_it;
-  test_node *node_15 = tree.find_equal(-5);
-  ASSERT_EQ(*it, node_15->item);
-  ASSERT_EQ(*c_it, node_15->item);
+  ASSERT_EQ(*it, node_1st->item);
+  ASSERT_EQ(*c_it, node_1st->item);
 }
 
 TEST_F(TreeTestF, IteratorArrowOperatorTest) {
   test_itr it = tree.begin();
-  test_node *node_m5 = tree.find_equal(-5);
-  ASSERT_EQ(it->first, node_m5->item.first);
+  ASSERT_EQ(it->first, node_1st->item.first);
 }
 
 TEST_F(TreeTestF, IteratorIncrementTest) {
   test_itr it = tree.begin();
-  test_node *node_m1 = tree.find_equal(-1);
-  test_node *node_0 = tree.find_equal(0);
   ++it;
-  ASSERT_EQ(*it, node_m1->item);
+  ASSERT_EQ(*it, node_2nd->item);
   it++;
-  ASSERT_EQ(*it, node_0->item);
+  ASSERT_EQ(*it, node_3rd->item);
 
   test_itr def_it;
   ++it;
@@ -237,13 +226,10 @@ TEST_F(TreeTestF, IteratorIncrementTest) {
 
 TEST_F(TreeTestF, IteratorDecrementTest) {
   test_itr it = tree.end();
-  test_node *header = tree.header();
-  test_node *node_10 = tree.find_equal(10);
-  test_node *node_15 = tree.find_equal(15);
   --it;
-  ASSERT_EQ(*it, node_15->item);
+  ASSERT_EQ(*it, node_6th->item);
   it--;
-  ASSERT_EQ(*it, node_10->item);
+  ASSERT_EQ(*it, node_5th->item);
 
   test_itr def_it;
   --it;

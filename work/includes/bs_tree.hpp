@@ -236,7 +236,6 @@ class bs_tree {
     header_->parent = nil_;
     header_->left = nil_;
     header_->right = nil_;
-    count_--;  // headerは数えない
     most_left_ = nil_;
     most_right_ = nil_;
   }
@@ -267,7 +266,7 @@ class bs_tree {
   bool add(const_reference x) {
     node_ptr ptr = find_last(key(x));
     node_ptr u = create_node(x);
-    return addChild(ptr, u);
+    return add_child(ptr, u);
   }
 
   bool remove(const_reference x) {
@@ -281,47 +280,9 @@ class bs_tree {
 
   //テスト用
   node_ptr header() { return header_; }
-  node_ptr mostLeft() { return most_left_; }
-  node_ptr mostRight() { return most_right_; }
-
-  node_ptr next(node_ptr node) {
-    // only dummy, size = 0
-    if (node->right == node) {
-      return node;
-    }
-    if (node->right != nil_) {
-      node = most_left(node->right);
-    } else {
-      node_ptr next = node->parent;
-      while (next != nil_ && next->right == node) {
-        node = next;
-        next = next->parent;
-      }
-      // dummy->nextのsegv対策
-      if (next) {
-        node = next;
-      }
-    }
-    return node;
-  }
-
-  node_ptr prev(node_ptr node) {
-    // only dummy, size = 0
-    if (node->right == node) {
-      return node;
-    }
-    if (node->left != nil_) {
-      node = most_right(node->left);
-    } else {
-      node_ptr next = node->parent;
-      while (next->left == node && next->parent != nil_) {
-        node = next;
-        next = next->parent;
-      }
-      node = next;
-    }
-    return node;
-  }
+  node_ptr nil() { return nil_; }
+  // node_ptr mostLeft() { return most_left_; }
+  // node_ptr mostRight() { return most_right_; }
 
   // debug
   void print() {
@@ -358,29 +319,8 @@ class bs_tree {
     most_right_ = most_right(root());
   }
 
-  // node_ptr most_left() {
-  //   node_ptr most_left = root();
-  //   while (most_left != nil_ && most_left->left != nil_) {
-  //     most_left = most_left->left;
-  //   }
-  //   return most_left;
-  // }
-
-  // node_ptr most_right() {
-  //   node_ptr most_right = root();
-  //   while (most_right != nil_ && most_right->right != nil_) {
-  //     most_right = most_right->right;
-  //   }
-  //   return most_right;
-  // }
-
   node_ptr most_left(node_ptr node) {
-    // std::cout << header() << std::endl;
-    // std::cout << node << std::endl;
-    // std::cout << key(node) << std::endl;
-    // std::cout << node->item.second << std::endl;
     while (node != nil_ && node->left != nil_) {
-      // std::cerr << "[\x1b[32mmost\x1b[39m]" << std::endl;
       node = node->left;
     }
     return node;
@@ -405,7 +345,7 @@ class bs_tree {
   node_ptr create_node(const_reference value) {
     node_ptr new_node = allocate(1);
     construct(new_node, value);
-    count_++;
+    // count_++;
     return new_node;
   }
 
@@ -449,9 +389,8 @@ class bs_tree {
   }
 
  private:
-  bool addChild(node_ptr ptr, node_ptr to_insert) {
+  bool add_child(node_ptr ptr, node_ptr to_insert) {
     if (ptr == nil_) {
-      // std::cerr << "[\x1b[32m1\x1b[39m]" << std::endl;
       connect_root_to_header(to_insert);
     } else {
       if (key(to_insert) == key(ptr)) {
@@ -465,8 +404,7 @@ class bs_tree {
       }
       to_insert->parent = ptr;
     }
-    // std::cerr << "[\x1b[32m2\x1b[39m]" << std::endl;
-    // n++;
+    count_++;
     update_header();
     return true;
   }
