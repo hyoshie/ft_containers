@@ -23,7 +23,7 @@ class TreeTestF : public ::testing::Test {
     node_1st = tree.find_equal(-5);
     node_2nd = tree.find_equal(-1);
     node_3rd = tree.find_equal(0);
-    node_4th = tree.root();
+    node_4th = tree.find_equal(1);
     node_5th = tree.find_equal(10);
     node_6th = tree.find_equal(15);
     node_header = tree.header();
@@ -323,4 +323,59 @@ TEST_F(TreeTestF, SizeTest) {
   ASSERT_EQ(empty_tree.size(), 1);
   ASSERT_EQ(tree.size(), 6);
   // erase実装後テスト追加すること
+}
+
+TEST_F(TreeTestF, Insert1FailTest) {
+  test_pair dup_key_pair(1, 'z');
+  ft::pair< test_itr, bool > failed = tree.insert(dup_key_pair);
+  ASSERT_FALSE(failed.second);
+  test_itr disrupted = failed.first;
+  ASSERT_EQ(disrupted->first, 1);
+  ASSERT_EQ(disrupted->second, 'a');
+  disrupted--;
+  ASSERT_EQ(disrupted, test_itr(node_3rd, node_nil));
+  ASSERT_EQ(failed, ft::make_pair(test_itr(node_4th, node_nil), false));
+}
+
+TEST_F(TreeTestF, Insert1SuccessTest) {
+  test_pair original_key_pair(42, 'z');
+  ft::pair< test_itr, bool > success = tree.insert(original_key_pair);
+  ASSERT_TRUE(success.second);
+  test_itr inserted = success.first;
+  ASSERT_EQ(inserted->first, 42);
+  ASSERT_EQ(inserted->second, 'z');
+  inserted--;
+  ASSERT_EQ(inserted, test_itr(node_6th, node_nil));
+}
+
+TEST_F(TreeTestF, InsertHintFailTest) {
+  test_pair dup_key_pair(1, 'z');
+  test_itr it = tree.begin();
+  test_itr disrupted = tree.insert(it, dup_key_pair);
+  ASSERT_EQ(disrupted->first, 1);
+  ASSERT_EQ(disrupted->second, 'a');
+  disrupted--;
+  ASSERT_EQ(disrupted, test_itr(node_3rd, node_nil));
+}
+
+TEST_F(TreeTestF, InsertHintSuccessTest) {
+  test_pair original_key_pair(42, 'z');
+  test_itr it = tree.begin();
+  test_itr inserted = tree.insert(it, original_key_pair);
+  ASSERT_EQ(inserted->first, 42);
+  ASSERT_EQ(inserted->second, 'z');
+  inserted--;
+  ASSERT_EQ(inserted, test_itr(node_6th, node_nil));
+}
+
+TEST_F(TreeTestF, InsertRangeTest) {
+  std::vector< test_pair > v;
+  for (int i = 100; i < 110; i++) {
+    v.push_back(test_pair(i, 'x'));
+  }
+  tree.insert(v.begin(), v.end());
+  ASSERT_EQ(tree.size(), 16);
+  for (int i = 100; i < 110; i++) {
+    ASSERT_EQ(tree.find_equal(i)->item.second, 'x');
+  }
 }

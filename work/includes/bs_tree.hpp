@@ -240,6 +240,7 @@ class bs_tree {
     most_right_ = nil_;
   }
 
+  // イテレータ
   iterator begin() { return iterator(most_left_, nil_); }
   const_iterator begin() const { return const_iterator(most_left_, nil_); }
 
@@ -256,12 +257,39 @@ class bs_tree {
     return const_reverse_iterator(begin());
   }
 
+  // 容量
   bool empty() const { return (count_ == 0); }
 
   size_type size() const { return count_; }
 
   // テストしてない
   size_type max_size() const { return node_alloc_.max_size(); }
+
+  // 容量
+  ft::pair< iterator, bool > insert(const value_type& value) {
+    node_ptr ptr = find_last(key(value));
+    if (key(ptr) == key(value)) {
+      return ft::make_pair(iterator(ptr, nil_), false);
+    }
+    node_ptr new_node = create_node(value);
+    bool has_added = add_child(ptr, new_node);
+    // 失敗しない
+    assert(has_added);
+    return ft::make_pair(iterator(new_node, nil_), true);
+  }
+
+  // 時間があれば対応
+  iterator insert(iterator hint, const value_type& value) {
+    (void)hint;
+    return insert(value).first;
+  }
+
+  template < class InputIt >
+  void insert(InputIt first, InputIt last) {
+    for (; first != last; first++) {
+      insert(*first);
+    }
+  }
 
   bool add(const_reference x) {
     node_ptr ptr = find_last(key(x));
