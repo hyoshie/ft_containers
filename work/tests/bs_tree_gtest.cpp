@@ -81,8 +81,8 @@ TEST(TreeTest, RemoveTest) {
   ASSERT_TRUE(tree.remove(test_pair(10, 'd')));
   ASSERT_TRUE(tree.remove(test_pair(1, 'a')));
   ASSERT_FALSE(tree.remove(test_pair(1, 'a')));
-  // ASSERT_FALSE(tree.remove(test_pair(15, 'z')));
   // 現在true。引数を後で考える
+  // ASSERT_FALSE(tree.remove(test_pair(15, 'z')));
   // tree.print();
 }
 
@@ -401,25 +401,15 @@ TEST_F(TreeTestF, EraseKeyFailTest) {
   ASSERT_EQ(tree.size(), 6);
 }
 
-// TEST_F(TreeTestF, EraseRangeOneElementTest) {
-//   test_itr itr_2nd(node_2nd, node_nil);  //-1
-//   test_itr itr_3rd(node_3rd, node_nil);  // 0
-//   tree.erase(itr_2nd, itr_3rd);
-//   ASSERT_EQ(tree.size(), 5);
-//   // tree.print();
-// }
+TEST_F(TreeTestF, EraseRangeTwoElementTest) {
+  test_itr itr_3rd(node_3rd, node_nil);  // 0
+  test_itr itr_5th(node_5th, node_nil);  // 10
+  tree.erase(itr_3rd, itr_5th);
+  ASSERT_EQ(tree.size(), 4);
+  tree.print();
+}
 
-// TEST_F(TreeTestF, EraseRangeTwoElementTest) {
-//   test_itr itr_3rd(node_3rd, node_nil);  // 0
-//   test_itr itr_5th(node_5th, node_nil);  // 10
-//   tree.erase(itr_3rd, itr_5th);
-//   ASSERT_EQ(tree.size(), 4);
-//   tree.print();
-// }
-
-// TEST_F(TreeTestF, EraseRangeTwoElement2Test) {
-//   test_itr itr_2nd(node_2nd, node_nil);  //-1
-//   test_itr itr_4th(node_4th, node_nil);  // 1
-//   tree.erase(itr_2nd, itr_4th);
-//   ASSERT_EQ(tree.size(), 4);
-// }
+TEST_F(TreeTestF, EraseRangeALLTest) {
+  tree.erase(tree.begin(), tree.end());
+  ASSERT_EQ(tree.size(), 0);
+}

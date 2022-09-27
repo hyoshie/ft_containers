@@ -270,7 +270,7 @@ class bs_tree {
   // 容量
   ft::pair< iterator, bool > insert(const value_type& value) {
     node_ptr ptr = find_last(key(value));
-    if (key(ptr) == key(value)) {
+    if (ptr != nil_ && key(ptr) == key(value)) {
       return ft::make_pair(iterator(ptr, nil_), false);
     }
     node_ptr new_node = create_node(value);
@@ -295,39 +295,11 @@ class bs_tree {
 
   void erase(iterator pos) { erase(pos->first); }
 
-  void print_itr(iterator iter) {
-    std::cerr << "[\x1b[32mSTART_PRINT\x1b[39m]" << std::endl;
-    std::cerr << "(" << iter.current_ << "):" << iter->first << ", "
-              << iter->second << std::endl;
-    std::cerr << "(" << iter.current_->parent << "):parent" << std::endl;
-    std::cerr << "(" << iter.current_->left << "):left" << std::endl;
-    std::cerr << "(" << iter.current_->right << "):right" << std::endl;
-    std::cerr << std::endl;
-    std::cerr << "[\x1b[32mEND_PRINT\x1b[39m]" << std::endl;
+  void erase(iterator first, iterator last) {
+    while (first != last) {
+      erase(first++);
+    }
   }
-
-  // void erase(iterator first, iterator last) {
-  //   // print_with_itr();
-
-  //   node_ptr next_node = find_equal(first->first);
-  //   if (!next_node) {
-  //     return;
-  //   }
-  //   key_type next_key = key(next_node);
-  //   node_ptr current_node = next_node;
-  //   while (end() != last && current_node != last) {
-  //     next_node = next(next_node, nil_);
-  //     erase(first);
-  //     first = iterator(next, nil_);
-  //     std::cout << std::boolalpha;
-  //     std::cout << (first == last) << std::endl;
-  //     // print_with_itr();
-  //   }
-  //   std::cout << std::boolalpha;
-  //   std::cout << (first == last) << std::endl;
-  //   // first++;
-  //   // print_with_itr();
-  // }
 
   size_type erase(const key_type& key) { return remove(key); }
 
@@ -403,7 +375,9 @@ class bs_tree {
  private:
   void connect_root_to_header(node_ptr new_root) {
     header_->left = new_root;
-    new_root->parent = header_;
+    if (new_root != nil_) {
+      new_root->parent = header_;
+    }
   }
 
   void update_header() {
@@ -501,15 +475,72 @@ class bs_tree {
     return true;
   }
 
+  // 隣り合うノードの位置を入れ替える
+  void swap_node_right_link(node_ptr parent, node_ptr right_child) {
+    node tmp;
+    node_ptr grand_parent = parent->parent;
+
+    if (grand_parent != nil_) {
+      if (grand_parent->left == parent) {
+        grand_parent->left = right_child;
+      } else {
+        grand_parent->right = right_child;
+      }
+    }
+    tmp.parent = parent->parent;
+    tmp.left = parent->left;
+    tmp.right = parent->right;
+
+    parent->parent = right_child;
+    parent->left = right_child->left;
+    parent->right = right_child->right;
+
+    right_child->parent = tmp.parent;
+    right_child->left = tmp.left;
+    right_child->right = parent;
+  }
+
+  // 2つのノードの位置を入れ替える
+  void swap_node_position(node_ptr node1, node_ptr node2) {
+    node tmp;
+    node_ptr node1_parent = node1->parent;
+    node_ptr node2_parent = node2->parent;
+
+    if (node1_parent->parent != nil_) {
+      if (node1_parent->left == node1) {
+        node1_parent->left = node2;
+      } else {
+        node1_parent->right = node2;
+      }
+    }
+    if (node2_parent->parent != nil_) {
+      if (node2_parent->left == node2) {
+        node2_parent->left = node1;
+      } else {
+        node2_parent->right = node1;
+      }
+    }
+    std::swap(node1->parent, node2->parent);
+    std::swap(node1->left, node2->left);
+    std::swap(node1->right, node2->right);
+  }
+
   void remove(node_ptr ptr) {
     if (ptr->left == nil_ || ptr->right == nil_) {
       splice(ptr);
       delete ptr;
     } else {
       node_ptr target = most_left(ptr->right);
-      ptr->item = target->item;
-      splice(target);
-      delete target;
+      if (target == ptr->right) {
+        swap_node_right_link(ptr, target);
+      } else {
+        swap_node_position(ptr, target);
+      }
+      if (ptr == root()) {
+        header_->left = target;
+      }
+      splice(ptr);
+      delete ptr;
     }
     count_--;
     update_header();
@@ -525,7 +556,7 @@ class bs_tree {
     }
     if (ptr == root()) {
       connect_root_to_header(child);
-      new_parent = nil_;
+      new_parent = header_;
     } else {
       new_parent = ptr->parent;
       if (new_parent->left == ptr) {
@@ -554,6 +585,28 @@ class bs_tree {
               << std::endl;
 
     print_graph(node->right, depth + 1);
+  }
+
+  void print_itr(iterator iter) {
+    std::cerr << "[\x1b[32mITERATOR\x1b[39m]" << std::endl;
+    std::cerr << "(" << iter.current_ << "):" << iter->first << ", "
+              << iter->second << std::endl;
+    std::cerr << "(" << iter.current_->parent << "):parent" << std::endl;
+    std::cerr << "(" << iter.current_->left << "):left" << std::endl;
+    std::cerr << "(" << iter.current_->right << "):right" << std::endl;
+    std::cerr << std::endl;
+    std::cerr << "[\x1b[32mEND_PRINT\x1b[39m]" << std::endl;
+  }
+
+  void print_node(node_ptr node) {
+    std::cerr << "[\x1b[32mPOINTER\x1b[39m]" << std::endl;
+    std::cerr << "(" << node << "):" << node->item.first << ", "
+              << node->item.second << std::endl;
+    std::cerr << "(" << node->parent << "):parent" << std::endl;
+    std::cerr << "(" << node->left << "):left" << std::endl;
+    std::cerr << "(" << node->right << "):right" << std::endl;
+    std::cerr << std::endl;
+    std::cerr << "[\x1b[32mEND_PRINT\x1b[39m]" << std::endl;
   }
 
   // メンバ変数
