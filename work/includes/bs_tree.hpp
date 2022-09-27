@@ -331,6 +331,46 @@ class bs_tree {
     return false;
   }
 
+  // 検索
+  size_type count(const Key& key) const { return (find_equal(key) != nil_); }
+
+  iterator find(const Key& key) {
+    node_ptr node = find_equal(key);
+    return (node != nil_) ? iterator(node, nil_) : end();
+  }
+
+  const_iterator find(const Key& key) const {
+    node_ptr node = find_equal(key);
+    return (node != nil_) ? const_iterator(node, nil_) : end();
+  }
+
+  iterator lower_bound(const Key& key) {
+    return iterator(find_lower_bound(key), nil_);
+  }
+
+  const_iterator lower_bound(const Key& key) const {
+    return const_iterator(find_lower_bound(key), nil_);
+  }
+
+  iterator upper_bound(const Key& key) {
+    return iterator(find_upper_bound(key), nil_);
+  }
+
+  const_iterator upper_bound(const Key& key) const {
+    return const_iterator(find_upper_bound(key), nil_);
+  }
+
+  ft::pair< iterator, iterator > equal_range(const Key& key) {
+    iterator lower = lower_bound(key);
+    iterator upper = upper_bound(key);
+    return ft::make_pair(lower, upper);
+  }
+  ft::pair< const_iterator, const_iterator > equal_range(const Key& key) const {
+    const_iterator lower = lower_bound(key);
+    const_iterator upper = upper_bound(key);
+    return ft::make_pair(lower, upper);
+  }
+
   //テスト用
   node_ptr header() { return header_; }
   node_ptr nil() { return nil_; }
@@ -446,7 +486,7 @@ class bs_tree {
   }
 
  public:
-  node_ptr find_equal(const key_type& search_key) {
+  node_ptr find_equal(const key_type& search_key) const {
     node_ptr current = root();
     node_ptr prev = nil_;
     while (current != nil_) {
@@ -461,10 +501,47 @@ class bs_tree {
         current = current->right;
       }
     }
-    return NULL;
+    return nil_;
   }
 
  private:
+  node_ptr find_lower_bound(const key_type& search_key) const {
+    node_ptr current = root();
+    node_ptr prev = header_;  //見つからない場合end()を返すため
+    while (current != nil_) {
+      if (search_key == key(current)) {
+        return current;
+      }
+      bool comp = comp_func_(search_key, key(current));
+      if (comp) {
+        prev = current;
+        current = current->left;
+      } else {
+        current = current->right;
+      }
+    }
+    return prev;
+  }
+
+  node_ptr find_upper_bound(const key_type& search_key) const {
+    node_ptr current = root();
+    node_ptr prev = header_;  //見つからない場合end()を返すため
+    while (current != nil_) {
+      if (search_key == key(current)) {
+        current = current->left;
+      } else {
+        bool comp = comp_func_(search_key, key(current));
+        if (comp) {
+          prev = current;
+          current = current->left;
+        } else {
+          current = current->right;
+        }
+      }
+    }
+    return prev;
+  }
+
   bool add_child(node_ptr ptr, node_ptr to_insert) {
     if (ptr == nil_) {
       connect_root_to_header(to_insert);

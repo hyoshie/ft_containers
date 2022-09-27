@@ -429,3 +429,62 @@ TEST(TreeTest, ClearEmptyMapTest) {
   empty.clear();
   ASSERT_EQ(empty.size(), 0);
 }
+
+TEST_F(TreeTestF, CountTest) {
+  ASSERT_EQ(tree.count(10), 1);
+  ASSERT_EQ(tree.count(11), 0);
+  tree.erase(10);
+  ASSERT_EQ(tree.count(10), 0);
+}
+
+TEST_F(TreeTestF, FindTest) {
+  ASSERT_EQ(tree.find(10), test_itr(node_5th, node_nil));
+  ASSERT_EQ(tree.find(10)->first, 10);
+  ASSERT_EQ(tree.find(11), tree.end());
+  tree.erase(10);
+  ASSERT_EQ(tree.find(10), tree.end());
+}
+
+TEST_F(TreeTestF, ConstFindTest) {
+  const test_tree const_tree(tree);
+  ASSERT_EQ(const_tree.find(10), test_itr(node_5th, node_nil));
+  ASSERT_EQ(const_tree.find(10)->first, 10);
+  ASSERT_EQ(const_tree.find(11), const_tree.end());
+}
+
+TEST_F(TreeTestF, LowerBoundTest) {
+  ASSERT_EQ(tree.lower_bound(10), test_itr(node_5th, node_nil));
+  ASSERT_EQ(tree.lower_bound(9), test_itr(node_5th, node_nil));
+  ASSERT_EQ(tree.lower_bound(100), tree.end());
+}
+
+TEST_F(TreeTestF, ConstLowerBoundTest) {
+  const test_tree const_tree(tree);
+  ASSERT_EQ(const_tree.lower_bound(10), test_itr(node_5th, node_nil));
+  ASSERT_EQ(const_tree.lower_bound(9), test_itr(node_5th, node_nil));
+  ASSERT_EQ(const_tree.lower_bound(100), tree.end());
+}
+
+TEST_F(TreeTestF, UpperBoundTest) {
+  ASSERT_EQ(tree.upper_bound(10), test_itr(node_6th, node_nil));
+  ASSERT_EQ(tree.upper_bound(9), test_itr(node_5th, node_nil));
+  ASSERT_EQ(tree.upper_bound(100), tree.end());
+}
+
+TEST_F(TreeTestF, ConstUpperBoundTest) {
+  const test_tree const_tree(tree);
+  ASSERT_EQ(const_tree.upper_bound(10), test_itr(node_6th, node_nil));
+  ASSERT_EQ(const_tree.upper_bound(9), test_itr(node_5th, node_nil));
+  ASSERT_EQ(const_tree.upper_bound(100), tree.end());
+}
+
+TEST_F(TreeTestF, EqualRangeTest) {
+  ASSERT_EQ(tree.equal_range(10).first, test_itr(node_5th, node_nil));
+  ASSERT_EQ(tree.equal_range(10).second, test_itr(node_6th, node_nil));
+  ASSERT_EQ(tree.equal_range(9).first, test_itr(node_5th, node_nil));
+  ASSERT_EQ(tree.equal_range(9).second, test_itr(node_5th, node_nil));
+  ASSERT_EQ(tree.equal_range(15).first, test_itr(node_6th, node_nil));
+  ASSERT_EQ(tree.equal_range(15).second, tree.end());
+  ASSERT_EQ(tree.equal_range(100).first, tree.end());
+  ASSERT_EQ(tree.equal_range(100).second, tree.end());
+}
