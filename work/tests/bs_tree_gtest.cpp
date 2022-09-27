@@ -412,4 +412,20 @@ TEST_F(TreeTestF, EraseRangeTwoElementTest) {
 TEST_F(TreeTestF, EraseRangeALLTest) {
   tree.erase(tree.begin(), tree.end());
   ASSERT_EQ(tree.size(), 0);
+  tree.erase(tree.begin(), tree.end());
+}
+
+TEST_F(TreeTestF, ClearTest) {
+  tree.clear();
+  ASSERT_EQ(tree.size(), 0);
+  tree.clear();
+  ASSERT_EQ(tree.size(), 0);
+}
+
+TEST(TreeTest, ClearEmptyMapTest) {
+  test_tree empty;
+  empty.clear();
+  ASSERT_EQ(empty.size(), 0);
+  empty.clear();
+  ASSERT_EQ(empty.size(), 0);
 }

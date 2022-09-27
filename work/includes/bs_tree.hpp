@@ -238,8 +238,8 @@ class bs_tree {
     header_->parent = nil_;
     header_->left = nil_;
     header_->right = nil_;
-    most_left_ = nil_;
-    most_right_ = nil_;
+    most_left_ = header_;
+    most_right_ = header_;
   }
 
   // イテレータ
@@ -268,6 +268,8 @@ class bs_tree {
   size_type max_size() const { return node_alloc_.max_size(); }
 
   // 容量
+  void clear() { erase(begin(), end()); }
+
   ft::pair< iterator, bool > insert(const value_type& value) {
     node_ptr ptr = find_last(key(value));
     if (ptr != nil_ && key(ptr) == key(value)) {
@@ -386,6 +388,9 @@ class bs_tree {
   }
 
   node_ptr most_left(node_ptr node) {
+    if (node == nil_) {
+      return header_;
+    }
     while (node != nil_ && node->left != nil_) {
       node = node->left;
     }
@@ -393,6 +398,9 @@ class bs_tree {
   }
 
   node_ptr most_right(node_ptr node) {
+    if (node == nil_) {
+      return header_;
+    }
     while (node != nil_ && node->right != nil_) {
       node = node->right;
     }
@@ -407,6 +415,8 @@ class bs_tree {
   void construct(node_ptr ptr, const_reference value) {
     node_alloc_.construct(ptr, value);
   }
+
+  void destroy(node_ptr ptr) { node_alloc_.destroy(ptr); }
 
   node_ptr create_node(const_reference value) {
     node_ptr new_node = allocate(1);
@@ -528,7 +538,7 @@ class bs_tree {
   void remove(node_ptr ptr) {
     if (ptr->left == nil_ || ptr->right == nil_) {
       splice(ptr);
-      delete ptr;
+      destroy(ptr);
     } else {
       node_ptr target = most_left(ptr->right);
       if (target == ptr->right) {
@@ -540,7 +550,7 @@ class bs_tree {
         header_->left = target;
       }
       splice(ptr);
-      delete ptr;
+      destroy(ptr);
     }
     count_--;
     update_header();
