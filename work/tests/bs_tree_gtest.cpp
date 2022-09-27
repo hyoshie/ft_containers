@@ -3,8 +3,8 @@
 #include "../includes/bs_tree.hpp"
 
 typedef ft::pair< int, char > test_pair;
-typedef bs_tree_node< test_pair > test_node;
-typedef bs_tree< int, test_pair, std::less< int > > test_tree;
+typedef ft::bs_tree_node< test_pair > test_node;
+typedef ft::bs_tree< int, test_pair, std::less< int > > test_tree;
 typedef test_tree::iterator test_itr;
 typedef test_tree::const_iterator test_const_itr;
 typedef test_tree::reverse_iterator test_rev_itr;
@@ -13,12 +13,12 @@ typedef test_tree::const_reverse_iterator test_const_rev_itr;
 class TreeTestF : public ::testing::Test {
  protected:
   virtual void SetUp() {
-    tree.add(test_pair(1, 'a'));
-    tree.add(test_pair(15, 'b'));
-    tree.add(test_pair(-1, 'c'));
-    tree.add(test_pair(10, 'd'));
-    tree.add(test_pair(0, 'e'));
-    tree.add(test_pair(-5, 'f'));
+    tree.insert(test_pair(1, 'a'));
+    tree.insert(test_pair(15, 'b'));
+    tree.insert(test_pair(-1, 'c'));
+    tree.insert(test_pair(10, 'd'));
+    tree.insert(test_pair(0, 'e'));
+    tree.insert(test_pair(-5, 'f'));
     node_nil = tree.nil();
     node_1st = tree.find_equal(-5);
     node_2nd = tree.find_equal(-1);
@@ -27,6 +27,7 @@ class TreeTestF : public ::testing::Test {
     node_5th = tree.find_equal(10);
     node_6th = tree.find_equal(15);
     node_header = tree.header();
+    default_size = tree.size();
   }
   virtual void TearDown() {}
 
@@ -39,17 +40,18 @@ class TreeTestF : public ::testing::Test {
   test_node *node_5th;
   test_node *node_6th;
   test_node *node_header;
+  test_tree::size_type default_size;
 };
 
 TEST(NodeTest, DefaultConstructTest) {
-  bs_tree_node< int > def_node;
+  ft::bs_tree_node< int > def_node;
   ASSERT_EQ(def_node.parent, nullptr);
   ASSERT_EQ(def_node.left, nullptr);
   ASSERT_EQ(def_node.right, nullptr);
 }
 
 TEST(NodeTest, ConstructTest) {
-  bs_tree_node< int > node(42);
+  ft::bs_tree_node< int > node(42);
   ASSERT_EQ(node.parent, nullptr);
   ASSERT_EQ(node.left, nullptr);
   ASSERT_EQ(node.right, nullptr);
@@ -61,46 +63,12 @@ TEST(TreeTest, ConstructTest) {
   ;
 }
 
-TEST(TreeTest, AddTest) {
-  test_tree tree;
-  ASSERT_TRUE(tree.add(test_pair(1, 'a')));
-  ASSERT_TRUE(tree.add(test_pair(15, 'b')));
-  ASSERT_TRUE(tree.add(test_pair(-1, 'c')));
-  ASSERT_TRUE(tree.add(test_pair(10, 'd')));
-  ASSERT_FALSE(tree.add(test_pair(10, 'e')));
-  tree.print();
-}
-
-TEST(TreeTest, RemoveTest) {
-  test_tree tree;
-  ASSERT_FALSE(tree.remove(test_pair(10, 'd')));
-  ASSERT_TRUE(tree.add(test_pair(1, 'a')));
-  ASSERT_TRUE(tree.add(test_pair(15, 'b')));
-  ASSERT_TRUE(tree.add(test_pair(-1, 'c')));
-  ASSERT_TRUE(tree.add(test_pair(10, 'd')));
-  ASSERT_TRUE(tree.remove(test_pair(10, 'd')));
-  ASSERT_TRUE(tree.remove(test_pair(1, 'a')));
-  ASSERT_FALSE(tree.remove(test_pair(1, 'a')));
-  // 現在true。引数を後で考える
-  // ASSERT_FALSE(tree.remove(test_pair(15, 'z')));
-  // tree.print();
-}
-
 TEST(TreeTest, HeaderEmptyTest) {
   test_tree empty;
 
   ASSERT_EQ(empty.header()->left, nullptr);
   ASSERT_EQ(empty.header()->right, nullptr);
 }
-
-// TEST_F(TreeTestF, MostLeftRightTest) {
-//   ASSERT_EQ(tree.mostLeft()->item.first, -5);
-//   ASSERT_EQ(tree.mostRight()->item.first, 15);
-//   tree.remove(test_pair(-5, 'f'));
-//   tree.remove(test_pair(15, 'b'));
-//   ASSERT_EQ(tree.mostLeft()->item.first, -1);
-//   ASSERT_EQ(tree.mostRight()->item.first, 10);
-// }
 
 TEST_F(TreeTestF, FindEqualTest) {
   test_node *node_null = tree.find_equal(4242);
@@ -135,7 +103,7 @@ TEST(TreeTest, NextTestWithSize0) {
 
 TEST(TreeTest, NextTestWithSize1) {
   test_tree tree;
-  tree.add(test_pair(1, 'a'));
+  tree.insert(test_pair(1, 'a'));
 
   test_node *node_4th = tree.root();
   test_node *node_header = tree.header();
@@ -166,7 +134,7 @@ TEST(TreeTest, PrevTestWithSize0) {
 
 TEST(TreeTest, PrevTestWithSize1) {
   test_tree tree;
-  tree.add(test_pair(1, 'a'));
+  tree.insert(test_pair(1, 'a'));
 
   test_node *node_4th = tree.root();
   test_node *node_header = tree.header();
@@ -310,7 +278,7 @@ TEST_F(TreeTestF, EmptyTest) {
   test_tree empty_tree;
 
   ASSERT_TRUE(empty_tree.empty());
-  empty_tree.add(test_pair(1, 'a'));
+  empty_tree.insert(test_pair(1, 'a'));
   ASSERT_FALSE(empty_tree.empty());
   ASSERT_FALSE(tree.empty());
 }
@@ -319,7 +287,7 @@ TEST_F(TreeTestF, SizeTest) {
   test_tree empty_tree;
 
   ASSERT_EQ(empty_tree.size(), 0);
-  empty_tree.add(test_pair(1, 'a'));
+  empty_tree.insert(test_pair(1, 'a'));
   ASSERT_EQ(empty_tree.size(), 1);
   ASSERT_EQ(tree.size(), 6);
   // erase実装後テスト追加すること
@@ -376,36 +344,34 @@ TEST_F(TreeTestF, InsertRangeTest) {
   tree.insert(v.begin(), v.end());
   ASSERT_EQ(tree.size(), 16);
   for (int i = 100; i < 110; i++) {
-    ASSERT_EQ(tree.find_equal(i)->item.second, 'x');
+    ASSERT_EQ(tree.find(i)->second, 'x');
   }
 }
 
 TEST_F(TreeTestF, Erase1Test) {
   tree.erase(test_itr(node_3rd, node_nil));
-  test_node *deleted = tree.find_equal(0);
-  ASSERT_EQ(deleted, nullptr);
-  ASSERT_EQ(tree.size(), 5);
+  ASSERT_EQ(tree.find(0), tree.end());
+  ASSERT_EQ(tree.size(), default_size - 1);
 }
 
 TEST_F(TreeTestF, EraseKeySuccessTest) {
   test_tree::size_type ret = tree.erase(node_3rd->item.first);
-  test_node *deleted = tree.find_equal(0);
   ASSERT_EQ(ret, 1);
-  ASSERT_EQ(deleted, nullptr);
-  ASSERT_EQ(tree.size(), 5);
+  ASSERT_EQ(tree.find(0), tree.end());
+  ASSERT_EQ(tree.size(), default_size - 1);
 }
 
 TEST_F(TreeTestF, EraseKeyFailTest) {
   test_tree::size_type ret = tree.erase(42);
   ASSERT_EQ(ret, 0);
-  ASSERT_EQ(tree.size(), 6);
+  ASSERT_EQ(tree.size(), default_size);
 }
 
 TEST_F(TreeTestF, EraseRangeTwoElementTest) {
   test_itr itr_3rd(node_3rd, node_nil);  // 0
   test_itr itr_5th(node_5th, node_nil);  // 10
   tree.erase(itr_3rd, itr_5th);
-  ASSERT_EQ(tree.size(), 4);
+  ASSERT_EQ(tree.size(), default_size - 2);
   tree.print();
 }
 
@@ -487,4 +453,26 @@ TEST_F(TreeTestF, EqualRangeTest) {
   ASSERT_EQ(tree.equal_range(15).second, tree.end());
   ASSERT_EQ(tree.equal_range(100).first, tree.end());
   ASSERT_EQ(tree.equal_range(100).second, tree.end());
+}
+
+TEST_F(TreeTestF, CompareOperatorTest) {
+  test_tree copy(tree);
+  test_tree appended(tree);
+  appended.insert(test_pair(8, 'b'));
+  // appended.print_with_itr();
+  ASSERT_EQ(appended.size(), default_size + 1);
+
+  ASSERT_TRUE(tree == copy);
+  ASSERT_FALSE(tree != copy);
+  ASSERT_FALSE(tree > copy);
+  ASSERT_TRUE(tree >= copy);
+  ASSERT_FALSE(tree < copy);
+  ASSERT_TRUE(tree <= copy);
+
+  // ASSERT_FALSE(tree == appended);
+  // ASSERT_TRUE(tree != appended);
+  // ASSERT_FALSE(tree > appended);
+  // ASSERT_TRUE(tree >= appended);
+  // ASSERT_FALSE(tree < appended);
+  // ASSERT_TRUE(tree <= appended);
 }

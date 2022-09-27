@@ -5,6 +5,9 @@
 
 #include "iterator.hpp"
 #include "pair.hpp"
+#include "util.hpp"
+
+namespace ft {
 
 template < typename T >
 struct bs_tree_node {
@@ -259,6 +262,16 @@ class bs_tree {
     return const_reverse_iterator(begin());
   }
 
+  // map側で対応, mapped_type作ってないので
+  // // 要素アクセス
+  // T& operator[](const Key& search_key) {
+  //   iterator it = lower_bound(search_key);
+  //   // 要素が見つからない場合
+  //   if (it == end() || comp_func_(search_key, it->first))
+  //     it = insert(it, value_type(search_key, mapped_type()));
+  //   return it->second;
+  // }
+
   // 容量
   bool empty() const { return (count_ == 0); }
 
@@ -305,32 +318,6 @@ class bs_tree {
 
   size_type erase(const key_type& key) { return remove(key); }
 
-  bool add(const_reference x) {
-    node_ptr ptr = find_last(key(x));
-    node_ptr u = create_node(x);
-    return add_child(ptr, u);
-  }
-
-  bool remove(const_reference x) {
-    node_ptr ptr = find_last(key(x));
-    // std::cout << "delete key:" << key(x) << std::endl;
-    if (ptr != nil_ && key(x) == key(ptr)) {
-      remove(ptr);
-      return true;
-    }
-    return false;
-  }
-
-  bool remove(const key_type& search_key) {
-    node_ptr ptr = find_last(search_key);
-    // std::cout << "delete key:" << key(x) << std::endl;
-    if (ptr != nil_ && search_key == key(ptr)) {
-      remove(ptr);
-      return true;
-    }
-    return false;
-  }
-
   // 検索
   size_type count(const Key& key) const { return (find_equal(key) != nil_); }
 
@@ -374,8 +361,8 @@ class bs_tree {
   //テスト用
   node_ptr header() { return header_; }
   node_ptr nil() { return nil_; }
-  // node_ptr mostLeft() { return most_left_; }
-  // node_ptr mostRight() { return most_right_; }
+  node_ptr root() { return header_->left; }
+  node_ptr root() const { return header_->left; }
 
   // debug
   void print() {
@@ -388,9 +375,9 @@ class bs_tree {
     print_graph(root(), 0);
   }
 
-  void print_with_itr() {
+  void print_with_itr() const {
     std::cerr << "[\x1b[32mPRINT_WITH_ITR\x1b[39m]" << std::endl;
-    for (iterator it = begin(); it != end(); it++) {
+    for (const_iterator it = begin(); it != end(); it++) {
       std::cerr << "(" << it.current_ << "):" << it->first << ", " << it->second
                 << std::endl;
       std::cerr << "(" << it.current_->parent << "):parent" << std::endl;
@@ -408,24 +395,6 @@ class bs_tree {
   key_type key(const_node_ptr node) const { return node->item.first; }
   key_type key(const_reference value) { return value.first; }
   key_type key(const_reference value) const { return value.first; }
-
-  //テスト用
- public:
-  node_ptr root() { return header_->left; }
-  node_ptr root() const { return header_->left; }
-
- private:
-  void connect_root_to_header(node_ptr new_root) {
-    header_->left = new_root;
-    if (new_root != nil_) {
-      new_root->parent = header_;
-    }
-  }
-
-  void update_header() {
-    most_left_ = most_left(root());
-    most_right_ = most_right(root());
-  }
 
   node_ptr most_left(node_ptr node) {
     if (node == nil_) {
@@ -447,6 +416,19 @@ class bs_tree {
     return node;
   }
 
+  // ヘッダーやルートの更新
+  void connect_root_to_header(node_ptr new_root) {
+    header_->left = new_root;
+    if (new_root != nil_) {
+      new_root->parent = header_;
+    }
+  }
+
+  void update_header() {
+    most_left_ = most_left(root());
+    most_right_ = most_right(root());
+  }
+
   // メモリ関連
   node_ptr allocate(size_type n) { return node_alloc_.allocate(n); }
 
@@ -461,12 +443,10 @@ class bs_tree {
   node_ptr create_node(const_reference value) {
     node_ptr new_node = allocate(1);
     construct(new_node, value);
-    // count_++;
     return new_node;
   }
 
   // add, remove, findのヘルパー
-
   node_ptr find_last(const key_type& search_key) {
     node_ptr current = root();
     node_ptr prev = nil_;
@@ -485,6 +465,7 @@ class bs_tree {
     return prev;
   }
 
+  // 本当はprivate、テストのためpublicに
  public:
   node_ptr find_equal(const key_type& search_key) const {
     node_ptr current = root();
@@ -562,18 +543,21 @@ class bs_tree {
     return true;
   }
 
-  // 隣り合うノードの位置を入れ替える
-  void swap_node_right_link(node_ptr parent, node_ptr right_child) {
-    node tmp;
-    node_ptr grand_parent = parent->parent;
-
-    if (grand_parent != nil_) {
-      if (grand_parent->left == parent) {
-        grand_parent->left = right_child;
+  void connect_parent_to_new_child(node_ptr new_child, node_ptr old_child) {
+    node_ptr parent = old_child->parent;
+    if (parent != nil_) {
+      if (parent->left == old_child) {
+        parent->left = new_child;
       } else {
-        grand_parent->right = right_child;
+        parent->right = new_child;
       }
     }
+  }
+
+  // 隣り合うノードの位置を入れ替える
+  void swap_node_right_link(node_ptr parent, node_ptr right_child) {
+    connect_parent_to_new_child(right_child, parent);
+    node tmp;
     tmp.parent = parent->parent;
     tmp.left = parent->left;
     tmp.right = parent->right;
@@ -589,27 +573,20 @@ class bs_tree {
 
   // 2つのノードの位置を入れ替える
   void swap_node_position(node_ptr node1, node_ptr node2) {
-    node tmp;
-    node_ptr node1_parent = node1->parent;
-    node_ptr node2_parent = node2->parent;
-
-    if (node1_parent->parent != nil_) {
-      if (node1_parent->left == node1) {
-        node1_parent->left = node2;
-      } else {
-        node1_parent->right = node2;
-      }
-    }
-    if (node2_parent->parent != nil_) {
-      if (node2_parent->left == node2) {
-        node2_parent->left = node1;
-      } else {
-        node2_parent->right = node1;
-      }
-    }
+    connect_parent_to_new_child(node1, node2);
+    connect_parent_to_new_child(node2, node1);
     std::swap(node1->parent, node2->parent);
     std::swap(node1->left, node2->left);
     std::swap(node1->right, node2->right);
+  }
+
+  bool remove(const key_type& search_key) {
+    node_ptr ptr = find_last(search_key);
+    if (ptr != nil_ && search_key == key(ptr)) {
+      remove(ptr);
+      return true;
+    }
+    return false;
   }
 
   void remove(node_ptr ptr) {
@@ -705,5 +682,44 @@ class bs_tree {
   node_allocator node_alloc_;
   size_type count_;
 };
+
+template < class Key, class Value, class Compare, class Alloc >
+bool operator==(const ft::bs_tree< Key, Value, Compare, Alloc >& lhs,
+                const ft::bs_tree< Key, Value, Compare, Alloc >& rhs) {
+  return (lhs.size() == rhs.size()) &&
+         ft::equal(lhs.begin(), lhs.end(), rhs.begin());
+}
+
+template < class Key, class Value, class Compare, class Alloc >
+bool operator!=(const ft::bs_tree< Key, Value, Compare, Alloc >& lhs,
+                const ft::bs_tree< Key, Value, Compare, Alloc >& rhs) {
+  return !(lhs == rhs);
+}
+
+template < class Key, class Value, class Compare, class Alloc >
+bool operator<(const ft::bs_tree< Key, Value, Compare, Alloc >& lhs,
+               const ft::bs_tree< Key, Value, Compare, Alloc >& rhs) {
+  return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(),
+                                     rhs.end());
+}
+
+template < class Key, class Value, class Compare, class Alloc >
+bool operator<=(const ft::bs_tree< Key, Value, Compare, Alloc >& lhs,
+                const ft::bs_tree< Key, Value, Compare, Alloc >& rhs) {
+  return !(rhs < lhs);
+}
+
+template < class Key, class Value, class Compare, class Alloc >
+bool operator>(const ft::bs_tree< Key, Value, Compare, Alloc >& lhs,
+               const ft::bs_tree< Key, Value, Compare, Alloc >& rhs) {
+  return rhs < lhs;
+}
+
+template < class Key, class Value, class Compare, class Alloc >
+bool operator>=(const ft::bs_tree< Key, Value, Compare, Alloc >& lhs,
+                const ft::bs_tree< Key, Value, Compare, Alloc >& rhs) {
+  return !(lhs < rhs);
+}
+}  // namespace ft
 
 #endif /* BS_TREE_HPP */
