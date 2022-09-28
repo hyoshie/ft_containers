@@ -134,6 +134,8 @@ class map {
 
   size_type erase(const key_type& key) { return tree_.erase(key); }
 
+  void swap(map& other) { tree_.swap(other.tree_); }
+
   // 検索
   size_type count(const Key& key) const { return tree_.count(key); }
 
@@ -175,6 +177,51 @@ class map {
   value_compare value_comp_;
 };
 
+template < class Key, class T, class Compare, class Alloc >
+bool operator==(const ft::map< Key, T, Compare, Alloc >& lhs,
+                const ft::map< Key, T, Compare, Alloc >& rhs) {
+  return (lhs.size() == rhs.size()) &&
+         ft::equal(lhs.begin(), lhs.end(), rhs.begin());
+}
+
+template < class Key, class T, class Compare, class Alloc >
+bool operator!=(const ft::map< Key, T, Compare, Alloc >& lhs,
+                const ft::map< Key, T, Compare, Alloc >& rhs) {
+  return !(lhs == rhs);
+}
+
+template < class Key, class T, class Compare, class Alloc >
+bool operator<(const ft::map< Key, T, Compare, Alloc >& lhs,
+               const ft::map< Key, T, Compare, Alloc >& rhs) {
+  return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(),
+                                     rhs.end());
+}
+
+template < class Key, class T, class Compare, class Alloc >
+bool operator<=(const ft::map< Key, T, Compare, Alloc >& lhs,
+                const ft::map< Key, T, Compare, Alloc >& rhs) {
+  return !(rhs < lhs);
+}
+
+template < class Key, class T, class Compare, class Alloc >
+bool operator>(const ft::map< Key, T, Compare, Alloc >& lhs,
+               const ft::map< Key, T, Compare, Alloc >& rhs) {
+  return rhs < lhs;
+}
+
+template < class Key, class T, class Compare, class Alloc >
+bool operator>=(const ft::map< Key, T, Compare, Alloc >& lhs,
+                const ft::map< Key, T, Compare, Alloc >& rhs) {
+  return !(lhs < rhs);
+}
 }  // namespace ft
+
+namespace std {
+template < class Key, class T, class Compare, class Alloc >
+void swap(const ft::map< Key, T, Compare, Alloc >& lhs,
+          const ft::map< Key, T, Compare, Alloc >& rhs) {
+  lhs.swap(rhs);
+}
+}  // namespace std
 
 #endif /* MAP_HPP */

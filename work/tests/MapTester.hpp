@@ -53,6 +53,7 @@ class MapTester {
     test_clear();
     test_insert();
     test_erase();
+    test_swap();
     test_count();
     test_find();
     test_equal_range();
@@ -60,6 +61,7 @@ class MapTester {
     test_upper_bound();
     test_key_comp();
     test_value_comp();
+    test_op_compare();
     // 木を表示
     print_graph();
   }
@@ -276,6 +278,23 @@ class MapTester {
     test_erase_range();
   }
 
+  void test_swap() {
+    pout("swap");
+    test_map map(original_);
+    test_map added(original_);
+    added.insert(new_pair_);
+
+    //メソッド
+    map.swap(added);
+    print_info(map);
+    print_info(added);
+
+    //非メソッド
+    std::swap(map, added);
+    print_info(map);
+    print_info(added);
+  }
+
   void test_count() {
     pout("count");
     const test_map c_map(original_);
@@ -426,6 +445,29 @@ class MapTester {
     test_pair pair_1st(it_1st->first, it_1st->second);
     test_pair pair_2nd(it_2nd->first, it_2nd->second);
     std::cout << comp(pair_1st, pair_2nd) << std::endl;
+  }
+
+  void test_op_compare() {
+    pout("op_compare");
+    test_map map(original_);
+    const test_map c_map(original_);
+    map.insert(new_pair_);
+
+    // 同じ。ついでにconstもチェック
+    std::cout << (original_ == c_map) << std::endl;
+    std::cout << (original_ != c_map) << std::endl;
+    std::cout << (original_ < c_map) << std::endl;
+    std::cout << (original_ <= c_map) << std::endl;
+    std::cout << (original_ > c_map) << std::endl;
+    std::cout << (original_ >= c_map) << std::endl;
+
+    // 違う
+    std::cout << (original_ == map) << std::endl;
+    std::cout << (original_ != map) << std::endl;
+    std::cout << (original_ < map) << std::endl;
+    std::cout << (original_ <= map) << std::endl;
+    std::cout << (original_ > map) << std::endl;
+    std::cout << (original_ >= map) << std::endl;
   }
 
  private:

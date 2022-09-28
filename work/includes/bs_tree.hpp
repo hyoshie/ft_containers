@@ -349,6 +349,16 @@ class bs_tree {
 
   size_type erase(const key_type& key) { return remove(key); }
 
+  void swap(bs_tree& other) {
+    std::swap(header_, other.header_);
+    std::swap(most_left_, other.most_left_);
+    std::swap(most_right_, other.most_right_);
+    std::swap(nil_, other.nil_);
+    std::swap(comp_func_, other.comp_func_);
+    std::swap(node_alloc_, other.node_alloc_);
+    std::swap(count_, other.count_);
+  }
+
   // 検索
   size_type count(const Key& key) const { return (find_equal(key) != nil_); }
 
