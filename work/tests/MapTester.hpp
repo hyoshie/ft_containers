@@ -46,21 +46,47 @@ class MapTester {
     print_info(original_);
   }
 
-  void test_ctor() {
-    pout("ctor");
+  void test_default_ctor() {
+    pout("default ctor");
     test_map default_map;
+    print_info(default_map);
+  }
+
+  void test_arg_ctor() {
+    pout("arg ctor");
     std::greater< Key > comp;
     std::allocator< test_pair > alloc;
-    ft::map< Key, T, std::greater< Key > > map(comp, alloc);
-    print_info(default_map);
+    ft::map< Key, T, std::greater< Key > > arg_map(comp, alloc);
     for (test_vec_iter it = vec_.begin(); it != vec_.end(); it++) {
-      map.insert(*it);
+      arg_map.insert(*it);
     }
-    print_info(map);
+    print_info(arg_map);
+  }
 
-    ft::map< Key, T, std::greater< Key > > iter_map(vec_.begin(), vec_.end(),
-                                                    comp, alloc);
-    print_info(iter_map);
+  void test_range_ctor() {
+    pout("range ctor");
+    std::greater< Key > comp;
+    std::allocator< test_pair > alloc;
+    ft::map< Key, T, std::greater< Key > > range_map(vec_.begin(), vec_.end(),
+                                                     comp, alloc);
+    for (test_vec_iter it = vec_.begin(); it != vec_.end(); it++) {
+      range_map.insert(*it);
+    }
+    print_info(range_map);
+  }
+
+  // void test_copy_ctor() {
+  //   pout("copy ctor");
+  //   test_map copy(original_);
+  //   print_info(copy);
+  // }
+
+  void test_ctor() {
+    pout("ctor");
+    test_default_ctor();
+    test_arg_ctor();
+    test_range_ctor();
+    // test_copy_ctor();
   }
 
  private:

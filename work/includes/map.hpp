@@ -61,6 +61,8 @@ class map {
     insert(first, last);
   }
 
+  map(const map& other) : tree_(other.tree_) {}
+
   // 要素アクセス
   // イテレータ
   iterator begin() { return tree_.begin(); }

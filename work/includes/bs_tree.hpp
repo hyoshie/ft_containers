@@ -257,6 +257,14 @@ class bs_tree {
     most_left_ = header_;
     most_right_ = header_;
   }
+
+  // bs_tree(const bs_tree&)
+  virtual ~bs_tree() {
+    destroy_tree(root());
+    destroy_node(nil_);
+    destroy_node(header_);
+  }
+
   // イテレータ
   iterator begin() { return iterator(most_left_, nil_); }
   const_iterator begin() const { return const_iterator(most_left_, nil_); }
@@ -293,7 +301,11 @@ class bs_tree {
   size_type max_size() const { return node_alloc_.max_size(); }
 
   // 容量
-  void clear() { erase(begin(), end()); }
+  void clear() {
+    destroy_tree(root());
+    connect_root_to_header(nil_);
+    count_ = 0;
+  }
 
   ft::pair< iterator, bool > insert(const value_type& value) {
     node_ptr ptr = find_last(key(value));
@@ -444,6 +456,8 @@ class bs_tree {
   // メモリ関連
   node_ptr allocate(size_type n) { return node_alloc_.allocate(n); }
 
+  void deallocate(node_ptr ptr, size_type n) { node_alloc_.deallocate(ptr, n); }
+
   void construct(node_ptr ptr) { node_alloc_.construct(ptr, node_type()); }
 
   void construct(node_ptr ptr, const_reference value) {
@@ -456,6 +470,19 @@ class bs_tree {
     node_ptr new_node = allocate(1);
     construct(new_node, value);
     return new_node;
+  }
+
+  void destroy_node(node_ptr ptr) {
+    destroy(ptr);
+    deallocate(ptr, 1);
+  }
+
+  void destroy_tree(node_ptr root) {
+    if (root != nil_) {
+      destroy_tree(root->left);
+      destroy_tree(root->right);
+      destroy_node(root);
+    }
   }
 
   // add, remove, findのヘルパー
@@ -606,7 +633,8 @@ class bs_tree {
   void remove(node_ptr ptr) {
     if (ptr->left == nil_ || ptr->right == nil_) {
       splice(ptr);
-      destroy(ptr);
+      // destroy(ptr);
+      destroy_node(ptr);
     } else {
       node_ptr target = most_left(ptr->right);
       if (target == ptr->right) {
@@ -618,7 +646,8 @@ class bs_tree {
         header_->left = target;
       }
       splice(ptr);
-      destroy(ptr);
+      // destroy(ptr);
+      destroy_node(ptr);
     }
     count_--;
     update_header();

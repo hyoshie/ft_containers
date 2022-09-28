@@ -9,6 +9,7 @@ CXXFLAGS = -Wall \
 		   -Wshadow \
 		   -std=c++98 \
 		   -pedantic \
+		   -g \
 		   $(INCS) \
 		   $(NULL)
 
