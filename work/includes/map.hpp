@@ -23,7 +23,6 @@ class map {
 
  private:
   typedef bs_tree< key_type, value_type, key_compare, allocator_type > rep_type;
-  rep_type tree_;
 
  public:
   typedef typename rep_type::iterator iterator;
@@ -49,19 +48,26 @@ class map {
   };
 
   // メンバ関数
-  map() : tree_() {}
+  // map()
+  //     : tree_(),
+  //       key_comp_(key_compare()),
+  //       value_comp_(value_compare(key_comp_)) {}
 
-  explicit map(const Compare& comp, const Allocator& alloc = Allocator())
-      : tree_(comp, alloc) {}
+  explicit map(const Compare& comp = Compare(),
+               const Allocator& alloc = Allocator())
+      : tree_(comp, alloc), key_comp_(comp), value_comp_(value_compare(comp)) {}
 
   template < class InputIt >
   map(InputIt first, InputIt last, const Compare& comp = Compare(),
       const Allocator& alloc = Allocator())
-      : tree_(comp, alloc) {
+      : tree_(comp, alloc), key_comp_(comp), value_comp_(value_compare(comp)) {
     insert(first, last);
   }
 
-  map(const map& other) : tree_(other.tree_) {}
+  map(const map& other)
+      : tree_(other.tree_),
+        key_comp_(other.key_comp_),
+        value_comp_(other.value_comp_) {}
 
   ~map() {}
 
@@ -129,18 +135,44 @@ class map {
   size_type erase(const key_type& key) { return tree_.erase(key); }
 
   // 検索
+  size_type count(const Key& key) const { return tree_.count(key); }
 
   iterator find(const Key& key) { return tree_.find(key); }
 
   const_iterator find(const Key& key) const { return tree_.find(key); }
 
+  ft::pair< iterator, iterator > equal_range(const Key& key) {
+    return tree_.equal_range(key);
+  }
+
+  ft::pair< const_iterator, const_iterator > equal_range(const Key& key) const {
+    return tree_.equal_range(key);
+  }
+
   iterator lower_bound(const Key& key) { return tree_.lower_bound(key); }
+
   const_iterator lower_bound(const Key& key) const {
     return tree_.lower_bound(key);
   }
+
+  iterator upper_bound(const Key& key) { return tree_.upper_bound(key); }
+
+  const_iterator upper_bound(const Key& key) const {
+    return tree_.upper_bound(key);
+  }
+
   // 観察
+  key_compare key_comp() const { return key_comp_; }
+
+  value_compare value_comp() const { return value_comp_; }
+
   // debug
   void print() const { tree_.print(); }
+
+ private:
+  rep_type tree_;
+  key_compare key_comp_;
+  value_compare value_comp_;
 };
 
 }  // namespace ft

@@ -16,6 +16,7 @@ template < typename Key, typename T, typename Compare = std::less< Key > >
 class MapTester {
  public:
   // 型
+  typedef Key test_key;
   typedef ft::pair< Key, T > test_pair;
   typedef ft::map< Key, T, Compare > test_map;
   typedef typename test_map::iterator test_iter;
@@ -52,6 +53,14 @@ class MapTester {
     test_clear();
     test_insert();
     test_erase();
+    test_count();
+    test_find();
+    test_equal_range();
+    test_lower_bound();
+    test_upper_bound();
+    test_key_comp();
+    test_value_comp();
+    // 木を表示
     print_graph();
   }
 
@@ -267,11 +276,156 @@ class MapTester {
     test_erase_range();
   }
 
+  void test_count() {
+    pout("count");
+    const test_map c_map(original_);
+
+    test_citer found = c_map.begin();
+    // 1
+    std::cout << c_map.count(found->first) << std::endl;
+    // 0
+    std::cout << c_map.count(new_pair_.first) << std::endl;
+  }
+
+  void test_find() {
+    pout("find");
+    test_map map(original_);
+    const test_map c_map(original_);
+
+    // 成功
+    test_key key = map.begin()->first;
+    test_iter found = map.find(key);
+    test_citer c_found = c_map.find(key);
+
+    print_iter(found);
+    print_iter(c_found);
+
+    // 失敗
+    key = new_pair_.first;
+    test_iter not_found = map.find(key);
+    test_citer c_not_found = c_map.find(key);
+
+    std::cout << (not_found == map.end()) << std::endl;
+    std::cout << (c_not_found == c_map.end()) << std::endl;
+  }
+
+  void test_equal_range() {
+    pout("equal_range");
+    test_map map(original_);
+    const test_map c_map(original_);
+
+    // 存在するkey
+    test_key key = map.begin()->first;
+    ft::pair< test_iter, test_iter > pair = map.equal_range(key);
+    ft::pair< test_citer, test_citer > c_pair = c_map.equal_range(key);
+
+    print_iter_range(pair.first, pair.second);
+    print_iter_range(c_pair.first, c_pair.second);
+
+    // 存在しないkey
+    // 1つ目の要素 < key < 2つめの要素なので、2つのイテレータは等しくなる
+    key = new_pair_.first;
+    std::cout << key << std::endl;
+    pair = map.equal_range(key);
+    c_pair = c_map.equal_range(key);
+
+    std::cout << (pair.first == pair.second) << std::endl;
+    std::cout << (c_pair.first == c_pair.second) << std::endl;
+  }
+
+  void test_lower_bound() {
+    pout("lower_bound");
+    test_map map(original_);
+    const test_map c_map(original_);
+
+    // 存在するkey
+    test_key key = map.begin()->first;
+    test_iter found = map.lower_bound(key);
+    test_citer c_found = c_map.lower_bound(key);
+
+    print_iter(found);
+    print_iter(c_found);
+
+    // 存在しないkey、範囲内
+    key = new_pair_.first;
+    found = map.lower_bound(key);
+    c_found = c_map.lower_bound(key);
+
+    print_iter(found);
+    print_iter(c_found);
+
+    // 存在しないkey、範囲外
+    test_iter last = --map.end();
+
+    key = last->first;
+    key++;
+    test_iter not_found = map.lower_bound(key);
+    test_citer c_not_found = c_map.lower_bound(key);
+
+    std::cout << (not_found == map.end()) << std::endl;
+    std::cout << (c_not_found == c_map.end()) << std::endl;
+  }
+
+  void test_upper_bound() {
+    pout("upper_bound");
+    test_map map(original_);
+    const test_map c_map(original_);
+
+    // 存在するkey
+    test_key key = map.begin()->first;
+    test_iter found = map.upper_bound(key);
+    test_citer c_found = c_map.upper_bound(key);
+
+    print_iter(found);
+    print_iter(c_found);
+
+    // 存在しないkey、範囲内
+    key = new_pair_.first;
+    found = map.upper_bound(key);
+    c_found = c_map.upper_bound(key);
+
+    print_iter(found);
+    print_iter(c_found);
+
+    // 存在しないkey、範囲外
+    test_iter last = --map.end();
+
+    key = last->first;
+    key++;
+    test_iter not_found = map.upper_bound(key);
+    test_citer c_not_found = c_map.upper_bound(key);
+
+    std::cout << (not_found == map.end()) << std::endl;
+    std::cout << (c_not_found == c_map.end()) << std::endl;
+  }
+
   void print_graph() {
     pout("get_allocator");
     std::allocator< T > alloc;
     std::cout << std::boolalpha << (alloc == original_.get_allocator())
               << std::endl;
+  }
+
+  void test_key_comp() {
+    pout("key_comp");
+    const test_map c_map(original_);
+
+    Compare comp = c_map.key_comp();
+    test_citer it_1st = c_map.begin();
+    test_citer it_2nd = ++c_map.begin();
+    std::cout << comp(it_1st->first, it_2nd->first) << std::endl;
+  }
+
+  void test_value_comp() {
+    pout("value_comp");
+    const test_map c_map(original_);
+
+    typename test_map::value_compare comp = c_map.value_comp();
+    test_citer it_1st = c_map.begin();
+    test_citer it_2nd = ++c_map.begin();
+    test_pair pair_1st(it_1st->first, it_1st->second);
+    test_pair pair_2nd(it_2nd->first, it_2nd->second);
+    std::cout << comp(pair_1st, pair_2nd) << std::endl;
   }
 
  private:
@@ -283,7 +437,7 @@ class MapTester {
   }
 
   template < typename Map >
-  void print_info(const Map& map) {
+  void print_info(Map map) {
     for (test_citer it = map.begin(); it != map.end(); it++) {
       print_pair(*it);
     }
@@ -291,8 +445,20 @@ class MapTester {
   }
 
   template < typename Pair >
-  void print_pair(const Pair& pair) {
+  void print_pair(Pair pair) {
     std::cout << "(" << pair.first << ", " << pair.second << ")" << std::endl;
+  }
+
+  template < typename Iter >
+  void print_iter(Iter iter) {
+    std::cout << "(" << iter->first << ", " << iter->second << ")" << std::endl;
+  }
+
+  template < typename Iter >
+  void print_iter_range(Iter first, Iter last) {
+    for (; first != last; first++) {
+      print_iter(first);
+    }
   }
 
   test_vec vec1_;
