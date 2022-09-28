@@ -63,6 +63,17 @@ class map {
 
   map(const map& other) : tree_(other.tree_) {}
 
+  ~map() {}
+
+  map& operator=(const map& other) {
+    if (this != &other) {
+      tree_ = other.tree_;
+    }
+    return *this;
+  }
+
+  allocator_type get_allocator() const { return tree_.get_allocator(); }
+
   // 要素アクセス
   // イテレータ
   iterator begin() { return tree_.begin(); }

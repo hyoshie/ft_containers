@@ -34,6 +34,8 @@ class MapTester {
   void run() {
     test_field();
     test_ctor();
+    test_op_assign();
+    test_get_allocator();
     ;
   }
 
@@ -75,18 +77,33 @@ class MapTester {
     print_info(range_map);
   }
 
-  // void test_copy_ctor() {
-  //   pout("copy ctor");
-  //   test_map copy(original_);
-  //   print_info(copy);
-  // }
+  void test_copy_ctor() {
+    pout("copy ctor");
+    test_map copy(original_);
+    print_info(copy);
+  }
+
+  void test_get_allocator() {
+    pout("get_allocator");
+    std::allocator< T > alloc;
+    std::cout << std::boolalpha << (alloc == original_.get_allocator())
+              << std::endl;
+  }
 
   void test_ctor() {
     pout("ctor");
     test_default_ctor();
     test_arg_ctor();
     test_range_ctor();
-    // test_copy_ctor();
+    test_copy_ctor();
+  }
+
+  void test_op_assign() {
+    pout("op_assign");
+    test_map map;
+    map.insert(*vec_.begin());
+    map = original_;
+    print_info(map);
   }
 
  private:

@@ -233,37 +233,40 @@ class bs_tree {
 
   // メンバ関数
   bs_tree()
-      : nil_(NULL),
-        comp_func_(key_compare()),
-        node_alloc_(node_allocator()),
-        count_(0) {
-    header_ = create_node(value_type());
-    header_->parent = nil_;
-    header_->left = nil_;
-    header_->right = nil_;
-    most_left_ = header_;
-    most_right_ = header_;
+      : nil_(NULL), comp_func_(key_compare()), node_alloc_(node_allocator()) {
+    initialize();
   }
 
   explicit bs_tree(const Compare& comp, const Allocator& alloc)
-      : nil_(NULL),
-        comp_func_(comp),
-        node_alloc_(node_allocator(alloc)),
-        count_(0) {
-    header_ = create_node(value_type());
-    header_->parent = nil_;
-    header_->left = nil_;
-    header_->right = nil_;
-    most_left_ = header_;
-    most_right_ = header_;
+      : nil_(NULL), comp_func_(comp), node_alloc_(node_allocator(alloc)) {
+    initialize();
   }
 
-  // bs_tree(const bs_tree&)
+  bs_tree(const bs_tree& other)
+      : nil_(NULL),
+        comp_func_(other.comp_func_),
+        node_alloc_(other.node_alloc_) {
+    initialize();
+    insert(other.begin(), other.end());
+  }
+
   virtual ~bs_tree() {
     destroy_tree(root());
     destroy_node(nil_);
     destroy_node(header_);
   }
+
+  bs_tree& operator=(const bs_tree& other) {
+    if (this != &other) {
+      clear();
+      comp_func_ = other.comp_func_;
+      node_alloc_ = other.node_alloc_;
+      insert(other.begin(), other.end());
+    }
+    return *this;
+  }
+
+  allocator_type get_allocator() const { return allocator_type(node_alloc_); }
 
   // イテレータ
   iterator begin() { return iterator(most_left_, nil_); }
@@ -304,6 +307,7 @@ class bs_tree {
   void clear() {
     destroy_tree(root());
     connect_root_to_header(nil_);
+    update_edge();
     count_ = 0;
   }
 
@@ -389,7 +393,7 @@ class bs_tree {
   node_ptr root() const { return header_->left; }
 
   // debug
-  void print() {
+  void print() const {
     value_type left_item = most_left_->item;
     value_type right_item = most_right_->item;
     std::cout << "most_left :(" << left_item.first << ", " << left_item.second
@@ -414,6 +418,16 @@ class bs_tree {
 
  private:
   // メンバ関数
+  void initialize() {
+    header_ = create_node(value_type());
+    header_->parent = nil_;
+    header_->left = nil_;
+    header_->right = nil_;
+    most_left_ = header_;
+    most_right_ = header_;
+    count_ = 0;
+  }
+
   // 木やノードの特定の値を取り出す
   key_type key(node_ptr node) { return node->item.first; }
   key_type key(const_node_ptr node) const { return node->item.first; }
@@ -448,7 +462,7 @@ class bs_tree {
     }
   }
 
-  void update_header() {
+  void update_edge() {
     most_left_ = most_left(root());
     most_right_ = most_right(root());
   }
@@ -548,7 +562,7 @@ class bs_tree {
     node_ptr prev = header_;  //見つからない場合end()を返すため
     while (current != nil_) {
       if (search_key == key(current)) {
-        current = current->left;
+        current = current->right;
       } else {
         bool comp = comp_func_(search_key, key(current));
         if (comp) {
@@ -578,7 +592,7 @@ class bs_tree {
       to_insert->parent = ptr;
     }
     count_++;
-    update_header();
+    update_edge();
     return true;
   }
 
@@ -650,7 +664,7 @@ class bs_tree {
       destroy_node(ptr);
     }
     count_--;
-    update_header();
+    update_edge();
   }
 
   void splice(node_ptr ptr) {
@@ -670,7 +684,7 @@ class bs_tree {
   }
 
   // debug
-  void print_graph(node_ptr node, int depth) {
+  void print_graph(node_ptr node, int depth) const {
     if (node == nil_) {
       return;
     }
@@ -685,7 +699,7 @@ class bs_tree {
     print_graph(node->right, depth + 1);
   }
 
-  void print_itr(iterator iter) {
+  void print_itr(iterator iter) const {
     std::cerr << "[\x1b[32mITERATOR\x1b[39m]" << std::endl;
     std::cerr << "(" << iter.current_ << "):" << iter->first << ", "
               << iter->second << std::endl;
@@ -696,7 +710,7 @@ class bs_tree {
     std::cerr << "[\x1b[32mEND_PRINT\x1b[39m]" << std::endl;
   }
 
-  void print_node(node_ptr node) {
+  void print_node(node_ptr node) const {
     std::cerr << "[\x1b[32mPOINTER\x1b[39m]" << std::endl;
     std::cerr << "(" << node << "):" << node->item.first << ", "
               << node->item.second << std::endl;
