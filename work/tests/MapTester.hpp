@@ -40,7 +40,8 @@ class MapTester {
     test_field();
     test_ctor();
     test_op_assign();
-    test_get_allocator();
+    // print_graphを仕込んでいるので一旦コメントアウト
+    // test_get_allocator();
     test_op_subscript();
     test_begin_and_end();
     test_rbegin_and_rend();
@@ -50,6 +51,8 @@ class MapTester {
     // test_max_size();
     test_clear();
     test_insert();
+    test_erase();
+    print_graph();
   }
 
   void test_field() {
@@ -229,6 +232,46 @@ class MapTester {
     test_insert1();
     test_insert_hint();
     test_insert_range();
+  }
+
+  void test_erase_from_iter() {
+    pout("erase1");
+    test_map map(original_);
+
+    map.erase(map.begin());
+    print_info(map);
+  }
+
+  void test_erase_from_key() {
+    pout("erase_key");
+    test_map map(original_);
+
+    test_iter it_2nd = ++map.begin();
+    map.erase(it_2nd->first);
+    print_info(map);
+  }
+
+  void test_erase_range() {
+    pout("erase_range");
+    test_map map(original_);
+
+    test_iter it_2nd = ++map.begin();
+    test_iter it_last = --map.end();
+    map.erase(it_2nd, it_last);
+    print_info(map);
+  }
+
+  void test_erase() {
+    test_erase_from_iter();
+    test_erase_from_key();
+    test_erase_range();
+  }
+
+  void print_graph() {
+    pout("get_allocator");
+    std::allocator< T > alloc;
+    std::cout << std::boolalpha << (alloc == original_.get_allocator())
+              << std::endl;
   }
 
  private:

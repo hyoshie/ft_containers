@@ -72,7 +72,10 @@ class map {
     return *this;
   }
 
-  allocator_type get_allocator() const { return tree_.get_allocator(); }
+  allocator_type get_allocator() const {
+    print();
+    return tree_.get_allocator();
+  }
 
   // 要素アクセス
   T& operator[](const Key& key) {
@@ -119,6 +122,12 @@ class map {
     tree_.insert(first, last);
   }
 
+  void erase(iterator pos) { tree_.erase(pos); }
+
+  void erase(iterator first, iterator last) { tree_.erase(first, last); }
+
+  size_type erase(const key_type& key) { return tree_.erase(key); }
+
   // 検索
 
   iterator find(const Key& key) { return tree_.find(key); }
@@ -130,6 +139,8 @@ class map {
     return tree_.lower_bound(key);
   }
   // 観察
+  // debug
+  void print() const { tree_.print(); }
 };
 
 }  // namespace ft

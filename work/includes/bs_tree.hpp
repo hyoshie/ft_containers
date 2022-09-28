@@ -399,11 +399,13 @@ class bs_tree {
   void print() const {
     value_type left_item = most_left_->item;
     value_type right_item = most_right_->item;
-    std::cout << "most_left :(" << left_item.first << ", " << left_item.second
+    std::cerr << "------------------------------" << std::endl;
+    std::cerr << "most_left :(" << left_item.first << ", " << left_item.second
               << ")" << std::endl;
-    std::cout << "most_right:(" << right_item.first << ", " << right_item.second
+    std::cerr << "most_right:(" << right_item.first << ", " << right_item.second
               << ")" << std::endl;
     print_graph(root(), 0);
+    std::cerr << "------------------------------" << std::endl;
   }
 
   void print_with_itr() const {
@@ -692,9 +694,9 @@ class bs_tree {
     print_graph(node->left, depth + 1);
 
     for (int i = 0; i < depth * 2; i++) {
-      std::cout << " ";
+      std::cerr << " ";
     }
-    std::cout << "+(" << node->item.first << ", " << node->item.second << ")"
+    std::cerr << "+(" << node->item.first << ", " << node->item.second << ")"
               << std::endl;
 
     print_graph(node->right, depth + 1);
