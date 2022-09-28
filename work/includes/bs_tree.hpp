@@ -2,6 +2,7 @@
 #define BS_TREE_HPP
 
 #include <cassert>
+#include <limits>
 
 #include "iterator.hpp"
 #include "pair.hpp"
@@ -300,8 +301,10 @@ class bs_tree {
 
   size_type size() const { return count_; }
 
-  // テストしてない
-  size_type max_size() const { return node_alloc_.max_size(); }
+  size_type max_size() const {
+    return std::min< size_type >(node_alloc_.max_size(),
+                                 std::numeric_limits< difference_type >::max());
+  }
 
   // 容量
   void clear() {
@@ -522,9 +525,7 @@ class bs_tree {
  public:
   node_ptr find_equal(const key_type& search_key) const {
     node_ptr current = root();
-    node_ptr prev = nil_;
     while (current != nil_) {
-      prev = current;
       if (search_key == key(current)) {
         return current;  // x.item はすでに木に含まれている
       }

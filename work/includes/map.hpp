@@ -75,21 +75,43 @@ class map {
   allocator_type get_allocator() const { return tree_.get_allocator(); }
 
   // 要素アクセス
+  T& operator[](const Key& key) {
+    iterator it = find(key);
+    if (it == end()) {
+      it = insert(ft::make_pair(key, T())).first;
+    }
+    return it->second;
+  }
+
   // イテレータ
   iterator begin() { return tree_.begin(); }
   const_iterator begin() const { return tree_.begin(); }
+
   iterator end() { return tree_.end(); }
   const_iterator end() const { return tree_.end(); }
+
   reverse_iterator rbegin() { return tree_.rbegin(); }
   const_reverse_iterator rbegin() const { return tree_.rbegin(); }
+
   reverse_iterator rend() { return tree_.rend(); }
   const_reverse_iterator rend() const { return tree_.rend(); }
-  bool empty() const { return tree_.empty(); }
-  size_type size() const { return tree_.size(); }
+
   // 容量
+  bool empty() const { return tree_.empty(); }
+
+  size_type size() const { return tree_.size(); }
+
+  size_type max_size() const { return tree_.max_size(); }
+
   // 変更
+  void clear() { tree_.clear(); }
+
   ft::pair< iterator, bool > insert(const value_type& value) {
     return tree_.insert(value);
+  }
+
+  iterator insert(iterator hint, const value_type& value) {
+    return tree_.insert(hint, value);
   }
 
   template < class InputIt >
@@ -98,6 +120,11 @@ class map {
   }
 
   // 検索
+
+  iterator find(const Key& key) { return tree_.find(key); }
+
+  const_iterator find(const Key& key) const { return tree_.find(key); }
+
   iterator lower_bound(const Key& key) { return tree_.lower_bound(key); }
   const_iterator lower_bound(const Key& key) const {
     return tree_.lower_bound(key);
