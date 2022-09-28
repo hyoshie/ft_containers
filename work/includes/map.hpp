@@ -1,27 +1,31 @@
 #ifndef MAP_HPP
 #define MAP_HPP
 
+#include <functional>
+
 #include "bs_tree.hpp"
 
 namespace ft {
 template < class Key, class T, class Compare = std::less< Key >,
-           class Allocator = std::allocator< std::pair< const Key, T > > >
+           class Allocator = std::allocator< ft::pair< const Key, T > > >
 class map {
- private:
-  typedef bs_tree< key_type, value_type, key_compare, allocator_type > rep_type;
-  rep_type tree_;
-
   // メンバ型
  public:
   typedef Key key_type;
   typedef T mapped_type;
-  typedef std::pair< const Key, T > value_type;
+  typedef ft::pair< const Key, T > value_type;
   typedef Compare key_compare;
   typedef Allocator allocator_type;
   typedef typename Allocator::pointer pointer;
   typedef typename Allocator::const_pointer const_pointer;
   typedef typename Allocator::reference reference;
   typedef typename Allocator::const_reference const_reference;
+
+ private:
+  typedef bs_tree< key_type, value_type, key_compare, allocator_type > rep_type;
+  rep_type tree_;
+
+ public:
   typedef typename rep_type::iterator iterator;
   typedef typename rep_type::const_iterator const_iterator;
   typedef typename rep_type::size_type size_type;
@@ -45,7 +49,18 @@ class map {
   };
 
   // メンバ関数
-  map() tree_() {}
+  map() : tree_() {}
+
+  explicit map(const Compare& comp, const Allocator& alloc = Allocator())
+      : tree_(comp, alloc) {}
+
+  template < class InputIt >
+  map(InputIt first, InputIt last, const Compare& comp = Compare(),
+      const Allocator& alloc = Allocator())
+      : tree_(comp, alloc) {
+    insert(first, last);
+  }
+
   // 要素アクセス
   // イテレータ
   iterator begin() { return tree_.begin(); }
@@ -63,13 +78,19 @@ class map {
   ft::pair< iterator, bool > insert(const value_type& value) {
     return tree_.insert(value);
   }
+
+  template < class InputIt >
+  void insert(InputIt first, InputIt last) {
+    tree_.insert(first, last);
+  }
+
   // 検索
   iterator lower_bound(const Key& key) { return tree_.lower_bound(key); }
   const_iterator lower_bound(const Key& key) const {
     return tree_.lower_bound(key);
   }
   // 観察
-}
+};
 
 }  // namespace ft
 

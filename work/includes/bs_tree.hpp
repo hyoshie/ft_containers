@@ -208,7 +208,7 @@ template < class Key, class Value, class Compare,
 class bs_tree {
   // 型
  private:
-  typedef bs_tree_node< Value > node;
+  typedef bs_tree_node< Value > node_type;
   typedef bs_tree_node< Value >* node_ptr;
   typedef const bs_tree_node< Value >* const_node_ptr;
   typedef typename Allocator::template rebind< bs_tree_node< Value > >::other
@@ -245,6 +245,18 @@ class bs_tree {
     most_right_ = header_;
   }
 
+  explicit bs_tree(const Compare& comp, const Allocator& alloc)
+      : nil_(NULL),
+        comp_func_(comp),
+        node_alloc_(node_allocator(alloc)),
+        count_(0) {
+    header_ = create_node(value_type());
+    header_->parent = nil_;
+    header_->left = nil_;
+    header_->right = nil_;
+    most_left_ = header_;
+    most_right_ = header_;
+  }
   // イテレータ
   iterator begin() { return iterator(most_left_, nil_); }
   const_iterator begin() const { return const_iterator(most_left_, nil_); }
@@ -432,7 +444,7 @@ class bs_tree {
   // メモリ関連
   node_ptr allocate(size_type n) { return node_alloc_.allocate(n); }
 
-  void construct(node_ptr ptr) { node_alloc_.construct(ptr, node()); }
+  void construct(node_ptr ptr) { node_alloc_.construct(ptr, node_type()); }
 
   void construct(node_ptr ptr, const_reference value) {
     node_alloc_.construct(ptr, value);
@@ -559,7 +571,7 @@ class bs_tree {
   // swap_node_positionと1つにできるが、後回し
   void swap_node_right_link(node_ptr parent, node_ptr right_child) {
     connect_parent_to_new_child(right_child, parent);
-    node tmp;
+    node_type tmp;
     tmp.parent = parent->parent;
     tmp.left = parent->left;
     tmp.right = parent->right;
