@@ -8,8 +8,8 @@ template < class Key, class T, class Compare = std::less< Key >,
            class Allocator = std::allocator< std::pair< const Key, T > > >
 class map {
  private:
-  typedef bs_tree< key_type, value_type, key_compare, allocator_type > Rep_type;
-  Rep_type tree_;
+  typedef bs_tree< key_type, value_type, key_compare, allocator_type > rep_type;
+  rep_type tree_;
 
   // メンバ型
  public:
@@ -22,12 +22,12 @@ class map {
   typedef typename Allocator::const_pointer const_pointer;
   typedef typename Allocator::reference reference;
   typedef typename Allocator::const_reference const_reference;
-  typedef typename Rep_type::iterator iterator;
-  typedef typename Rep_type::const_iterator const_iterator;
-  typedef typename Rep_type::size_type size_type;
-  typedef typename Rep_type::difference_type difference_type;
-  typedef typename Rep_type::reverse_iterator reverse_iterator;
-  typedef typename Rep_type::const_reverse_iterator const_reverse_iterator;
+  typedef typename rep_type::iterator iterator;
+  typedef typename rep_type::const_iterator const_iterator;
+  typedef typename rep_type::size_type size_type;
+  typedef typename rep_type::difference_type difference_type;
+  typedef typename rep_type::reverse_iterator reverse_iterator;
+  typedef typename rep_type::const_reverse_iterator const_reverse_iterator;
 
   // メンバクラス
   class value_compare

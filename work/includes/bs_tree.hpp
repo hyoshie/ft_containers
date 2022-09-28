@@ -545,16 +545,18 @@ class bs_tree {
 
   void connect_parent_to_new_child(node_ptr new_child, node_ptr old_child) {
     node_ptr parent = old_child->parent;
-    if (parent != nil_) {
-      if (parent->left == old_child) {
-        parent->left = new_child;
-      } else {
-        parent->right = new_child;
-      }
+    if (parent == nil_) {
+      return;
+    }
+    if (parent->left == old_child) {
+      parent->left = new_child;
+    } else {
+      parent->right = new_child;
     }
   }
 
   // 隣り合うノードの位置を入れ替える
+  // swap_node_positionと1つにできるが、後回し
   void swap_node_right_link(node_ptr parent, node_ptr right_child) {
     connect_parent_to_new_child(right_child, parent);
     node tmp;
@@ -611,28 +613,19 @@ class bs_tree {
   }
 
   void splice(node_ptr ptr) {
-    node_ptr child;
-    node_ptr new_parent;
-    if (ptr->left != nil_) {
-      child = ptr->left;
-    } else {
-      child = ptr->right;
-    }
+    node_ptr child = (ptr->left != nil_) ? ptr->left : ptr->right;
+    node_ptr new_parent = nil_;
+
     if (ptr == root()) {
-      connect_root_to_header(child);
       new_parent = header_;
+      connect_root_to_header(child);
     } else {
       new_parent = ptr->parent;
-      if (new_parent->left == ptr) {
-        new_parent->left = child;
-      } else {
-        new_parent->right = child;
-      }
+      connect_parent_to_new_child(child, ptr);
     }
     if (child != nil_) {
       child->parent = new_parent;
     }
-    // n--;
   }
 
   // debug
