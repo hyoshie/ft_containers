@@ -850,6 +850,7 @@ class rb_tree {
         return;  //赤い辺がない
       }
 
+      // 赤い辺をなくす
       node_ptr g_parent = parent->parent;
       if (g_parent == header_) {
         parent->color = black;  // parent == root()
@@ -857,31 +858,42 @@ class rb_tree {
       }
       if (g_parent->right->color == black) {
         flip_right(g_parent);
-        // std::cerr << "[\x1b[34mFLIP\x1b[39m]" << std::endl;
         return;
       } else {
-        // std::cerr << "[\x1b[34mPUSH\x1b[39m]" << std::endl;
         push_black(g_parent);
         node = g_parent;
       }
-      // std::cerr << "[\x1b[32mPASS\x1b[39m]" << std::endl;
-      // print_node(node);
-      // print();
     }
   }
 
   // debug
-
-  int verify(node_ptr node) {
-    if (node == nil_) return node->color;
+  void validate_color(node_ptr node) {
     assert(node->color == red || node->color == black);
+  }
+
+  void validate_red_edge(node_ptr node) {
     if (node->color == red)
       assert(node->left->color == black && node->right->color == black);
+  }
+
+  void validate_left_leaning(node_ptr node) {
     assert(node->right->color == black ||
            node->left->color == red);  // left leaning
-    int dl = verify(node->left);
-    int dr = verify(node->right);
-    if (dl != dr) return dl + node->color;
+  }
+
+  int verify(node_ptr node) {
+    if (node == nil_) {
+      return node->color;  // black = 1が返ってほしい
+    }
+    validate_color(node);
+    validate_left_leaning(node);
+    validate_red_edge(node);
+    int dl = verify(node->left);   // 基本1
+    int dr = verify(node->right);  // 基本1
+    if (dl != dr) {
+      // 入ってほしくない
+      return dl + node->color;
+    }
     return dl;
   }
 
