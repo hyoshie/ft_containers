@@ -2,6 +2,7 @@
 #define RB_TREE_HPP
 
 #include <cassert>
+#include <cmath>
 #include <limits>
 
 #include "iterator.hpp"
@@ -330,8 +331,21 @@ class rb_tree {
     bool has_added = add_child(ptr, new_node);
     // 失敗しない
     assert(has_added);
+    add_fixup(new_node);
     return ft::make_pair(iterator(new_node, nil_), true);
   }
+
+  // ft::pair< iterator, bool > insert(const value_type& value) {
+  //   node_ptr ptr = find_last(key(value));
+  //   if (ptr != nil_ && key(ptr) == key(value)) {
+  //     return ft::make_pair(iterator(ptr, nil_), false);
+  //   }
+  //   node_ptr new_node = create_node(value);
+  //   bool has_added = add_child(ptr, new_node);
+  //   // 失敗しない
+  //   assert(has_added);
+  //   return ft::make_pair(iterator(new_node, nil_), true);
+  // }
 
   // 時間があれば対応
   iterator insert(iterator hint, const value_type& value) {
@@ -413,6 +427,15 @@ class rb_tree {
   node_ptr root() const { return header_->left; }
 
   // debug
+  void verify() {
+    print();
+    // assert(height() < 2 * log2(size()));
+    std::cout << "size  :" << size() << std::endl;
+    // std::cout << "height:" << height() << std::endl;
+    std::cout << "log2(size):" << log2(size()) << std::endl;
+    std::cout << "result:" << verify(root()) << std::endl;
+  }
+
   void print() const {
     value_type left_item = most_left_->item;
     value_type right_item = most_right_->item;
@@ -631,10 +654,29 @@ class rb_tree {
     }
   }
 
+  void connect_children_to_new_parent(node_ptr new_parent,
+                                      node_ptr old_parent) {
+    node_ptr left_child = old_parent->left;
+    if (left_child != nil_ && left_child != new_parent) {
+      left_child->parent = new_parent;
+    }
+
+    node_ptr right_child = old_parent->left;
+    if (right_child != nil_ && right_child != new_parent) {
+      right_child->parent = new_parent;
+    }
+  }
+
   // 隣り合うノードの位置を入れ替える
   // swap_node_positionと1つにできるが、後回し
   void swap_node_right_link(node_ptr parent, node_ptr right_child) {
     connect_parent_to_new_child(right_child, parent);
+    // if (parent->left != nil_) {
+    //   parent->left->parent = right_child;
+    // }
+    connect_children_to_new_parent(right_child, parent);
+    connect_children_to_new_parent(parent, right_child);
+
     node_type tmp;
     tmp.parent = parent->parent;
     tmp.left = parent->left;
@@ -650,9 +692,12 @@ class rb_tree {
   }
 
   // 2つのノードの位置を入れ替える
+  // 隣り合うノードで使うとバグる、おそらく
   void swap_node_position(node_ptr node1, node_ptr node2) {
     connect_parent_to_new_child(node1, node2);
     connect_parent_to_new_child(node2, node1);
+    connect_children_to_new_parent(node1, node2);
+    connect_children_to_new_parent(node2, node1);
     std::swap(node1->parent, node2->parent);
     std::swap(node1->left, node2->left);
     std::swap(node1->right, node2->right);
@@ -670,7 +715,6 @@ class rb_tree {
   void remove(node_ptr ptr) {
     if (ptr->left == nil_ || ptr->right == nil_) {
       splice(ptr);
-      // destroy(ptr);
       destroy_node(ptr);
     } else {
       node_ptr target = most_left(ptr->right);
@@ -683,7 +727,6 @@ class rb_tree {
         header_->left = target;
       }
       splice(ptr);
-      // destroy(ptr);
       destroy_node(ptr);
     }
     count_--;
@@ -756,22 +799,88 @@ class rb_tree {
     }
   }
 
+  void swap_colors(node_ptr node1, node_ptr node2) {
+    std::swap(node1->color, node2->color);
+  }
+
  private:
   // 黒の高さを保ったまま、色を変更する
   void push_black(node_ptr node) {
-    node->colour--;
-    node->left->colour++;
-    node->right->colour++;
+    node->color--;
+    node->left->color++;
+    node->right->color++;
   }
 
   // 黒の高さを保ったまま、色を変更する
   void pull_black(node_ptr node) {
-    node->colour++;
-    node->left->colour--;
-    node->right->colour--;
+    node->color++;
+    node->left->color--;
+    node->right->color--;
+  }
+
+  void flip_left(node_ptr node) {
+    swap_colors(node, node->right);
+    rotate_left(node);
+  }
+
+  void flip_right(node_ptr node) {
+    swap_colors(node, node->left);
+    rotate_right(node);
+  }
+
+  void add_fixup(node_ptr node) {
+    while (node->color == red) {
+      if (node == root()) {
+        node->color = black;
+        return;
+      }
+
+      node_ptr parent = node->parent;
+      // 左傾性を維持する
+      if (parent->left->color == black) {
+        flip_left(parent);
+        node = parent;
+        parent = node->parent;
+      }
+      if (parent->color == black) {
+        return;  //赤い辺がない
+      }
+
+      node_ptr g_parent = parent->parent;
+      if (g_parent == header_) {
+        parent->color = black;  // parent == root()
+        return;
+      }
+      if (g_parent->right->color == black) {
+        flip_right(g_parent);
+        // std::cerr << "[\x1b[34mFLIP\x1b[39m]" << std::endl;
+        return;
+      } else {
+        // std::cerr << "[\x1b[34mPUSH\x1b[39m]" << std::endl;
+        push_black(g_parent);
+        node = g_parent;
+      }
+      // std::cerr << "[\x1b[32mPASS\x1b[39m]" << std::endl;
+      // print_node(node);
+      // print();
+    }
   }
 
   // debug
+
+  int verify(node_ptr node) {
+    if (node == nil_) return node->color;
+    assert(node->color == red || node->color == black);
+    if (node->color == red)
+      assert(node->left->color == black && node->right->color == black);
+    assert(node->right->color == black ||
+           node->left->color == red);  // left leaning
+    int dl = verify(node->left);
+    int dr = verify(node->right);
+    if (dl != dr) return dl + node->color;
+    return dl;
+  }
+
   void print_graph(node_ptr node, int depth) const {
     if (node == nil_) {
       return;
@@ -806,6 +915,8 @@ class rb_tree {
     std::cerr << "(" << node->parent << "):parent" << std::endl;
     std::cerr << "(" << node->left << "):left" << std::endl;
     std::cerr << "(" << node->right << "):right" << std::endl;
+    std::cerr << "(" << ((node->color == red) ? "red" : "black") << ")"
+              << std::endl;
     std::cerr << std::endl;
     std::cerr << "[\x1b[32mEND_PRINT\x1b[39m]" << std::endl;
   }

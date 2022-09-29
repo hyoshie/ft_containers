@@ -75,7 +75,8 @@ clean:
 
 .PHONY: fclean
 fclean: clean
-	$(RM) $(NAME_FT) $(NAME_STL) a.out
+	$(RM) $(NAME_FT) $(NAME_STL)
+	$(RM) a.out ft_log stl_log
 
 .PHONY: re
 re: fclean all

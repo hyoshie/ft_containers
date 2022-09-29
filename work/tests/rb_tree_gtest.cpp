@@ -530,3 +530,79 @@ TEST_F(TreeTestF, RotateRightRootTest) {
   tree.print();
   ASSERT_TRUE(tree == copy);
 }
+
+TEST_F(TreeTestF, NilTest) {
+  ASSERT_NE(node_nil->color, ft::red);
+  ASSERT_EQ(node_nil->color, ft::black);
+}
+
+TEST_F(TreeTestF, SwapColorsTest) {
+  ASSERT_EQ(node_1st_m5f->color, ft::red);
+  ASSERT_EQ(node_nil->color, ft::black);
+  tree.swap_colors(node_1st_m5f, node_nil);
+  ASSERT_EQ(node_1st_m5f->color, ft::black);
+  ASSERT_EQ(node_nil->color, ft::red);
+}
+
+TEST(RBTreeTest, OnenodeTest) {
+  test_tree rb_tree;
+  rb_tree.insert(test_pair(1, 'a'));
+  rb_tree.verify();
+}
+
+TEST(RBTreeTest, TwoNodeTest) {
+  test_tree rb_tree;
+  rb_tree.insert(test_pair(1, 'a'));
+  rb_tree.insert(test_pair(15, 'b'));
+  rb_tree.verify();
+}
+
+TEST(RBTreeTest, FourNodeTest) {
+  test_tree rb_tree;
+  rb_tree.insert(test_pair(1, 'a'));
+  rb_tree.insert(test_pair(15, 'b'));
+  rb_tree.insert(test_pair(-1, 'c'));
+  rb_tree.insert(test_pair(10, 'd'));
+  rb_tree.verify();
+}
+
+TEST(RBTreeTest, FiveNodeTest) {
+  test_tree rb_tree;
+  rb_tree.insert(test_pair(1, 'a'));
+  rb_tree.insert(test_pair(15, 'b'));
+  rb_tree.insert(test_pair(-1, 'c'));
+  rb_tree.insert(test_pair(10, 'd'));
+  rb_tree.insert(test_pair(0, 'e'));
+  rb_tree.verify();
+}
+
+TEST(RBTreeTest, SixNodeTest) {
+  test_tree rb_tree;
+  rb_tree.insert(test_pair(1, 'a'));
+  rb_tree.insert(test_pair(15, 'b'));
+  rb_tree.insert(test_pair(-1, 'c'));
+  rb_tree.insert(test_pair(10, 'd'));
+  rb_tree.insert(test_pair(0, 'e'));
+  rb_tree.insert(test_pair(-5, 'f'));
+  rb_tree.verify();
+}
+
+TEST(RBTreeTest, SevenNodeTest) {
+  test_tree rb_tree;
+  rb_tree.insert(test_pair(1, 'a'));
+  rb_tree.insert(test_pair(15, 'b'));
+  rb_tree.insert(test_pair(-1, 'c'));
+  rb_tree.insert(test_pair(10, 'd'));
+  rb_tree.insert(test_pair(0, 'e'));
+  rb_tree.insert(test_pair(-5, 'f'));
+  rb_tree.insert(test_pair(20, 'g'));
+  rb_tree.verify();
+}
+
+TEST_F(TreeTestF, VerifyTest) {
+  ;
+  tree.verify();
+}
+
+// rb_tree.insert(test_pair(19, 'h'));
+// rb_tree.insert(test_pair(-3, 'i'));
