@@ -426,12 +426,19 @@ class rb_tree {
   node_ptr root() { return header_->left; }
   node_ptr root() const { return header_->left; }
 
+  int height(node_ptr node) {
+    if (node == nil_) {
+      return -1;
+    }
+    return 1 + std::max(height(node->left), height(node->right));
+  }
+
   // debug
   void verify() {
     print();
-    // assert(height() < 2 * log2(size()));
+    assert(height(root()) <= 2 * log2(size()));
     std::cout << "size  :" << size() << std::endl;
-    // std::cout << "height:" << height() << std::endl;
+    std::cout << "height:" << height(root()) << std::endl;
     std::cout << "log2(size):" << log2(size()) << std::endl;
     std::cout << "result:" << verify(root()) << std::endl;
   }
@@ -671,9 +678,6 @@ class rb_tree {
   // swap_node_positionと1つにできるが、後回し
   void swap_node_right_link(node_ptr parent, node_ptr right_child) {
     connect_parent_to_new_child(right_child, parent);
-    // if (parent->left != nil_) {
-    //   parent->left->parent = right_child;
-    // }
     connect_children_to_new_parent(right_child, parent);
     connect_children_to_new_parent(parent, right_child);
 

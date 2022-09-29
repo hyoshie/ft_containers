@@ -55,7 +55,6 @@ $(OBJDIR_STL)/%.o : $(TESTDIR)/%.cpp
 run: $(NAME_FT) $(NAME_STL)
 	./grademe.sh $(NAME_FT) $(NAME_STL)
 
-
 .PHONY: ft
 ft: $(NAME_FT)
 	./$(NAME_FT)

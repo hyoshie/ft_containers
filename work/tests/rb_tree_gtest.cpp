@@ -600,9 +600,44 @@ TEST(RBTreeTest, SevenNodeTest) {
 }
 
 TEST_F(TreeTestF, VerifyTest) {
-  ;
   tree.verify();
+  ;
 }
 
-// rb_tree.insert(test_pair(19, 'h'));
-// rb_tree.insert(test_pair(-3, 'i'));
+TEST_F(TreeTestF, HeightTest) {
+  ASSERT_LE(tree.height(tree.root()), 2 * log2(tree.size()));
+  ;
+}
+
+#ifndef COUNT
+#define COUNT 1000
+#endif
+
+class RBTreeTestF : public ::testing::Test {
+  typedef std::vector< test_pair > test_vec;
+
+ protected:
+  virtual void SetUp() {
+    for (int i = 0; i < COUNT; i++) {
+      src_vec.push_back(ft::make_pair(i, ('a' + i) % 90 + 33));
+      std::random_shuffle(src_vec.begin(), src_vec.end());
+    }
+    for (test_vec::iterator it = src_vec.begin(); it != src_vec.end(); it++) {
+      tree.insert(*it);
+    }
+  }
+  virtual void TearDown() {}
+
+  test_vec src_vec;
+  test_tree tree;
+};
+
+TEST_F(RBTreeTestF, SetUpTest) {
+  ASSERT_EQ(src_vec.size(), COUNT);
+  ASSERT_EQ(tree.size(), COUNT);
+}
+
+TEST_F(RBTreeTestF, VerifyTest) {
+  tree.verify();
+  ;
+}
