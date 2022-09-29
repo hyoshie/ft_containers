@@ -77,8 +77,8 @@ TEST(TreeTest, ConstructTest) {
 TEST(TreeTest, HeaderEmptyTest) {
   test_tree empty;
 
-  ASSERT_EQ(empty.header()->left, nullptr);
-  ASSERT_EQ(empty.header()->right, nullptr);
+  ASSERT_EQ(empty.header()->left, empty.nil());
+  ASSERT_EQ(empty.header()->right, empty.nil());
 }
 
 TEST_F(TreeTestF, FindEqualTest) {
@@ -89,7 +89,7 @@ TEST_F(TreeTestF, FindEqualTest) {
   ASSERT_EQ(node_4th_0e->item.second, 'e');
   ASSERT_EQ(node_5th_1a->item.second, 'a');
   ASSERT_EQ(node_6th_10d->item.second, 'd');
-  ASSERT_EQ(node_null, nullptr);
+  ASSERT_EQ(node_null, node_nil);
 }
 
 TEST_F(TreeTestF, NextTest) {

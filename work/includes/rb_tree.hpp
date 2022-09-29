@@ -28,8 +28,8 @@ struct rb_tree_node {
   char color;
 
   rb_tree_node() : parent(NULL), left(NULL), right(NULL), color(red) {}
-  rb_tree_node(const T& given)
-      : parent(NULL), left(NULL), right(NULL), item(given), color(red) {}
+  rb_tree_node(const T& given, node_ptr nil = NULL)
+      : parent(nil), left(nil), right(nil), item(given), color(red) {}
 };
 
 template < class Node >
@@ -50,7 +50,7 @@ static Node* next(Node* node, Node* nil) {
       next = next->parent;
     }
     // dummy->nextのsegv対策
-    if (next) {
+    if (next != nil) {
       node = next;
     }
   }
@@ -243,20 +243,17 @@ class rb_tree {
   typedef ft::reverse_iterator< const_iterator > const_reverse_iterator;
 
   // メンバ関数
-  rb_tree()
-      : nil_(NULL), comp_func_(key_compare()), node_alloc_(node_allocator()) {
+  rb_tree() : comp_func_(key_compare()), node_alloc_(node_allocator()) {
     initialize();
   }
 
   explicit rb_tree(const Compare& comp, const Allocator& alloc)
-      : nil_(NULL), comp_func_(comp), node_alloc_(node_allocator(alloc)) {
+      : comp_func_(comp), node_alloc_(node_allocator(alloc)) {
     initialize();
   }
 
   rb_tree(const rb_tree& other)
-      : nil_(NULL),
-        comp_func_(other.comp_func_),
-        node_alloc_(other.node_alloc_) {
+      : comp_func_(other.comp_func_), node_alloc_(other.node_alloc_) {
     initialize();
     insert(other.begin(), other.end());
   }
@@ -444,10 +441,13 @@ class rb_tree {
  private:
   // メンバ関数
   void initialize() {
+    nil_ = create_node(value_type());
+    // 最初のcreate_nodeで初期化に使用するnil_は今確保した値が入っていない
+    nil_->parent = nil_;
+    nil_->left = nil_;
+    nil_->right = nil_;
+    nil_->color = black;
     header_ = create_node(value_type());
-    header_->parent = nil_;
-    header_->left = nil_;
-    header_->right = nil_;
     most_left_ = header_;
     most_right_ = header_;
     count_ = 0;
@@ -499,15 +499,15 @@ class rb_tree {
 
   void construct(node_ptr ptr) { node_alloc_.construct(ptr, node_type()); }
 
-  void construct(node_ptr ptr, const_reference value) {
-    node_alloc_.construct(ptr, value);
+  void construct(node_ptr ptr, node_ptr nil, const_reference value) {
+    node_alloc_.construct(ptr, node_type(value, nil));
   }
 
   void destroy(node_ptr ptr) { node_alloc_.destroy(ptr); }
 
   node_ptr create_node(const_reference value) {
     node_ptr new_node = allocate(1);
-    construct(new_node, value);
+    construct(new_node, nil_, value);
     return new_node;
   }
 
