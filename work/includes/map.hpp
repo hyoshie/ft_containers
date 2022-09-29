@@ -3,7 +3,7 @@
 
 #include <functional>
 
-#include "bs_tree.hpp"
+#include "rb_tree.hpp"
 
 namespace ft {
 template < class Key, class T, class Compare = std::less< Key >,
@@ -22,7 +22,7 @@ class map {
   typedef typename Allocator::const_reference const_reference;
 
  private:
-  typedef bs_tree< key_type, value_type, key_compare, allocator_type > rep_type;
+  typedef rb_tree< key_type, value_type, key_compare, allocator_type > rep_type;
 
  public:
   typedef typename rep_type::iterator iterator;
