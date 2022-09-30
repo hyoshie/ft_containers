@@ -637,6 +637,13 @@ TEST_F(RBTreeTestF, SetUpTest) {
   ASSERT_EQ(tree.size(), COUNT);
 }
 
+TEST_F(RBTreeTestF, EraseManyTest) {
+  ASSERT_EQ(src_vec.size(), COUNT);
+  ASSERT_EQ(tree.size(), COUNT);
+  tree.erase(tree.begin(), tree.end());
+  ASSERT_EQ(tree.size(), 0);
+}
+
 TEST_F(RBTreeTestF, VerifyTest) {
   tree.verify();
   ;

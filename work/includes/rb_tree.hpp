@@ -685,14 +685,17 @@ class rb_tree {
     tmp.parent = parent->parent;
     tmp.left = parent->left;
     tmp.right = parent->right;
+    tmp.color = parent->color;
 
     parent->parent = right_child;
     parent->left = right_child->left;
     parent->right = right_child->right;
+    parent->color = right_child->color;
 
     right_child->parent = tmp.parent;
     right_child->left = tmp.left;
     right_child->right = parent;
+    right_child->color = tmp.color;
   }
 
   // 2つのノードの位置を入れ替える
@@ -705,6 +708,7 @@ class rb_tree {
     std::swap(node1->parent, node2->parent);
     std::swap(node1->left, node2->left);
     std::swap(node1->right, node2->right);
+    std::swap(node1->color, node2->color);
   }
 
   bool remove(const key_type& search_key) {
@@ -716,37 +720,63 @@ class rb_tree {
     return false;
   }
 
-  void remove(node_ptr ptr) {
-    if (ptr->left == nil_ || ptr->right == nil_) {
-      splice(ptr);
-      destroy_node(ptr);
+  // next_target色の変更を始めるノード
+  void remove(node_ptr to_delete) {
+    node_ptr next_target = to_delete->right;
+    if (next_target == nil_) {
+      next_target = to_delete->left;
     } else {
-      node_ptr target = most_left(ptr->right);
-      if (target == ptr->right) {
-        swap_node_right_link(ptr, target);
+      next_target = most_left(next_target);
+      if (next_target == to_delete->right) {
+        swap_node_right_link(to_delete, next_target);
       } else {
-        swap_node_position(ptr, target);
+        swap_node_position(to_delete, next_target);
       }
-      if (ptr == root()) {
-        header_->left = target;
-      }
-      splice(ptr);
-      destroy_node(ptr);
+      next_target = next_target->right;
     }
+    if (to_delete == root()) {
+      header_->left = next_target;
+    }
+    splice(to_delete);
+    next_target->color += to_delete->color;
+    next_target->parent = to_delete->parent;
+    destroy_node(to_delete);
     count_--;
     update_edge();
   }
 
-  void splice(node_ptr ptr) {
-    node_ptr child = (ptr->left != nil_) ? ptr->left : ptr->right;
+  // void remove(node_ptr to_delete) {
+  //   if (to_delete->left == nil_ || to_delete->right == nil_) {
+  //     splice(to_delete);
+  //     destroy_node(to_delete);
+  //   } else {
+  //     node_ptr target = most_left(to_delete->right);
+  //     if (target == to_delete->right) {
+  //       swap_node_right_link(to_delete, target);
+  //     } else {
+  //       swap_node_position(to_delete, target);
+  //     }
+  //     if (to_delete == root()) {
+  //       header_->left = target;
+  //     }
+  //     splice(to_delete);
+  //     destroy_node(to_delete);
+  //   }
+  //   count_--;
+  //   update_edge();
+  // }
+
+  void splice(node_ptr to_delete) {
+    node_ptr child =
+        (to_delete->left != nil_) ? to_delete->left : to_delete->right;
     node_ptr new_parent = nil_;
 
-    if (ptr == root()) {
+    if (to_delete == root()) {
       new_parent = header_;
       connect_root_to_header(child);
     } else {
-      new_parent = ptr->parent;
-      connect_parent_to_new_child(child, ptr);
+      new_parent = to_delete->parent;
+      connect_parent_to_new_child(child, to_delete);
     }
     if (child != nil_) {
       child->parent = new_parent;
