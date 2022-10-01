@@ -17,6 +17,7 @@ namespace ft {
 
 static const int red = 0;
 static const int black = 1;
+static const int doubleblack = 2;
 
 template < typename T >
 struct rb_tree_node {
@@ -435,8 +436,11 @@ class rb_tree {
 
   // debug
   void verify() {
-    print();
-    assert(height(root()) <= 2 * log2(size()));
+    // print();
+    // 0の対数が-infになってた
+    if (size() != 0) {
+      assert(height(root()) <= 2 * log2(size()));
+    }
     std::cout << "size  :" << size() << std::endl;
     std::cout << "height:" << height(root()) << std::endl;
     std::cout << "log2(size):" << log2(size()) << std::endl;
@@ -668,15 +672,15 @@ class rb_tree {
       left_child->parent = new_parent;
     }
 
-    node_ptr right_child = old_parent->left;
+    node_ptr right_child = old_parent->right;
     if (right_child != nil_ && right_child != new_parent) {
       right_child->parent = new_parent;
     }
   }
 
   // 隣り合うノードの位置を入れ替える
-  // swap_node_positionと1つにできるが、後回し
-  void swap_node_right_link(node_ptr parent, node_ptr right_child) {
+  // swap_nodes_posと1つにできるが、後回し
+  void swap_nodes_right_link(node_ptr parent, node_ptr right_child) {
     connect_parent_to_new_child(right_child, parent);
     connect_children_to_new_parent(right_child, parent);
     connect_children_to_new_parent(parent, right_child);
@@ -685,22 +689,19 @@ class rb_tree {
     tmp.parent = parent->parent;
     tmp.left = parent->left;
     tmp.right = parent->right;
-    tmp.color = parent->color;
 
     parent->parent = right_child;
     parent->left = right_child->left;
     parent->right = right_child->right;
-    parent->color = right_child->color;
 
     right_child->parent = tmp.parent;
     right_child->left = tmp.left;
     right_child->right = parent;
-    right_child->color = tmp.color;
   }
 
   // 2つのノードの位置を入れ替える
   // 隣り合うノードで使うとバグる、おそらく
-  void swap_node_position(node_ptr node1, node_ptr node2) {
+  void swap_nodes_pos(node_ptr node1, node_ptr node2) {
     connect_parent_to_new_child(node1, node2);
     connect_parent_to_new_child(node2, node1);
     connect_children_to_new_parent(node1, node2);
@@ -708,7 +709,21 @@ class rb_tree {
     std::swap(node1->parent, node2->parent);
     std::swap(node1->left, node2->left);
     std::swap(node1->right, node2->right);
-    std::swap(node1->color, node2->color);
+  }
+
+  void swap_nodes_in_subtree(node_ptr root, node_ptr descendant) {
+    if (root->right == descendant) {
+      swap_nodes_right_link(root, descendant);
+    } else if (root->left == descendant) {
+      assert(1);
+      // 今回は使わない予定。テストが面倒なのであとで
+      // swap_nodes_left_link(root, descendant);
+    } else {
+      swap_nodes_pos(root, descendant);
+    }
+    std::cout << std::boolalpha;
+    // std::cout << "to_delete:" << (root->color == red) << std::endl
+    //           << "to_fix_color:" << (descendant->color == red) << std::endl;
   }
 
   bool remove(const key_type& search_key) {
@@ -720,29 +735,122 @@ class rb_tree {
     return false;
   }
 
-  // next_target色の変更を始めるノード
+  void print_3node(node_ptr to_delete, node_ptr to_swap,
+                   node_ptr to_fix_color) {
+    std::cerr << "[\x1b[33mTO_DELETE\x1b[39m]" << std::endl;
+    print_node(to_delete);
+    std::cerr << "[\x1b[33mTO_SWAP\x1b[39m]" << std::endl;
+    print_node(to_swap);
+    std::cerr << "[\x1b[33mTO_FIX_COLOR\x1b[39m]" << std::endl;
+    print_node(to_fix_color);
+  }
+
+  // to_swap色の変更を始めるノード
   void remove(node_ptr to_delete) {
-    node_ptr next_target = to_delete->right;
-    if (next_target == nil_) {
-      next_target = to_delete->left;
+    node_ptr to_fix_color;
+    node_ptr to_swap = to_delete->right;
+    if (to_swap == nil_) {
+      to_fix_color = to_delete->left;
     } else {
-      next_target = most_left(next_target);
-      if (next_target == to_delete->right) {
-        swap_node_right_link(to_delete, next_target);
-      } else {
-        swap_node_position(to_delete, next_target);
-      }
-      next_target = next_target->right;
+      to_swap = most_left(to_swap);
+      swap_nodes_in_subtree(to_delete, to_swap);
+      // print_node(to_swap);
+      // colorは交換前の状態を維持する
+      std::swap(to_delete->color, to_swap->color);
+      to_fix_color = to_delete->right;
+      // print_node(to_swap);
     }
-    if (to_delete == root()) {
-      header_->left = next_target;
-    }
+    // print_3node(to_delete, to_swap, to_fix_color);
+    // std::cout << (to_swap->parent == header_) << std::endl;
+    // print_node(to_swap->right);
+    // print_node(to_swap->right->parent);
     splice(to_delete);
-    next_target->color += to_delete->color;
-    next_target->parent = to_delete->parent;
+    // std::cout << "!!!!!!!!!!!!!!:" << (to_swap->color == black) << std::endl;
+    // to_fix_color->color += to_swap->color;
+    to_fix_color->color += to_delete->color;
+    to_fix_color->parent = to_delete->parent;
     destroy_node(to_delete);
+    remove_fixup(to_fix_color);
     count_--;
     update_edge();
+  }
+
+  // ダブルブラックのノードを木から追い出す
+  void remove_fixup(node_ptr node) {
+    while (node->color > black) {
+      if (node == root()) {
+        node->color = black;
+      } else if (is_red(node->parent->left)) {
+        node = remove_fixup_case1(node);
+      } else if (node == node->parent->left) {
+        node = remove_fixup_case2(node);
+      } else {
+        node = remove_fixup_case3(node);
+      }
+    }
+    if (node != root()) {
+      node_ptr parent = node->parent;
+      if (!is_left_leaning(parent)) {
+        flip_left(parent);
+      }
+    }
+  }
+
+  // node->parentの左の子がred、右の子がdoubleblackのケース
+  node_ptr remove_fixup_case1(node_ptr node) {
+    flip_right(node->parent);
+    return node;
+  }
+
+  // node->parentの左の子がdoubleblack、右の子がblackのケース
+  node_ptr remove_fixup_case2(node_ptr node) {
+    // print_node(node->parent->parent);
+    node_ptr node1 = node->parent;
+    node_ptr node2 = node1->right;
+
+    pull_black(node1);
+    flip_left(node1);
+
+    node_ptr node3 = node1->right;
+
+    if (is_black(node3)) {
+      return node2;
+    }
+
+    rotate_left(node1);
+    flip_right(node2);
+    push_black(node3);
+    if (is_red(node2->right)) {
+      flip_left(node2);
+    }
+    return node3;
+  }
+
+  // node->parentの左の子がblack、右の子がdoubleblackのケース
+  // case2と対称的
+  node_ptr remove_fixup_case3(node_ptr node) {
+    node_ptr node1 = node->parent;
+    node_ptr node2 = node1->left;
+
+    pull_black(node1);
+    flip_right(node1);
+
+    node_ptr node3 = node1->left;
+
+    if (is_black(node3)) {
+      if (is_black(node2->left)) {
+        flip_left(node2);
+        return node1;
+      } else {
+        push_black(node2);
+        return node2;
+      }
+    } else {
+      rotate_right(node1);
+      flip_left(node2);
+      push_black(node3);
+      return node3;
+    }
   }
 
   // void remove(node_ptr to_delete) {
@@ -752,9 +860,9 @@ class rb_tree {
   //   } else {
   //     node_ptr target = most_left(to_delete->right);
   //     if (target == to_delete->right) {
-  //       swap_node_right_link(to_delete, target);
+  //       swap_nodes_right_link(to_delete, target);
   //     } else {
-  //       swap_node_position(to_delete, target);
+  //       swap_nodes_pos(to_delete, target);
   //     }
   //     if (to_delete == root()) {
   //       header_->left = target;
@@ -784,6 +892,18 @@ class rb_tree {
   }
 
   // 赤黒木用の関数
+ private:
+  bool is_red(node_ptr node) const { return (node->color == red); }
+
+  bool is_black(node_ptr node) const { return (node->color == black); }
+
+  bool is_doubleblack(node_ptr node) const {
+    return (node->color == doubleblack);
+  }
+
+  bool is_left_leaning(node_ptr node) const {
+    return !(is_black(node->left) && is_red(node->right));
+  }
 
   // 回転
  public:  //テストのため
@@ -863,7 +983,7 @@ class rb_tree {
   }
 
   void add_fixup(node_ptr node) {
-    while (node->color == red) {
+    while (is_red(node)) {
       if (node == root()) {
         node->color = black;
         return;
@@ -871,12 +991,12 @@ class rb_tree {
 
       node_ptr parent = node->parent;
       // 左傾性を維持する
-      if (parent->left->color == black) {
+      if (is_black(parent->left)) {
         flip_left(parent);
         node = parent;
         parent = node->parent;
       }
-      if (parent->color == black) {
+      if (is_black(parent)) {
         return;  //赤い辺がない
       }
 
@@ -886,7 +1006,7 @@ class rb_tree {
         parent->color = black;  // parent == root()
         return;
       }
-      if (g_parent->right->color == black) {
+      if (is_black(g_parent->right)) {
         flip_right(g_parent);
         return;
       } else {
@@ -897,19 +1017,15 @@ class rb_tree {
   }
 
   // debug
-  void validate_color(node_ptr node) {
-    assert(node->color == red || node->color == black);
-  }
+  void validate_color(node_ptr node) { assert(is_red(node) || is_black(node)); }
 
   void validate_red_edge(node_ptr node) {
-    if (node->color == red)
-      assert(node->left->color == black && node->right->color == black);
+    if (is_red(node)) {
+      assert(is_black(node->left) && is_black(node->right));
+    }
   }
 
-  void validate_left_leaning(node_ptr node) {
-    assert(node->right->color == black ||
-           node->left->color == red);  // left leaning
-  }
+  void validate_left_leaning(node_ptr node) { assert(is_left_leaning(node)); }
 
   int verify(node_ptr node) {
     if (node == nil_) {
@@ -936,8 +1052,22 @@ class rb_tree {
     for (int i = 0; i < depth * 2; i++) {
       std::cerr << " ";
     }
-    std::cerr << "+(" << ((node->color == red) ? "\x1b[31m" : "")
-              << node->item.first << ", " << node->item.second << "\x1b[39m"
+    std::string color_prefix;
+    if (is_red(node)) {
+      color_prefix = "\x1b[31m";
+    } else if (is_black(node)) {
+      color_prefix = "";
+    } else if (is_doubleblack(node)) {
+      color_prefix =
+          "\x1b[34m"
+          "dblack";
+    } else {
+      color_prefix =
+          "\x1b[35m"
+          "???";
+    }
+    std::cerr << "+(" << color_prefix << node->item.first << ", "
+              << node->item.second << "\x1b[39m"
               << ")" << std::endl;
 
     print_graph(node->right, depth + 1);
@@ -955,16 +1085,24 @@ class rb_tree {
   }
 
   void print_node(node_ptr node) const {
-    std::cerr << "[\x1b[32mPOINTER\x1b[39m]" << std::endl;
+    std::cerr << "---------------------------------------------" << std::endl;
     std::cerr << "(" << node << "):" << node->item.first << ", "
               << node->item.second << std::endl;
     std::cerr << "(" << node->parent << "):parent" << std::endl;
     std::cerr << "(" << node->left << "):left" << std::endl;
     std::cerr << "(" << node->right << "):right" << std::endl;
-    std::cerr << "(" << ((node->color == red) ? "red" : "black") << ")"
-              << std::endl;
-    std::cerr << std::endl;
-    std::cerr << "[\x1b[32mEND_PRINT\x1b[39m]" << std::endl;
+    std::string color;
+    if (is_red(node)) {
+      color = "red";
+    } else if (is_black(node)) {
+      color = "black";
+    } else if (is_doubleblack(node)) {
+      color = "double black";
+    } else {
+      color = "unknown";
+    }
+    std::cerr << "(" << color << ")" << std::endl;
+    std::cerr << "---------------------------------------------" << std::endl;
   }
 
   // メンバ変数
