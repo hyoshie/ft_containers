@@ -319,34 +319,20 @@ class rb_tree {
   void clear() {
     destroy_tree(root());
     connect_root_to_header(nil_);
-    update_edge();
+    update_ends();
     count_ = 0;
   }
 
   ft::pair< iterator, bool > insert(const value_type& value) {
-    node_ptr ptr = find_last(key(value));
-    if (ptr != nil_ && key(ptr) == key(value)) {
-      return ft::make_pair(iterator(ptr, nil_), false);
+    node_ptr parent = find_last(key(value));
+    if (parent != nil_ && key(parent) == key(value)) {
+      return ft::make_pair(iterator(parent, nil_), false);
     }
     node_ptr new_node = create_node(value);
-    bool has_added = add_child(ptr, new_node);
-    // 失敗しない
-    assert(has_added);
+    add_child(parent, new_node);
     add_fixup(new_node);
     return ft::make_pair(iterator(new_node, nil_), true);
   }
-
-  // ft::pair< iterator, bool > insert(const value_type& value) {
-  //   node_ptr ptr = find_last(key(value));
-  //   if (ptr != nil_ && key(ptr) == key(value)) {
-  //     return ft::make_pair(iterator(ptr, nil_), false);
-  //   }
-  //   node_ptr new_node = create_node(value);
-  //   bool has_added = add_child(ptr, new_node);
-  //   // 失敗しない
-  //   assert(has_added);
-  //   return ft::make_pair(iterator(new_node, nil_), true);
-  // }
 
   // 時間があれば対応
   iterator insert(iterator hint, const value_type& value) {
@@ -521,7 +507,7 @@ class rb_tree {
     }
   }
 
-  void update_edge() {
+  void update_ends() {
     most_left_ = most_left(root());
     most_right_ = most_right(root());
   }
@@ -529,15 +515,17 @@ class rb_tree {
   // メモリ関連
   node_ptr allocate(size_type n) { return node_alloc_.allocate(n); }
 
-  void deallocate(node_ptr ptr, size_type n) { node_alloc_.deallocate(ptr, n); }
-
-  void construct(node_ptr ptr) { node_alloc_.construct(ptr, node_type()); }
-
-  void construct(node_ptr ptr, node_ptr nil, const_reference value) {
-    node_alloc_.construct(ptr, node_type(value, nil));
+  void deallocate(node_ptr node, size_type n) {
+    node_alloc_.deallocate(node, n);
   }
 
-  void destroy(node_ptr ptr) { node_alloc_.destroy(ptr); }
+  void construct(node_ptr node) { node_alloc_.construct(node, node_type()); }
+
+  void construct(node_ptr node, node_ptr nil, const_reference value) {
+    node_alloc_.construct(node, node_type(value, nil));
+  }
+
+  void destroy(node_ptr node) { node_alloc_.destroy(node); }
 
   node_ptr create_node(const_reference value) {
     node_ptr new_node = allocate(1);
@@ -545,9 +533,9 @@ class rb_tree {
     return new_node;
   }
 
-  void destroy_node(node_ptr ptr) {
-    destroy(ptr);
-    deallocate(ptr, 1);
+  void destroy_node(node_ptr node) {
+    destroy(node);
+    deallocate(node, 1);
   }
 
   void destroy_tree(node_ptr root) {
@@ -633,23 +621,23 @@ class rb_tree {
     return prev;
   }
 
-  bool add_child(node_ptr ptr, node_ptr to_insert) {
-    if (ptr == nil_) {
+  bool add_child(node_ptr parent, node_ptr to_insert) {
+    if (parent == nil_) {
       connect_root_to_header(to_insert);
     } else {
-      if (key(to_insert) == key(ptr)) {
+      if (key(to_insert) == key(parent)) {
         return false;  // to_insert.item はすでに木に含まれている
       }
-      bool comp = comp_func_(key(to_insert), key(ptr));
+      bool comp = comp_func_(key(to_insert), key(parent));
       if (comp) {
-        ptr->left = to_insert;
+        parent->left = to_insert;
       } else {
-        ptr->right = to_insert;
+        parent->right = to_insert;
       }
-      to_insert->parent = ptr;
+      to_insert->parent = parent;
     }
     count_++;
-    update_edge();
+    update_ends();
     return true;
   }
 
@@ -721,15 +709,12 @@ class rb_tree {
     } else {
       swap_nodes_pos(root, descendant);
     }
-    std::cout << std::boolalpha;
-    // std::cout << "to_delete:" << (root->color == red) << std::endl
-    //           << "to_fix_color:" << (descendant->color == red) << std::endl;
   }
 
   bool remove(const key_type& search_key) {
-    node_ptr ptr = find_last(search_key);
-    if (ptr != nil_ && search_key == key(ptr)) {
-      remove(ptr);
+    node_ptr to_remove = find_last(search_key);
+    if (to_remove != nil_ && search_key == key(to_remove)) {
+      remove(to_remove);
       return true;
     }
     return false;
@@ -754,30 +739,22 @@ class rb_tree {
     } else {
       to_swap = most_left(to_swap);
       swap_nodes_in_subtree(to_delete, to_swap);
-      // print_node(to_swap);
       // colorは交換前の状態を維持する
       std::swap(to_delete->color, to_swap->color);
       to_fix_color = to_delete->right;
-      // print_node(to_swap);
     }
-    // print_3node(to_delete, to_swap, to_fix_color);
-    // std::cout << (to_swap->parent == header_) << std::endl;
-    // print_node(to_swap->right);
-    // print_node(to_swap->right->parent);
     splice(to_delete);
-    // std::cout << "!!!!!!!!!!!!!!:" << (to_swap->color == black) << std::endl;
-    // to_fix_color->color += to_swap->color;
     to_fix_color->color += to_delete->color;
     to_fix_color->parent = to_delete->parent;
-    destroy_node(to_delete);
     remove_fixup(to_fix_color);
+    destroy_node(to_delete);
     count_--;
-    update_edge();
+    update_ends();
   }
 
   // ダブルブラックのノードを木から追い出す
   void remove_fixup(node_ptr node) {
-    while (node->color > black) {
+    while (is_doubleblack(node)) {
       if (node == root()) {
         node->color = black;
       } else if (is_red(node->parent->left)) {
@@ -852,27 +829,6 @@ class rb_tree {
       return node3;
     }
   }
-
-  // void remove(node_ptr to_delete) {
-  //   if (to_delete->left == nil_ || to_delete->right == nil_) {
-  //     splice(to_delete);
-  //     destroy_node(to_delete);
-  //   } else {
-  //     node_ptr target = most_left(to_delete->right);
-  //     if (target == to_delete->right) {
-  //       swap_nodes_right_link(to_delete, target);
-  //     } else {
-  //       swap_nodes_pos(to_delete, target);
-  //     }
-  //     if (to_delete == root()) {
-  //       header_->left = target;
-  //     }
-  //     splice(to_delete);
-  //     destroy_node(to_delete);
-  //   }
-  //   count_--;
-  //   update_edge();
-  // }
 
   void splice(node_ptr to_delete) {
     node_ptr child =
@@ -1029,18 +985,15 @@ class rb_tree {
 
   int verify(node_ptr node) {
     if (node == nil_) {
-      return node->color;  // black = 1が返ってほしい
+      return node->color;
     }
     validate_color(node);
     validate_left_leaning(node);
     validate_red_edge(node);
-    int dl = verify(node->left);   // 基本1
-    int dr = verify(node->right);  // 基本1
-    if (dl != dr) {
-      // 入ってほしくない
-      return dl + node->color;
-    }
-    return dl;
+    int left_black_node_count = verify(node->left);
+    int right_black_node_count = verify(node->right);
+    assert(left_black_node_count == right_black_node_count);
+    return left_black_node_count + node->color;
   }
 
   void print_graph(node_ptr node, int depth) const {
