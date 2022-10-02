@@ -42,9 +42,8 @@ class vector {
                   const allocator_type& alloc = allocator_type())
       : first_(NULL), last_(NULL), reserved_last_(NULL), alloc_(alloc) {
     reserve(size);
-    for (; last_ != reserved_last_; ++last_) {
-      construct(last_, value);
-    }
+    std::uninitialized_fill_n(first_, size, value);
+    last_ += size;
   }
 
   template < typename InputIterator >
@@ -68,13 +67,10 @@ class vector {
   // コピー
   vector(const vector& rhs)
       : first_(NULL), last_(NULL), reserved_last_(NULL), alloc_(rhs.alloc_) {
-    reserve(rhs.size());
-    pointer dest = first_;
-    for (const_iterator src = rhs.begin(), last = rhs.end(); src != last;
-         ++dest, ++src) {
-      construct(dest, *src);
-    }
-    last_ = first_ + rhs.size();
+    size_type count = rhs.size();
+    reserve(count);
+    std::uninitialized_copy(rhs.first_, rhs.last_, first_);
+    last_ = first_ + count;
   }
 
   vector& operator=(const vector& rhs) {
@@ -273,24 +269,17 @@ class vector {
   }
 
   iterator erase(iterator pos) {
-    size_type offset = std::distance(begin(), pos);
-    move_elements_backward(pos, 1);
-    destroy(--last_);
-    return begin() + offset;
+    std::copy(pos.base() + 1, last_, pos.base());
+    pop_back();
+    return pos;
   }
 
   iterator erase(iterator first, iterator last) {
-    size_type offset = std::distance(begin(), first);
-    size_type count = std::distance(first, last);
-
-    if (first == last) {
-      return last;
-    }
-    move_elements_backward(first, count);
-    for (size_type i = 0; i < count; i++) {
-      destroy(--last_);
-    }
-    return begin() + offset;
+    size_type count = std::distance(first.base(), last.base());
+    std::copy(last.base(), last_, first.base());
+    destroy_range(last_ - count, last_);
+    last_ -= count;
+    return first;
   }
 
   void push_back(const T& value) {
@@ -339,6 +328,12 @@ class vector {
   void construct(pointer ptr, const T& value) { alloc_.construct(ptr, value); }
 
   void destroy(pointer ptr) { alloc_.destroy(ptr); }
+
+  void destroy_range(pointer first, pointer last) {
+    for (; first != last; ++first) {
+      destroy(first);
+    }
+  }
 
   void destroy_until(reverse_iterator rend) {
     for (reverse_iterator riter = rbegin(); riter != rend; ++riter, --last_) {
