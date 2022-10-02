@@ -4,7 +4,8 @@
 
 void test_vector() {
   std::deque< int > src1;
-  for (int i = 0; i < 20; i += 2) {
+  // for (int i = 0; i < 20; i += 2) {
+  for (int i = 0; i < VectorBenchmarkTester< int >::kElemCount; i += 2) {
     src1.push_back(i);
   }
   std::random_shuffle(src1.begin(), src1.end());

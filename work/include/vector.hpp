@@ -316,6 +316,7 @@ class vector {
     swap_data(first_, other.first_);
     swap_data(last_, other.last_);
     swap_data(reserved_last_, other.reserved_last_);
+    swap_data(alloc_, other.alloc_);
   }
 
  private:
@@ -428,7 +429,6 @@ bool operator>=(const ft::vector< T, Alloc >& lhs,
                 const ft::vector< T, Alloc >& rhs) {
   return !(lhs < rhs);
 }
-
 }  // namespace ft
 
 namespace std {
@@ -436,7 +436,6 @@ template < class T, class Alloc >
 void swap(ft::vector< T, Alloc >& lhs, ft::vector< T, Alloc >& rhs) {
   lhs.swap(rhs);
 }
-
 }  // namespace std
 
 #endif /* VECTOR_HPP */
