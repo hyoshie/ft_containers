@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "../includes/rb_tree.hpp"
+#include "../../includes/rb_tree.hpp"
 
 typedef ft::pair< int, char > pair_t;
 typedef ft::rb_tree_node< pair_t > node_t;
