@@ -9,6 +9,7 @@
 #endif
 
 #include <deque>
+#include <iomanip>
 #include <iostream>
 
 template < typename T >
@@ -21,19 +22,16 @@ class VectorBenchmarkTester {
   typedef typename test_deq::const_iterator test_deq_citer;
 
   VectorBenchmarkTester(const std::deque< T >& deq) : src_deq_(deq) {
-    std::cout << "Create Original Vector" << std::endl;
     for (test_deq_citer it = src_deq_.begin(); it != src_deq_.end(); it++) {
       original_.push_back(*it);
     }
   }
 
   void run() {
-    // test_default_ctor();
-    // measure(&VectorBenchmarkTester::print);
-    measure("default ctor", &VectorBenchmarkTester::test_default_ctor);
-    measure("value ctor", &VectorBenchmarkTester::test_value_ctor);
-    measure("range ctor", &VectorBenchmarkTester::test_range_ctor);
-    measure("copy ctor", &VectorBenchmarkTester::test_copy_ctor);
+    measure("def_ctor", &VectorBenchmarkTester::test_default_ctor);
+    measure("value_ctor", &VectorBenchmarkTester::test_value_ctor);
+    measure("range_ctor", &VectorBenchmarkTester::test_range_ctor);
+    measure("copy_ctor", &VectorBenchmarkTester::test_copy_ctor);
     measure("at", &VectorBenchmarkTester::test_at);
     measure("op_subscript", &VectorBenchmarkTester::test_op_subscript);
     measure("front", &VectorBenchmarkTester::test_front);
@@ -96,11 +94,6 @@ class VectorBenchmarkTester {
     }
   }
 
-  void print() {
-    std::cerr << "[\x1b[32mPASS\x1b[39m]" << std::endl;
-    ;
-  }
-
   void measure(const std::string& name,
                void (VectorBenchmarkTester::*func)(void)) {
     pout(name);
@@ -109,15 +102,13 @@ class VectorBenchmarkTester {
     (this->*func)();
     end = clock();
     double time = (double)(end - start) / CLOCKS_PER_SEC;
-    std::cout << time << std::endl;
+    std::cout << std::fixed << time << std::endl;
   }
 
  private:
   template < typename U >
   void pout(U s) {
-    static int no;
-    std::cout << std::endl;
-    std::cout << "--- [" << ++no << "]:" << s << " ---" << std::endl;
+    std::cout << std::setw(13) << std::left << s << ": ";
   }
 
   static const int kLoopCount = 100000;
