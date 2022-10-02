@@ -21,8 +21,8 @@ class VectorBenchmarkTester {
   typedef std::deque< T > test_deq;
   typedef typename test_deq::const_iterator test_deq_citer;
 
-  static const int kLoopCount = 10000;
-  static const int kElemCount = 100;
+  static const int kLoopCount = 1000;
+  static const int kElemCount = 50;
 
   VectorBenchmarkTester(const std::deque< T >& deq) : src_deq_(deq) {
     for (test_deq_citer it = src_deq_.begin(); it != src_deq_.end(); it++) {
@@ -35,6 +35,9 @@ class VectorBenchmarkTester {
     measure("value_ctor", &VectorBenchmarkTester::test_value_ctor);
     measure("range_ctor", &VectorBenchmarkTester::test_range_ctor);
     measure("copy_ctor", &VectorBenchmarkTester::test_copy_ctor);
+    measure("op_assign", &VectorBenchmarkTester::test_op_assign);
+    measure("assign_one", &VectorBenchmarkTester::test_assign_one);
+    measure("assign_range", &VectorBenchmarkTester::test_assign_range);
     measure("at", &VectorBenchmarkTester::test_at);
     measure("op_subscript", &VectorBenchmarkTester::test_op_subscript);
     measure("front", &VectorBenchmarkTester::test_front);
@@ -83,6 +86,39 @@ class VectorBenchmarkTester {
   void test_copy_ctor() {
     for (int i = 0; i < kLoopCount; i++) {
       test_vec vec(original_);
+    }
+  }
+
+  void test_op_assign() {
+    typename test_vec::value_type val1 = original_[0];
+    for (int i = 0; i < kLoopCount; i++) {
+      test_vec v(kElemCount / 2, val1);
+      v = original_;
+    }
+  }
+
+  void test_assign_one() {
+    typename test_vec::value_type val1 = original_[0];
+    typename test_vec::value_type val2 = original_[1];
+    for (int i = 0; i < kLoopCount; i++) {
+      test_vec v(kElemCount / 2, val1);
+      v.assign(kElemCount + i, val2);
+    }
+  }
+
+  void test_assign_range() {
+    typename test_vec::value_type val1 = original_[0];
+    test_iter it = original_.begin();
+    test_iter ite = original_.end();
+    for (int i = 0; i < kLoopCount; i++) {
+      test_vec v(kElemCount / 2, val1);
+      v.assign(it, ite);
+    }
+  }
+
+  void test_get_allocator() {
+    for (int i = 0; i < kLoopCount; i++) {
+      original_.get_allocator();
     }
   }
 
