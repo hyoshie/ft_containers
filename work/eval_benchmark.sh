@@ -1,17 +1,18 @@
 #!/bin/bash
 
-FT_LOG=benchmark_ft.txt
-STL_LOG=benchmark_stl.txt
-CONNECT_LOG=benchmark_2.txt
-RESULT_LOG=benchmark_result.txt
+LOGDIR=./log
+FT_LOG=${LOGDIR}/benchmark_ft.txt
+STL_LOG=${LOGDIR}/benchmark_stl.txt
+TMP_LOG=${LOGDIR}/benchmark_tmp.txt
+RESULT_LOG=${LOGDIR}/benchmark_result.txt
 
 # $1 = binary_ft
 # $2 = binary_stl
 make_log() {
 	./$1 > $FT_LOG
 	./$2 > $STL_LOG
-	paste $FT_LOG $STL_LOG  > $CONNECT_LOG
-	awk '{ratio = $3/$6} {printf "%13s [ratio]%5.2f [ft]%6.4f [stl]%6.4f\n", $1, ratio, $3, $6}' $CONNECT_LOG  > $RESULT_LOG
+	paste $FT_LOG $STL_LOG  > $TMP_LOG
+	awk '{ratio = $3/$6} {printf "%13s [ratio]%5.2f [ft]%6.4f [stl]%6.4f\n", $1, ratio, $3, $6}' $TMP_LOG  > $RESULT_LOG
 }
 
 validate_ratio(){

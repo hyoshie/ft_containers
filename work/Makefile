@@ -1,8 +1,8 @@
-NAME_FT = output_ft
-NAME_STL = output_stl
+NAME_FT = $(BINDIR)/output_ft
+NAME_STL = $(BINDIR)/output_stl
 
-BENCHMARK_FT = benchmark_ft
-BENCHMARK_STL = benchmark_stl
+BENCHMARK_FT = $(BINDIR)/benchmark_ft
+BENCHMARK_STL = $(BINDIR)/benchmark_stl
 
 CXX = c++
 
@@ -16,14 +16,17 @@ CXXFLAGS = -Wall \
 		   $(INCS) \
 		   $(NULL)
 
-INCDIR = ./includes \
+BINDIR  = ./bin
+LOGDIR  = ./log
+
+INCDIR = ./include \
 		  $(NULL)
 INCS = $(addprefix -I, $(INCDIR))
 
 OBJDIR_FT	= ./objs_ft
 OBJDIR_STL	= ./objs_stl
 
-OUTPUT_DIR	= ./tests/output
+OUTPUT_DIR	= ./test/output
 OUTPUT_SRCS = $(shell find $(OUTPUT_DIR) -name '*.cpp')
 
 OUTPUT_OBJS_FT = $(addprefix $(OBJDIR_FT)/, $(notdir $(OUTPUT_SRCS:.cpp=.o)))
@@ -32,7 +35,7 @@ OUTPUT_OBJS_STL = $(addprefix $(OBJDIR_STL)/, $(notdir $(OUTPUT_SRCS:.cpp=.o)))
 OUTPUT_DEPS_FT = $(OUTPUT_OBJS_FT:.o=.d)
 OUTPUT_DEPS_STL = $(OUTPUT_OBJS_STL:.o=.d)
 
-BENCHMARK_DIR	= ./tests/benchmark
+BENCHMARK_DIR	= ./test/benchmark
 BENCHMARK_SRCS = $(shell find $(BENCHMARK_DIR) -name '*.cpp')
 
 BENCHMARK_OBJS_FT = $(addprefix $(OBJDIR_FT)/, $(notdir $(BENCHMARK_SRCS:.cpp=.o)))
@@ -47,16 +50,26 @@ all: $(NAME_FT) $(NAME_STL)
 -include $(OUTPUT_DEPS_FT) $(OUTPUT_DEPS_STL) $(BENCHMARK_DEPS_FT) $(BENCHMARK_DEPS_STL)
 
 $(NAME_FT): $(OBJDIR_FT) $(OUTPUT_OBJS_FT)
+	@if [ ! -e `dirname $@` ]; then mkdir -p `dirname $@`; fi
 	$(CXX) $(CXXFLAGS) $(OUTPUT_OBJS_FT) -o $@
 
 $(NAME_STL): $(OBJDIR_STL) $(OUTPUT_OBJS_STL)
+	@if [ ! -e `dirname $@` ]; then mkdir -p `dirname $@`; fi
 	$(CXX) $(CXXFLAGS) -D USE_STL=1 $(OUTPUT_OBJS_STL) -o $@
 
 $(BENCHMARK_FT): $(OBJDIR_FT) $(BENCHMARK_OBJS_FT)
+	@if [ ! -e `dirname $@` ]; then mkdir -p `dirname $@`; fi
 	$(CXX) $(CXXFLAGS) $(BENCHMARK_OBJS_FT) -o $@
 
 $(BENCHMARK_STL): $(OBJDIR_STL) $(BENCHMARK_OBJS_STL)
+	@if [ ! -e `dirname $@` ]; then mkdir -p `dirname $@`; fi
 	$(CXX) $(CXXFLAGS) -D USE_STL=1 $(BENCHMARK_OBJS_STL) -o $@
+
+$(BINDIR):
+	mkdir -p $@
+
+$(LOGDIR):
+	mkdir -p $@
 
 $(OBJDIR_FT):
 	mkdir -p $@
@@ -77,12 +90,12 @@ $(OBJDIR_STL)/%.o : $(BENCHMARK_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -D USE_STL=1 -MMD -MP -c $< -o $@
 
 .PHONY: run
-run: $(NAME_FT) $(NAME_STL)
-	./grademe.sh $(NAME_FT) $(NAME_STL)
+run: $(NAME_FT) $(NAME_STL) $(LOGDIR)
+	./eval_output.sh $(NAME_FT) $(NAME_STL)
 
 .PHONY: bench
-bench: $(BENCHMARK_FT) $(BENCHMARK_STL)
-	./$(BENCHMARK_FT)
+bench: $(BENCHMARK_FT) $(BENCHMARK_STL) $(LOGDIR)
+	./eval_benchmark.sh $(BENCHMARK_FT) $(BENCHMARK_STL)
 
 .PHONY: ft
 ft: $(NAME_FT)
