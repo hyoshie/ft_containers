@@ -7,5 +7,5 @@ int main() {
   srand(time(NULL));
   test_vector();
   test_stack();
-  ;
+  test_map();
 }

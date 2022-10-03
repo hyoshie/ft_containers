@@ -193,19 +193,19 @@ class VectorBenchmarkTester {
   }
 
  private:
-  typename test_vec::size_type random_index(const test_vec& vec) {
-    return rand() % vec.size();
-  }
+  // typename test_vec::size_type random_index(const test_vec& vec) {
+  //   return rand() % vec.size();
+  // }
 
-  typename test_vec::size_type random_mini() {
-    typename test_vec::size_type size = rand() % 50;
-    return (size == 0) ? 1 : size;
-  }
+  // typename test_vec::size_type random_mini() {
+  //   typename test_vec::size_type size = rand() % 50;
+  //   return (size == 0) ? 1 : size;
+  // }
 
-  typename test_vec::size_type random_size(const test_vec& vec) {
-    typename test_vec::size_type size = rand() % vec.size();
-    return (size == 0) ? 1 : size;
-  }
+  // typename test_vec::size_type random_size(const test_vec& vec) {
+  //   typename test_vec::size_type size = rand() % vec.size();
+  //   return (size == 0) ? 1 : size;
+  // }
 
   test_deq src_deq_;
   const test_vec original_;
