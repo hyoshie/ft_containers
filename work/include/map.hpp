@@ -48,10 +48,6 @@ class map {
   };
 
   // メンバ関数
-  // map()
-  //     : tree_(),
-  //       key_comp_(key_compare()),
-  //       value_comp_(value_compare(key_comp_)) {}
 
   explicit map(const Compare& comp = Compare(),
                const Allocator& alloc = Allocator())
@@ -59,7 +55,9 @@ class map {
 
   template < class InputIt >
   map(InputIt first, InputIt last, const Compare& comp = Compare(),
-      const Allocator& alloc = Allocator())
+      const Allocator& alloc = Allocator(),
+      typename ft::enable_if< !ft::is_integral< InputIt >::value,
+                              InputIt >::type* = NULL)
       : tree_(comp, alloc), key_comp_(comp), value_comp_(value_compare(comp)) {
     insert(first, last);
   }
