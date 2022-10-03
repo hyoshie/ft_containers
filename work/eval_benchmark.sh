@@ -21,8 +21,8 @@ validate_ratio(){
 		result=$(echo "$ratio > 20" | bc)
 		if [ $result -eq 1 ]; then
 			echo -e "\e[33mOver 20 times, OH MY GOD:()\e[m"
-			cat $RESULT_LOG
-			exit 1
+			# cat $RESULT_LOG
+			# exit 1
 		fi
 	done  < $RESULT_LOG
 	echo -e "\e[32mPerformance is OK:)\e[m"

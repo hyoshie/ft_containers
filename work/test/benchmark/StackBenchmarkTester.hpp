@@ -2,31 +2,30 @@
 #define STACKBENCHMARKTESTER
 
 #if USE_STL
-#define test_namespace std
+#define NAMESPACE std
 #include <stack>
 #else
-#define test_namespace ft
+#define NAMESPACE ft
 #include "stack.hpp"
 #endif
 
-#include <iomanip>
-#include <iostream>
+#include <string>
+
+#include "Timer.hpp"
+#include "print.hpp"
 
 template < typename T, typename Container >
 class StackBenchmarkTester {
  public:
-  typedef test_namespace::stack< T, Container > test_stack;
+  typedef NAMESPACE::stack< T, Container > test_stack;
   typedef Container test_con;
   typedef typename test_con::const_iterator test_con_citer;
 
-  static const int kLoopCount = 1000;
-  static const int kElemCount = 50;
+  static const int kLoopCount = 100;
+  static const int kElemCount = 1000;
 
-  StackBenchmarkTester(const Container& c) : src_(c) {
-    for (test_con_citer it = src_.begin(); it != src_.end(); it++) {
-      original_.push(*it);
-    }
-  }
+  StackBenchmarkTester(const Container& c)
+      : src_(c), original_(create_stack()), value_(original_.top()) {}
 
   void run() {
     measure("def_ctor", &StackBenchmarkTester::test_default_ctor);
@@ -38,102 +37,84 @@ class StackBenchmarkTester {
     measure("size", &StackBenchmarkTester::test_size);
     measure("push", &StackBenchmarkTester::test_push);
     measure("pop", &StackBenchmarkTester::test_pop);
-    measure("op_compare", &StackBenchmarkTester::test_op_compare);
+    measure("op_eq", &StackBenchmarkTester::test_op_eq);
+    measure("op_ne", &StackBenchmarkTester::test_op_ne);
+    measure("op_lt", &StackBenchmarkTester::test_op_lt);
+    measure("op_le", &StackBenchmarkTester::test_op_le);
+    measure("op_gt", &StackBenchmarkTester::test_op_gt);
+    measure("op_ge", &StackBenchmarkTester::test_op_ge);
   }
 
-  void test_default_ctor() {
+  void test_default_ctor() { test_stack default_stack; }
+
+  void test_arg_ctor() { test_stack default_stack(src_); }
+
+  void test_copy_ctor() { test_stack stack(original_); }
+
+  void test_op_assign(test_stack& stack) { stack = original_; }
+
+  void test_top() { original_.top(); }
+
+  void test_empty() { original_.empty(); }
+
+  void test_size() { original_.size(); }
+
+  void test_push(test_stack& stack) { stack.push(value_); }
+
+  void test_pop(test_stack& stack) { stack.pop(); }
+
+  void test_op_eq(test_stack& stack) { original_ == stack; }
+
+  void test_op_ne(test_stack& stack) { original_ != stack; }
+
+  void test_op_lt(test_stack& stack) { original_ < stack; }
+
+  void test_op_le(test_stack& stack) { original_ <= stack; }
+
+  void test_op_gt(test_stack& stack) { original_ > stack; }
+
+  void test_op_ge(test_stack& stack) { original_ >= stack; }
+
+  void measure(const std::string& func_name,
+               void (StackBenchmarkTester::*func)(void)) {
+    Timer timer;
+    print_func(func_name);
     for (int i = 0; i < kLoopCount; i++) {
-      test_stack default_stack;
+      timer.start();
+      (this->*func)();
+      timer.stop();
     }
+    print_time(timer.elapsed_time());
+    timer.reset();
   }
 
-  void test_arg_ctor() {
-    for (int i = 0; i < kLoopCount; i++) {
-      test_stack default_stack(src_);
-    }
-  }
-
-  void test_copy_ctor() {
+  void measure(const std::string& func_name,
+               void (StackBenchmarkTester::*func)(test_stack&)) {
+    Timer timer;
+    print_func(func_name);
     for (int i = 0; i < kLoopCount; i++) {
       test_stack stack(original_);
+      stack.pop();
+      timer.start();
+      (this->*func)(stack);
+      timer.stop();
     }
-  }
-
-  void test_op_assign() {
-    typename test_stack::value_type val1 = src_[0];
-    test_stack stack1(original_);
-    test_stack stack2;
-    stack2.push(val1);
-    for (int i = 0; i < kLoopCount; i++) {
-      stack1 = stack2;
-      stack2 = original_;
-    }
-  }
-
-  void test_top() {
-    for (int i = 0; i < kLoopCount; i++) {
-      original_.top();
-    }
-  }
-
-  void test_empty() {
-    for (int i = 0; i < kLoopCount; i++) {
-      original_.empty();
-    }
-  }
-
-  void test_size() {
-    for (int i = 0; i < kLoopCount; i++) {
-      original_.size();
-    }
-  }
-
-  void test_push() {
-    typename test_stack::value_type val1 = src_[0];
-    for (int i = 0; i < kLoopCount; i++) {
-      original_.push(val1);
-    }
-  }
-
-  void test_pop() {
-    for (int i = 0; i < kElemCount; i++) {
-      original_.pop();
-    }
-  }
-
-  void test_op_compare() {
-    test_stack stack(original_);
-    typename test_stack::value_type val1 = src_[0];
-    stack.push(val1);
-    for (int i = 0; i < kLoopCount; i++) {
-      original_ == stack;
-      original_ != stack;
-      original_ < stack;
-      original_ <= stack;
-      original_ > stack;
-      original_ >= stack;
-    }
-  }
-
-  void measure(const std::string& name,
-               void (StackBenchmarkTester::*func)(void)) {
-    pout(name);
-    clock_t start, end;
-    start = clock();
-    (this->*func)();
-    end = clock();
-    double time = (double)(end - start) / CLOCKS_PER_SEC;
-    std::cout << std::fixed << time << std::endl;
+    print_time(timer.elapsed_time());
+    timer.reset();
   }
 
  private:
-  template < typename U >
-  void pout(U s) {
-    std::cout << std::setw(13) << std::left << s << ": ";
+  test_stack create_stack() {
+    test_stack stack;
+    for (test_con_citer it = src_.begin(); it != src_.end(); it++) {
+      stack.push(*it);
+    }
+    return stack;
   }
 
-  test_stack original_;
   const Container src_;
+  const test_stack original_;
+  typename test_stack::value_type value_;
 };
 
 #endif /* STACKBENCHMARKTESTER */
