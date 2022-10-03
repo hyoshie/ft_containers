@@ -62,7 +62,7 @@ class VectorBenchmarkTester {
     measure("resize", &VectorBenchmarkTester::test_resize);
     measure("swap", &VectorBenchmarkTester::test_swap);
     measure("std::swap", &VectorBenchmarkTester::test_std_swap);
-    measure("op_compare", &VectorBenchmarkTester::test_swap);
+    measure("op_compare", &VectorBenchmarkTester::test_op_compare);
   }
 
   void test_default_ctor() {
