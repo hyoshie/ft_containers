@@ -2,22 +2,29 @@
 #define STACKTESTER_HPP
 
 #if USE_STL
-#define ft std
+#define NAMESPACE std
 #include <stack>
 #else
+#define NAMESPACE ft
 #include "stack.hpp"
 #endif
 
 #include <iostream>
 
-template < typename T, typename Container >
+template < typename Container >
 class StackTester {
+ private:
+  typedef typename Container::value_type value_t;
+  typedef NAMESPACE::stack< value_t, Container > stack_t;
+
  public:
-  // StackTester(const Container &c, const T &pushed) : c_(c), pushed_(pushed)
-  // {}
-  StackTester(const Container& c) : c_(c) {}
+  static const int kElemCount = 1000;
+
+  StackTester(const Container& c)
+      : c_(c), original_(stack_t(c_)), value_(c_.front()) {}
 
   void run() {
+    std::cout << std::boolalpha;
     test_ctor();
     test_op_equal();
     test_top();
@@ -31,226 +38,118 @@ class StackTester {
 
   void test_ctor() {
     pout("ctor");
-    ft::stack< T, Container > default_s;
-    ft::stack< T, Container > s(c_);
+    stack_t default_s;
+    stack_t stack(c_);
+    stack_t copy(original_);
+
     print_info(default_s);
-    print_info(s);
+    print_info(stack);
+    print_info(copy);
   }
 
   void test_op_equal() {
     pout("op_equal");
-    ft::stack< T, Container > s(c_);
-    ft::stack< T, Container > copy;
+    stack_t copy;
 
-    copy = s;
+    copy = original_;
     print_info(copy);
   }
 
   void test_top() {
     pout("top");
-    ft::stack< T, Container > s(c_);
-    const ft::stack< T, Container > immutable(c_);
 
-    std::cout << s.top() << std::endl;
-    std::cout << immutable.top() << std::endl;
+    std::cout << original_.top() << std::endl;
   }
 
   void test_empty() {
     pout("empty");
-    ft::stack< T, Container > s(c_);
-    const ft::stack< T, Container > immutable(c_);
+    stack_t default_s;
 
-    std::cout << s.empty() << std::endl;
-    std::cout << immutable.empty() << std::endl;
+    std::cout << default_s.empty() << std::endl;
+    std::cout << original_.empty() << std::endl;
   }
 
   void test_size() {
     pout("size");
-    ft::stack< T, Container > s(c_);
-    const ft::stack< T, Container > immutable(c_);
 
-    std::cout << s.size() << std::endl;
-    std::cout << immutable.size() << std::endl;
+    std::cout << original_.size() << std::endl;
   }
 
   void test_push() {
     pout("push");
-    ft::stack< T, Container > s(c_);
-    const ft::stack< T, Container > immutable(c_);
+    stack_t stack(original_);
 
-    s.push(42);
-    print_info(s);
+    stack.push(value_);
+    print_info(stack);
   }
 
   void test_pop() {
     pout("pop");
-    ft::stack< T, Container > s(c_);
+    stack_t stack(original_);
 
-    s.pop();
-    print_info(s);
+    stack.pop();
+    print_info(stack);
   }
-  // void test_op_compare();
+
   void test_op_compare() {
     pout("op_compare");
 
-    ft::stack< T, Container > s(c_);
-    ft::stack< T, Container > copy(c_);
-    ft::stack< T, Container > large_s(c_);
+    stack_t stack(original_);
+    stack_t copy(stack);
+    stack_t large(stack);
+    large.push(value_);
 
-    large_s.push(42);
-    std::cout << (s == copy) << std::endl;
-    std::cout << (s != copy) << std::endl;
-    std::cout << (s < large_s) << std::endl;
-    std::cout << (s <= large_s) << std::endl;
-    std::cout << (s <= copy) << std::endl;
-    std::cout << (large_s >= s) << std::endl;
-    std::cout << (s >= copy) << std::endl;
+    // 同じ
+    std::cout << (stack == copy) << std::endl;
+    std::cout << (stack != copy) << std::endl;
+    std::cout << (stack < copy) << std::endl;
+    std::cout << (stack <= copy) << std::endl;
+    std::cout << (stack > copy) << std::endl;
+    std::cout << (stack >= copy) << std::endl;
+
+    // 違う
+    std::cout << (stack == large) << std::endl;
+    std::cout << (stack != large) << std::endl;
+    std::cout << (stack < large) << std::endl;
+    std::cout << (stack <= large) << std::endl;
+    std::cout << (stack > large) << std::endl;
+    std::cout << (stack >= large) << std::endl;
+
+    // constとの比較
+    std::cout << (stack == original_) << std::endl;
+    std::cout << (stack != original_) << std::endl;
+    std::cout << (stack < original_) << std::endl;
+    std::cout << (stack <= original_) << std::endl;
+    std::cout << (stack > original_) << std::endl;
+    std::cout << (stack >= original_) << std::endl;
   }
 
  private:
   template < typename U >
-  void pout(U s) {
+  void pout(U stack) {
     static int no;
     std::cout << std::endl;
-    std::cout << "--- [" << ++no << "]:" << s << " ---" << std::endl;
+    std::cout << "--- [" << ++no << "]:" << stack << " ---" << std::endl;
   }
 
   template < typename Stack >
-  void print_info(Stack& s) {
-    std::cout << "size:" << s.size() << std::endl;
-    if (s.size()) {
-      std::cout << "top:" << s.top() << std::endl;
+  void print_info(Stack& stack) {
+    std::cout << "size:" << stack.size() << std::endl;
+    if (stack.size()) {
+      std::cout << "top:" << stack.top() << std::endl;
     }
     std::cout << "{ ";
-    if (s.size()) {
-      for (; !s.empty(); s.pop()) {
-        std::cout << s.top() << " ";
+    if (stack.size()) {
+      for (; !stack.empty(); stack.pop()) {
+        std::cout << stack.top() << " ";
       }
     }
     std::cout << "}" << std::endl;
   }
+
   Container c_;
-  // T pushed_;
-};
-
-template < typename T >
-class StackDefaultTester {
- public:
-  // StackTester(const Container &c, const T &pushed) : c_(c), pushed_(pushed)
-  // {}
-  StackDefaultTester() {}
-
-  void run() {
-    test_ctor();
-    test_op_equal();
-    test_top();
-    test_empty();
-    test_size();
-    test_push();
-    test_pop();
-    // 非メンバ関数
-    test_op_compare();
-  }
-
-  void test_ctor() {
-    pout("ctor");
-    ft::stack< T > default_s;
-    print_info(default_s);
-  }
-
-  void test_op_equal() {
-    pout("op_equal");
-    ft::stack< T > s;
-    ft::stack< T > copy;
-
-    copy = s;
-    print_info(copy);
-  }
-
-  void test_top() {
-    pout("top");
-    ft::stack< T > s;
-    const ft::stack< T > immutable;
-    s.push(42);
-    std::cout << s.top() << std::endl;
-  }
-
-  void test_empty() {
-    pout("empty");
-    ft::stack< T > s;
-    const ft::stack< T > immutable;
-
-    std::cout << s.empty() << std::endl;
-    std::cout << immutable.empty() << std::endl;
-  }
-
-  void test_size() {
-    pout("size");
-    ft::stack< T > s;
-    const ft::stack< T > immutable;
-
-    std::cout << s.size() << std::endl;
-    std::cout << immutable.size() << std::endl;
-  }
-
-  void test_push() {
-    pout("push");
-    ft::stack< T > s;
-
-    s.push(42);
-    print_info(s);
-  }
-
-  void test_pop() {
-    pout("pop");
-    ft::stack< T > s;
-
-    s.push(42);
-    s.push(42);
-    s.pop();
-    print_info(s);
-  }
-
-  void test_op_compare() {
-    pout("op_compare");
-
-    ft::stack< T > s;
-    ft::stack< T > copy(s);
-    ft::stack< T > large_s;
-
-    large_s.push(42);
-    std::cout << (s == copy) << std::endl;
-    std::cout << (s != copy) << std::endl;
-    std::cout << (s < large_s) << std::endl;
-    std::cout << (s <= large_s) << std::endl;
-    std::cout << (s <= copy) << std::endl;
-    std::cout << (large_s >= s) << std::endl;
-    std::cout << (s >= copy) << std::endl;
-  }
-
- private:
-  template < typename U >
-  void pout(U s) {
-    static int no;
-    std::cout << std::endl;
-    std::cout << "--- [" << ++no << "]:" << s << " ---" << std::endl;
-  }
-
-  template < typename Stack >
-  void print_info(Stack& s) {
-    std::cout << "size:" << s.size() << std::endl;
-    if (s.size()) {
-      std::cout << "top:" << s.top() << std::endl;
-    }
-    std::cout << "{ ";
-    if (s.size()) {
-      for (; !s.empty(); s.pop()) {
-        std::cout << s.top() << " ";
-      }
-    }
-    std::cout << "}" << std::endl;
-  }
-  // T pushed_;
+  const stack_t original_;
+  value_t value_;
 };
 
 #endif
