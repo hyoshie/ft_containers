@@ -20,8 +20,7 @@ class StackTester {
  public:
   static const int kElemCount = 1000;
 
-  StackTester(const Container& c)
-      : c_(c), original_(stack_t(c_)), value_(c_.front()) {}
+  StackTester(const Container& c) : c_(c), original_(c_), value_(c_.front()) {}
 
   void run() {
     std::cout << std::boolalpha;

@@ -341,6 +341,7 @@ random_access_iterator< Iter > operator+(
     typename random_access_iterator< Iter >::difference_type n,
     const random_access_iterator< Iter >& it) {
   random_access_iterator< Iter >(it.base() + n);
+  return it + n;
 }
 
 template < class Iterator >
