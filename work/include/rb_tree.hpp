@@ -216,7 +216,7 @@ struct rb_tree_const_iterator
   node_ptr nil_;
 };
 
-template < class Key, class Value, class Compare,
+template < class Key, class Value, class KeyOfValue, class Compare,
            class Allocator = std::allocator< Value > >
 class rb_tree {
   // 型
@@ -347,7 +347,7 @@ class rb_tree {
     }
   }
 
-  void erase(iterator pos) { erase(pos->first); }
+  void erase(iterator pos) { erase(key(pos)); }
 
   void erase(iterator first, iterator last) {
     while (first != last) {
@@ -474,10 +474,12 @@ class rb_tree {
   }
 
   // 木やノードの特定の値を取り出す
-  key_type key(node_ptr node) { return node->item.first; }
-  key_type key(const_node_ptr node) const { return node->item.first; }
-  key_type key(const_reference value) { return value.first; }
-  key_type key(const_reference value) const { return value.first; }
+  key_type key(node_ptr node) { return KeyOfValue()(node->item); }
+  key_type key(const_node_ptr node) const { return KeyOfValue()(node->item); }
+  key_type key(const_reference value) { return KeyOfValue()(value); }
+  key_type key(const_reference value) const { return KeyOfValue()(value); }
+  key_type key(iterator pos) { return KeyOfValue()(*pos); }
+  key_type key(const_iterator pos) const { return KeyOfValue()(*pos); }
 
   node_ptr most_left(node_ptr node) {
     if (node == nil_) {

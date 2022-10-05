@@ -26,7 +26,7 @@ void test_int_char() {
 
   std::deque< pair_ic_t > src2;
   for (int i = 1; i < elem_count * 2; i += 2) {
-    src1.push_back(pair_ic_t(i, i % 95 + 32));
+    src2.push_back(pair_ic_t(i, i % 95 + 32));
   }
   std::random_shuffle(src2.begin(), src2.end());
 
@@ -47,7 +47,7 @@ void test_fixed_short() {
 
   std::deque< pair_fs_t > src2;
   for (int i = 1; i < elem_count * 2; i += 2) {
-    src1.push_back(pair_fs_t(Fixed(base * i), i));
+    src2.push_back(pair_fs_t(Fixed(base * i), i));
   }
   std::random_shuffle(src2.begin(), src2.end());
 

@@ -169,6 +169,30 @@ bool lexicographical_compare(InputIt1 first1, InputIt1 last1, InputIt2 first2,
   return (first1 == last1) && (first2 != last2);
 }
 
+// ----------------------------------------------------
+// KeyOfValue
+// ----------------------------------------------------
+
+template < typename T >
+struct identity {
+  T& operator()(T& x) const { return x; }
+
+  const T& operator()(const T& x) const { return x; }
+};
+
+// Partial specialization, avoids confusing errors in e.g. std::set<const T>.
+template < typename T >
+struct identity< const T > : identity< T > {};
+
+template < typename Pair >
+struct select1st {
+  typename Pair::first_type& operator()(Pair& x) const { return x.first; }
+
+  const typename Pair::first_type& operator()(const Pair& x) const {
+    return x.first;
+  }
+};
+
 }  // namespace ft
 
 #endif /* UTIL_HPP */

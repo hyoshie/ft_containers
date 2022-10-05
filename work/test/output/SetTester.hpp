@@ -1,12 +1,12 @@
-#ifndef MAPTESTER_HPP
-#define MAPTESTER_HPP
+#ifndef SETTESTER_HPP
+#define SETTESTER_HPP
 
 #if USE_STL
 #define NAMESPACE std
-#include <map>
+#include <set>
 #else
 #define NAMESPACE ft
-#include "map.hpp"
+#include "set.hpp"
 #endif
 
 #include <deque>
@@ -15,28 +15,27 @@
 
 #include "IteratorTester.hpp"
 
-template < typename Key, typename T, typename Compare = std::less< Key > >
-class MapTester {
+template < typename Key, typename Compare = std::less< Key > >
+class SetTester {
  private:
   // 型
   typedef Key key_t;
-  typedef NAMESPACE::pair< Key, T > pair_t;
-  typedef NAMESPACE::map< Key, T, Compare > map_t;
-  typedef typename map_t::iterator iter_t;
-  typedef typename map_t::const_iterator citer_t;
-  typedef typename std::deque< pair_t > deque_t;
+  typedef NAMESPACE::set< Key, Compare > set_t;
+  typedef typename set_t::iterator iter_t;
+  typedef typename set_t::const_iterator citer_t;
+  typedef typename std::deque< key_t > deque_t;
   typedef typename deque_t::iterator deque_iter;
 
  public:
   static const int kElemCount = 1000;
 
   // メンバ関数
-  MapTester(deque_t deq1, deque_t deq2, pair_t min_pair)
+  SetTester(deque_t deq1, deque_t deq2, key_t min)
       : src_deq1_(deq1),
         src_deq2_(deq2),
         default_size_(deq1.size()),
         original_(src_deq1_.begin(), src_deq1_.end()),
-        min_pair_(min_pair) {}
+        min_(min) {}
 
   void run() {
     std::cout << std::boolalpha;
@@ -45,7 +44,6 @@ class MapTester {
     test_op_assign();
     // print_graphを仕込んでいるので一旦コメントアウト
     // test_get_allocator();
-    test_op_subscript();
     test_begin_and_end();
     test_rbegin_and_rend();
     test_empty();
@@ -64,52 +62,52 @@ class MapTester {
     test_key_comp();
     test_value_comp();
     test_op_compare();
-    // 木を表示
-    print_graph();
+    // // 木を表示
+    // print_graph();
   }
 
   void test_default_ctor() {
     pout("default ctor");
-    map_t def_map;
-    print_basic_info(def_map);
+    set_t def_set;
+    print_basic_info(def_set);
   }
 
   void test_arg_ctor() {
     pout("arg ctor");
     std::greater< Key > comp;
-    std::allocator< pair_t > alloc;
-    NAMESPACE::map< Key, T, std::greater< Key > > arg_map(comp, alloc);
+    std::allocator< key_t > alloc;
+    NAMESPACE::set< Key, std::greater< Key > > arg_set(comp, alloc);
     for (deque_iter it = src_deq1_.begin(); it != src_deq1_.end(); it++) {
-      arg_map.insert(*it);
+      arg_set.insert(*it);
     }
-    print_basic_info(arg_map);
+    print_basic_info(arg_set);
   }
 
   void test_range_ctor() {
     pout("range ctor");
     std::greater< Key > comp;
-    std::allocator< pair_t > alloc;
-    NAMESPACE::map< Key, T, std::greater< Key > > range_map(
+    std::allocator< key_t > alloc;
+    NAMESPACE::set< Key, std::greater< Key > > range_set(
         src_deq2_.begin(), src_deq2_.end(), comp, alloc);
-    print_basic_info(range_map);
+    print_basic_info(range_set);
   }
 
   void test_copy_ctor() {
     pout("copy ctor");
-    map_t copy(original_);
+    set_t copy(original_);
     print_basic_info(copy);
   }
 
   void test_iter() {
     pout("iter");
 
-    IteratorTester< map_t > tester(original_);
+    IteratorTester< set_t > tester(original_);
     tester.run();
   }
 
   void test_get_allocator() {
     pout("get_allocator");
-    std::allocator< T > alloc;
+    std::allocator< key_t > alloc;
     std::cout << std::boolalpha << (alloc == original_.get_allocator())
               << std::endl;
   }
@@ -124,19 +122,10 @@ class MapTester {
 
   void test_op_assign() {
     pout("op_assign");
-    map_t map;
-    map.insert(min_pair_);
-    map = original_;
-    print_basic_info(map);
-  }
-
-  void test_op_subscript() {
-    pout("op_subscript");
-    map_t map(original_);
-    std::cout << map[original_.begin()->first] << std::endl;
-    // 見つからないケース
-    std::cout << map[min_pair_.first] << std::endl;
-    print_basic_info(map);
+    set_t set;
+    set.insert(min_);
+    set = original_;
+    print_basic_info(set);
   }
 
   void test_begin_and_end() {
@@ -155,50 +144,50 @@ class MapTester {
 
   void test_empty() {
     pout("empty");
-    const map_t def_map;
+    const set_t def_set;
 
-    std::cout << def_map.empty() << std::endl;
+    std::cout << def_set.empty() << std::endl;
     std::cout << original_.empty() << std::endl;
   }
 
   void test_size() {
     pout("size");
-    const map_t def_map;
+    const set_t def_set;
 
-    std::cout << def_map.size() << std::endl;
+    std::cout << def_set.size() << std::endl;
     std::cout << original_.size() << std::endl;
   }
 
   void test_max_size() {
     pout("size");
-    const map_t c_map(original_);
+    const set_t c_set(original_);
 
     std::cout << original_.max_size() << std::endl;
   }
 
   void test_clear() {
     pout("clear");
-    map_t map(original_);
+    set_t set(original_);
 
-    map.clear();
-    print_basic_info(map);
+    set.clear();
+    print_basic_info(set);
   }
 
   void test_insert1() {
     pout("insert1");
-    map_t map(original_);
-    iter_t it = map.begin();
+    set_t set(original_);
+    iter_t it = set.begin();
 
     // 成功
-    NAMESPACE::pair< iter_t, bool > result = map.insert(min_pair_);
+    NAMESPACE::pair< iter_t, bool > result = set.insert(min_);
     print_value(*(result.first));
     std::cout << result.second << std::endl;
     // 失敗
-    result = map.insert(min_pair_);
+    result = set.insert(min_);
     print_value(*(result.first));
     std::cout << result.second << std::endl;
 
-    print_basic_info(map);
+    print_basic_info(set);
 
     // insert前のiteratorが有効かの確認
     print_iter(it);
@@ -206,29 +195,29 @@ class MapTester {
 
   void test_insert_hint() {
     pout("insert_hint");
-    map_t map(original_);
-    iter_t it = map.begin();
-    iter_t hint = map.begin();
+    set_t set(original_);
+    iter_t it = set.begin();
+    iter_t hint = set.begin();
 
     // 成功
-    iter_t result = map.insert(hint, min_pair_);
+    iter_t result = set.insert(hint, min_);
     print_value(*result);
     // 失敗
-    result = map.insert(hint, min_pair_);
+    result = set.insert(hint, min_);
     print_value(*result);
 
-    print_basic_info(map);
+    print_basic_info(set);
     // insert前のiteratorが有効かの確認
     print_iter(it);
   }
 
   void test_insert_range() {
     pout("insert_range");
-    map_t map(original_);
-    iter_t it = map.begin();
+    set_t set(original_);
+    iter_t it = set.begin();
 
-    map.insert(src_deq2_.begin(), src_deq2_.end());
-    print_basic_info(map);
+    set.insert(src_deq2_.begin(), src_deq2_.end());
+    print_basic_info(set);
     // insert前のiteratorが有効かの確認
     print_iter(it);
   }
@@ -241,37 +230,37 @@ class MapTester {
 
   void test_erase_from_iter() {
     pout("erase1");
-    map_t map(original_);
-    iter_t it = map.begin();
-    iter_t it_2nd = ++map.begin();
+    set_t set(original_);
+    iter_t it = set.begin();
+    iter_t it_2nd = ++set.begin();
 
-    map.erase(it_2nd);
-    print_basic_info(map);
+    set.erase(it_2nd);
+    print_basic_info(set);
     // erase前のiteratorが有効かの確認
     print_iter(it);
   }
 
   void test_erase_from_key() {
     pout("erase_key");
-    map_t map(original_);
-    iter_t it = map.begin();
-    iter_t it_2nd = ++map.begin();
+    set_t set(original_);
+    iter_t it = set.begin();
+    iter_t it_2nd = ++set.begin();
 
-    map.erase(it_2nd->first);
-    print_basic_info(map);
+    set.erase(it_2nd);
+    print_basic_info(set);
     // erase前のiteratorが有効かの確認
     print_iter(it);
   }
 
   void test_erase_range() {
     pout("erase_range");
-    map_t map(original_);
-    iter_t it = map.begin();
-    iter_t it_2nd = ++map.begin();
-    iter_t it_last = --map.end();
+    set_t set(original_);
+    iter_t it = set.begin();
+    iter_t it_2nd = ++set.begin();
+    iter_t it_last = --set.end();
 
-    map.erase(it_2nd, it_last);
-    print_basic_info(map);
+    set.erase(it_2nd, it_last);
+    print_basic_info(set);
     // erase前のiteratorが有効かの確認
     print_iter(it);
   }
@@ -284,18 +273,18 @@ class MapTester {
 
   void test_swap() {
     pout("swap");
-    map_t map(original_);
-    map_t added(original_);
-    added.insert(min_pair_);
+    set_t set(original_);
+    set_t added(original_);
+    added.insert(min_);
 
     //メソッド
-    map.swap(added);
-    print_basic_info(map);
+    set.swap(added);
+    print_basic_info(set);
     print_basic_info(added);
 
     //非メソッド
-    std::swap(map, added);
-    print_basic_info(map);
+    std::swap(set, added);
+    print_basic_info(set);
     print_basic_info(added);
   }
 
@@ -304,22 +293,22 @@ class MapTester {
 
     citer_t found = original_.begin();
     // 1
-    std::cout << original_.count(found->first) << std::endl;
+    std::cout << original_.count(*found) << std::endl;
     // 0
-    std::cout << original_.count(min_pair_.first) << std::endl;
+    std::cout << original_.count(min_) << std::endl;
   }
 
   void test_find() {
     pout("find");
 
     // 成功
-    key_t key = original_.begin()->first;
+    key_t key = *original_.begin();
     citer_t c_found = original_.find(key);
 
     print_iter(c_found);
 
     // 失敗
-    key = min_pair_.first;
+    key = min_;
     citer_t c_not_found = original_.find(key);
 
     std::cout << (c_not_found == original_.end()) << std::endl;
@@ -329,13 +318,13 @@ class MapTester {
     pout("equal_range");
 
     // 存在するkey
-    key_t key = original_.begin()->first;
+    key_t key = *original_.begin();
     NAMESPACE::pair< citer_t, citer_t > c_pair = original_.equal_range(key);
 
     print_iter_range(c_pair.first, c_pair.second);
 
     // 存在しないkey
-    key = min_pair_.first;
+    key = min_;
     std::cout << key << std::endl;
     c_pair = original_.equal_range(key);
 
@@ -346,13 +335,13 @@ class MapTester {
     pout("lower_bound");
 
     // 存在するkey
-    key_t key = original_.begin()->first;
+    key_t key = *original_.begin();
     citer_t c_found = original_.lower_bound(key);
 
     print_iter(c_found);
 
     // 存在しないkey、minより下
-    key = min_pair_.first;
+    key = min_;
     c_found = original_.lower_bound(key);
 
     print_iter(c_found);
@@ -360,7 +349,7 @@ class MapTester {
     // 存在しないkey、maxより上
     citer_t last = --original_.end();
 
-    key = last->first;
+    key = *last;
     key++;
     citer_t c_not_found = original_.lower_bound(key);
 
@@ -371,13 +360,13 @@ class MapTester {
     pout("upper_bound");
 
     // 存在するkey
-    key_t key = original_.begin()->first;
+    key_t key = *original_.begin();
     citer_t c_found = original_.upper_bound(key);
 
     print_iter(c_found);
 
     // 存在しないkey、minより下
-    key = min_pair_.first;
+    key = min_;
     c_found = original_.upper_bound(key);
 
     print_iter(c_found);
@@ -385,7 +374,7 @@ class MapTester {
     // 存在しないkey、maxより上
     citer_t last = --original_.end();
 
-    key = last->first;
+    key = *last;
     key++;
     citer_t c_not_found = original_.upper_bound(key);
 
@@ -394,7 +383,7 @@ class MapTester {
 
   void print_graph() {
     pout("get_allocator");
-    std::allocator< T > alloc;
+    std::allocator< key_t > alloc;
     std::cout << std::boolalpha << (alloc == original_.get_allocator())
               << std::endl;
   }
@@ -405,49 +394,47 @@ class MapTester {
     Compare comp = original_.key_comp();
     citer_t it_1st = original_.begin();
     citer_t it_2nd = ++original_.begin();
-    std::cout << comp(it_1st->first, it_2nd->first) << std::endl;
+    std::cout << comp(*it_1st, *it_2nd) << std::endl;
   }
 
   void test_value_comp() {
     pout("value_comp");
 
-    typename map_t::value_compare comp = original_.value_comp();
+    Compare comp = original_.value_comp();
     citer_t it_1st = original_.begin();
     citer_t it_2nd = ++original_.begin();
-    pair_t pair_1st(it_1st->first, it_1st->second);
-    pair_t pair_2nd(it_2nd->first, it_2nd->second);
-    std::cout << comp(pair_1st, pair_2nd) << std::endl;
+    std::cout << comp(*it_1st, *it_2nd) << std::endl;
   }
 
   void test_op_compare() {
     pout("op_compare");
-    map_t map(original_);
-    map_t added(original_);
-    added.insert(min_pair_);
+    set_t set(original_);
+    set_t added(original_);
+    added.insert(min_);
 
     // 同じ。ついでにconstもチェック
-    std::cout << (original_ == map) << std::endl;
-    std::cout << (original_ != map) << std::endl;
-    std::cout << (original_ < map) << std::endl;
-    std::cout << (original_ <= map) << std::endl;
-    std::cout << (original_ > map) << std::endl;
-    std::cout << (original_ >= map) << std::endl;
+    std::cout << (original_ == set) << std::endl;
+    std::cout << (original_ != set) << std::endl;
+    std::cout << (original_ < set) << std::endl;
+    std::cout << (original_ <= set) << std::endl;
+    std::cout << (original_ > set) << std::endl;
+    std::cout << (original_ >= set) << std::endl;
 
     // 違う
-    std::cout << (added == map) << std::endl;
-    std::cout << (added != map) << std::endl;
-    std::cout << (added < map) << std::endl;
-    std::cout << (added <= map) << std::endl;
-    std::cout << (added > map) << std::endl;
-    std::cout << (added >= map) << std::endl;
+    std::cout << (added == set) << std::endl;
+    std::cout << (added != set) << std::endl;
+    std::cout << (added < set) << std::endl;
+    std::cout << (added <= set) << std::endl;
+    std::cout << (added > set) << std::endl;
+    std::cout << (added >= set) << std::endl;
   }
 
  private:
   deque_t src_deq1_;
   deque_t src_deq2_;
   size_t default_size_;
-  const map_t original_;
-  pair_t min_pair_;
+  const set_t original_;
+  key_t min_;
 };
 
-#endif
+#endif /* SETTESTER_HPP */
