@@ -4,7 +4,8 @@
 
 typedef ft::pair< int, char > pair_t;
 typedef ft::rb_tree_node< pair_t > node_t;
-typedef ft::rb_tree< int, pair_t, std::less< int > > tree_t;
+typedef ft::rb_tree< int, pair_t, ft::select1st< pair_t >, std::less< int > >
+    tree_t;
 typedef tree_t::iterator iter_t;
 typedef tree_t::const_iterator citer_t;
 typedef tree_t::reverse_iterator rev_iter_t;

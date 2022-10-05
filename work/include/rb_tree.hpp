@@ -408,19 +408,6 @@ class rb_tree {
   }
 
   //テスト用
-  node_ptr header() { return header_; }
-  node_ptr nil() { return nil_; }
-  node_ptr root() { return header_->left; }
-  node_ptr root() const { return header_->left; }
-
-  int height(node_ptr node) {
-    if (node == nil_) {
-      return -1;
-    }
-    return 1 + std::max(height(node->left), height(node->right));
-  }
-
-  // debug
   void verify() {
     // print();
     // 0の対数が-infになってた
@@ -458,8 +445,11 @@ class rb_tree {
     std::cerr << "[\x1b[32mEND_ITR\x1b[39m]" << std::endl;
   }
 
+#ifdef PRIVATE_TEST
+ public:
+#else
  private:
-  // メンバ関数
+#endif
   void initialize() {
     nil_ = create_node(value_type());
     // 最初のcreate_nodeで初期化に使用するnil_は今確保した値が入っていない
@@ -567,8 +557,6 @@ class rb_tree {
     return prev;
   }
 
-  // 本当はprivate、テストのためpublicに
- public:
   node_ptr find_equal(const key_type& search_key) const {
     node_ptr current = root();
     while (current != nil_) {
@@ -585,7 +573,6 @@ class rb_tree {
     return nil_;
   }
 
- private:
   node_ptr find_lower_bound(const key_type& search_key) const {
     node_ptr current = root();
     node_ptr prev = header_;  //見つからない場合end()を返すため
@@ -850,7 +837,6 @@ class rb_tree {
   }
 
   // 赤黒木用の関数
- private:
   bool is_red(node_ptr node) const { return (node->color == red); }
 
   bool is_black(node_ptr node) const { return (node->color == black); }
@@ -864,7 +850,6 @@ class rb_tree {
   }
 
   // 回転
- public:  //テストのため
   void rotate_left(node_ptr old_parent) {
     node_ptr new_parent = old_parent->right;
 
@@ -915,7 +900,6 @@ class rb_tree {
     std::swap(node1->color, node2->color);
   }
 
- private:
   // 黒の高さを保ったまま、色を変更する
   void push_black(node_ptr node) {
     node->color--;
@@ -1060,6 +1044,19 @@ class rb_tree {
     std::cerr << "---------------------------------------------" << std::endl;
   }
 
+  node_ptr header() { return header_; }
+  node_ptr nil() { return nil_; }
+  node_ptr root() { return header_->left; }
+  node_ptr root() const { return header_->left; }
+
+  int height(node_ptr node) {
+    if (node == nil_) {
+      return -1;
+    }
+    return 1 + std::max(height(node->left), height(node->right));
+  }
+
+ private:
   // メンバ変数
   node_ptr header_;
   node_ptr most_left_;
