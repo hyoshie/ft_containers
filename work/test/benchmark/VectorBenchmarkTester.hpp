@@ -18,12 +18,11 @@
 template < typename T >
 class VectorBenchmarkTester {
  public:
-  typedef ft::vector< T > test_vec;
-  typedef typename test_vec::iterator test_iter;
-  typedef typename test_vec::const_iterator test_citer;
-  typedef std::deque< T > test_deq;
-  typedef typename test_deq::iterator test_deq_iter;
-  typedef typename test_deq::const_iterator test_deq_citer;
+  typedef ft::vector< T > vector_t;
+  typedef typename vector_t::iterator iter_t;
+  typedef typename vector_t::const_iterator citer_t;
+  typedef std::deque< T > deque_t;
+  typedef typename deque_t::iterator deque_iter;
 
   static const int kLoopCount = 100;
   static const int kElemCount = 1000;
@@ -71,21 +70,21 @@ class VectorBenchmarkTester {
     measure("op_ge", &VectorBenchmarkTester::test_op_ge);
   }
 
-  void test_default_ctor() { test_vec default_vec; }
+  void test_default_ctor() { vector_t default_vec; }
 
-  void test_value_ctor() { test_vec vec(kElemCount, src_deq_.front()); }
+  void test_value_ctor() { vector_t vec(kElemCount, src_deq_.front()); }
 
-  void test_range_ctor() { test_vec vec(src_deq_.begin(), src_deq_.end()); }
+  void test_range_ctor() { vector_t vec(src_deq_.begin(), src_deq_.end()); }
 
-  void test_copy_ctor() { test_vec vec(original_); }
+  void test_copy_ctor() { vector_t vec(original_); }
 
-  void test_op_assign(test_vec& vec) { vec = original_; }
+  void test_op_assign(vector_t& vec) { vec = original_; }
 
-  void test_assign_fill(test_vec& vec) { vec.assign(random_size(vec), value_); }
+  void test_assign_fill(vector_t& vec) { vec.assign(random_size(vec), value_); }
 
-  void test_assign_range(test_vec& vec) {
-    test_deq_iter first = random_itr(src_deq_);
-    test_deq_iter last = random_itr(src_deq_, first);
+  void test_assign_range(vector_t& vec) {
+    deque_iter first = random_itr(src_deq_);
+    deque_iter last = random_itr(src_deq_, first);
     vec.assign(first, last);
   }
 
@@ -93,7 +92,7 @@ class VectorBenchmarkTester {
 
   void test_at() { original_.at(random_index(original_)); }
 
-  void test_op_subscript(test_vec& vec) { original_[random_index(vec)]; }
+  void test_op_subscript(vector_t& vec) { original_[random_index(vec)]; }
 
   void test_front() { original_.front(); }
 
@@ -113,59 +112,59 @@ class VectorBenchmarkTester {
 
   void test_max_size() { original_.max_size(); }
 
-  void test_reserve(test_vec& vec) { vec.reserve(random_size(vec)); }
+  void test_reserve(vector_t& vec) { vec.reserve(random_size(vec)); }
 
   void test_capacity() { original_.capacity(); }
 
-  void test_clear(test_vec& vec) { vec.clear(); }
+  void test_clear(vector_t& vec) { vec.clear(); }
 
-  void test_insert_one(test_vec& vec) { vec.insert(random_itr(vec), value_); }
+  void test_insert_one(vector_t& vec) { vec.insert(random_itr(vec), value_); }
 
-  void test_insert_fill(test_vec& vec) {
+  void test_insert_fill(vector_t& vec) {
     vec.insert(random_itr(vec), random_mini(), value_);
   }
 
-  void test_insert_range(test_vec& vec) {
-    test_deq_iter first = random_itr(src_deq_);
-    test_deq_iter last = random_itr(src_deq_, first);
+  void test_insert_range(vector_t& vec) {
+    deque_iter first = random_itr(src_deq_);
+    deque_iter last = random_itr(src_deq_, first);
     vec.insert(random_itr(vec), first, last);
   }
 
-  void test_erase_one(test_vec& vec) { vec.erase(random_itr(vec)); }
+  void test_erase_one(vector_t& vec) { vec.erase(random_itr(vec)); }
 
-  void test_erase_range(test_vec& vec) {
-    test_iter first = random_itr(vec);
-    test_iter last = random_itr(vec, first);
+  void test_erase_range(vector_t& vec) {
+    iter_t first = random_itr(vec);
+    iter_t last = random_itr(vec, first);
     vec.erase(first, last);
   }
 
-  void test_push_back(test_vec& vec) { vec.push_back(value_); }
+  void test_push_back(vector_t& vec) { vec.push_back(value_); }
 
-  void test_pop_back(test_vec& vec) { vec.pop_back(); }
+  void test_pop_back(vector_t& vec) { vec.pop_back(); }
 
-  void test_resize(test_vec& vec) { vec.resize(random_size(vec)); }
+  void test_resize(vector_t& vec) { vec.resize(random_size(vec)); }
 
-  void test_swap(test_vec& vec) {
-    test_vec v;
+  void test_swap(vector_t& vec) {
+    vector_t v;
     vec.swap(v);
   }
 
-  void test_std_swap(test_vec& vec) {
-    test_vec v;
+  void test_std_swap(vector_t& vec) {
+    vector_t v;
     std::swap(vec, v);
   }
 
-  void test_op_eq(test_vec& vec) { (void)(original_ == vec); }
+  void test_op_eq(vector_t& vec) { (void)(original_ == vec); }
 
-  void test_op_ne(test_vec& vec) { (void)(original_ != vec); }
+  void test_op_ne(vector_t& vec) { (void)(original_ != vec); }
 
-  void test_op_lt(test_vec& vec) { (void)(original_ < vec); }
+  void test_op_lt(vector_t& vec) { (void)(original_ < vec); }
 
-  void test_op_le(test_vec& vec) { (void)(original_ <= vec); }
+  void test_op_le(vector_t& vec) { (void)(original_ <= vec); }
 
-  void test_op_gt(test_vec& vec) { (void)(original_ > vec); }
+  void test_op_gt(vector_t& vec) { (void)(original_ > vec); }
 
-  void test_op_ge(test_vec& vec) { (void)(original_ >= vec); }
+  void test_op_ge(vector_t& vec) { (void)(original_ >= vec); }
 
   void measure(const std::string& func_name,
                void (VectorBenchmarkTester::*func)(void)) {
@@ -180,11 +179,11 @@ class VectorBenchmarkTester {
   }
 
   void measure(const std::string& func_name,
-               void (VectorBenchmarkTester::*func)(test_vec&)) {
+               void (VectorBenchmarkTester::*func)(vector_t&)) {
     Timer timer;
     print_func(func_name);
     for (int i = 0; i < kLoopCount; i++) {
-      test_vec vec(original_);
+      vector_t vec(original_);
       timer.start();
       (this->*func)(vec);
       timer.stop();
@@ -193,23 +192,23 @@ class VectorBenchmarkTester {
   }
 
  private:
-  // typename test_vec::size_type random_index(const test_vec& vec) {
+  // typename vector_t::size_type random_index(const vector_t& vec) {
   //   return rand() % vec.size();
   // }
 
-  // typename test_vec::size_type random_mini() {
-  //   typename test_vec::size_type size = rand() % 50;
+  // typename vector_t::size_type random_mini() {
+  //   typename vector_t::size_type size = rand() % 50;
   //   return (size == 0) ? 1 : size;
   // }
 
-  // typename test_vec::size_type random_size(const test_vec& vec) {
-  //   typename test_vec::size_type size = rand() % vec.size();
+  // typename vector_t::size_type random_size(const vector_t& vec) {
+  //   typename vector_t::size_type size = rand() % vec.size();
   //   return (size == 0) ? 1 : size;
   // }
 
-  test_deq src_deq_;
-  const test_vec original_;
-  typename test_vec::value_type value_;
+  deque_t src_deq_;
+  const vector_t original_;
+  typename vector_t::value_type value_;
 };
 
 #endif /* VECTORBENCHMARKTESTER_HPP */

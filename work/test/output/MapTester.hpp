@@ -25,7 +25,6 @@ class MapTester {
   typedef typename map_t::iterator iter_t;
   typedef typename map_t::const_iterator citer_t;
   typedef typename std::deque< pair_t > deque_t;
-  typedef typename deque_t::iterator deque_iter;
 
  public:
   static const int kElemCount = 1000;
@@ -79,9 +78,7 @@ class MapTester {
     std::greater< Key > comp;
     std::allocator< pair_t > alloc;
     NAMESPACE::map< Key, T, std::greater< Key > > arg_map(comp, alloc);
-    for (deque_iter it = src_deq1_.begin(); it != src_deq1_.end(); it++) {
-      arg_map.insert(*it);
-    }
+    arg_map.insert(min_pair_);
     print_basic_info(arg_map);
   }
 

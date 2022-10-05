@@ -24,7 +24,6 @@ class SetTester {
   typedef typename set_t::iterator iter_t;
   typedef typename set_t::const_iterator citer_t;
   typedef typename std::deque< key_t > deque_t;
-  typedef typename deque_t::iterator deque_iter;
 
  public:
   static const int kElemCount = 1000;
@@ -77,9 +76,7 @@ class SetTester {
     std::greater< Key > comp;
     std::allocator< key_t > alloc;
     NAMESPACE::set< Key, std::greater< Key > > arg_set(comp, alloc);
-    for (deque_iter it = src_deq1_.begin(); it != src_deq1_.end(); it++) {
-      arg_set.insert(*it);
-    }
+    arg_set.insert(min_);
     print_basic_info(arg_set);
   }
 

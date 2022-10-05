@@ -2,14 +2,15 @@
 #define MAPBENCHMARKTESTER_HPP
 
 #if USE_STL
-#define ft std
+#define NAMESPACE std
 #include <map>
 #else
+#define NAMESPACE ft
 #include "map.hpp"
 #endif
 
+#include <deque>
 #include <string>
-#include <vector>
 
 #include "Timer.hpp"
 #include "print.hpp"
@@ -18,22 +19,22 @@
 template < typename Key, typename T >
 class MapBenchmarkTester {
  public:
-  typedef Key test_key;
-  typedef ft::pair< Key, T > test_pair;
-  typedef ft::map< Key, T > test_map;
-  typedef typename test_map::iterator test_iter;
-  typedef typename test_map::const_iterator test_citer;
-  typedef typename std::vector< test_pair > test_vec;
-  typedef typename test_vec::iterator test_vec_iter;
+  typedef Key key_t;
+  typedef NAMESPACE::pair< Key, T > pair_t;
+  typedef NAMESPACE::map< Key, T > map_t;
+  typedef typename map_t::iterator iter_t;
+  typedef typename map_t::const_iterator citer_t;
+  typedef typename std::deque< pair_t > deque_t;
+  typedef typename deque_t::iterator deque_iter;
 
   static const int kLoopCount = 100;
   static const int kElemCount = 1000;
 
-  MapBenchmarkTester(test_vec vec1, test_vec vec2)
-      : vec1_(vec1),
-        vec2_(vec2),
-        original_(vec1.begin(), vec1.end()),
-        value_(vec2.front()) {}
+  MapBenchmarkTester(deque_t deq1, deque_t deq2)
+      : src_deq1_(deq1),
+        src_deq2_(deq2),
+        original_(deq1.begin(), deq1.end()),
+        value_(deq2.front()) {}
 
   void run() {
     measure("def_ctor", &MapBenchmarkTester::test_default_ctor);
@@ -72,17 +73,17 @@ class MapBenchmarkTester {
     measure("op_ge", &MapBenchmarkTester::test_op_ge);
   }
 
-  void test_default_ctor() { test_map default_vec; }
+  void test_default_ctor() { map_t default_vec; }
 
-  void test_range_ctor() { test_map map(vec2_.begin(), vec2_.end()); }
+  void test_range_ctor() { map_t map(src_deq2_.begin(), src_deq2_.end()); }
 
-  void test_copy_ctor() { test_map map(original_); }
+  void test_copy_ctor() { map_t map(original_); }
 
-  void test_op_assign(test_map& map) { map = original_; }
+  void test_op_assign(map_t& map) { map = original_; }
 
   void test_get_allocator() { original_.get_allocator(); }
 
-  void test_op_subscript(test_map& map) { map[random_index(map)]; }
+  void test_op_subscript(map_t& map) { map[random_index(map)]; }
 
   void test_begin() { original_.begin(); }
 
@@ -100,27 +101,27 @@ class MapBenchmarkTester {
 
   void test_capacity() { original_.capacity(); }
 
-  void test_clear(test_map& map) { map.clear(); }
+  void test_clear(map_t& map) { map.clear(); }
 
-  void test_insert_one(test_map& map) { map.insert(value_); }
+  void test_insert_one(map_t& map) { map.insert(value_); }
 
-  void test_insert_hint(test_map& map) { map.insert(random_itr(map), value_); }
+  void test_insert_hint(map_t& map) { map.insert(random_itr(map), value_); }
 
-  void test_insert_range(test_map& map) {
-    test_vec_iter first = random_itr(vec2_);
-    test_vec_iter last = random_itr(vec2_, first);
+  void test_insert_range(map_t& map) {
+    deque_iter first = random_itr(src_deq2_);
+    deque_iter last = random_itr(src_deq2_, first);
     map.insert(first, last);
   }
 
-  void test_erase_one(test_map& map) { map.erase(random_itr(map)); }
+  void test_erase_one(map_t& map) { map.erase(random_itr(map)); }
 
-  void test_erase_range(test_map& map) {
-    test_iter first = random_itr(map);
-    test_iter last = random_itr(map, first);
+  void test_erase_range(map_t& map) {
+    iter_t first = random_itr(map);
+    iter_t last = random_itr(map, first);
     map.erase(first, last);
   }
 
-  void test_erase_key(test_map& map) { map.erase(random_key(map)); }
+  void test_erase_key(map_t& map) { map.erase(random_key(map)); }
 
   void test_count() { original_.count(random_key(original_)); }
 
@@ -136,27 +137,27 @@ class MapBenchmarkTester {
 
   void test_value_comp() { original_.value_comp(); }
 
-  void test_swap(test_map& map) {
-    test_map v;
+  void test_swap(map_t& map) {
+    map_t v;
     map.swap(v);
   }
 
-  void test_std_swap(test_map& map) {
-    test_map v;
+  void test_std_swap(map_t& map) {
+    map_t v;
     std::swap(map, v);
   }
 
-  void test_op_eq(test_map& map) { (void)(original_ == map); }
+  void test_op_eq(map_t& map) { (void)(original_ == map); }
 
-  void test_op_ne(test_map& map) { (void)(original_ != map); }
+  void test_op_ne(map_t& map) { (void)(original_ != map); }
 
-  void test_op_lt(test_map& map) { (void)(original_ < map); }
+  void test_op_lt(map_t& map) { (void)(original_ < map); }
 
-  void test_op_le(test_map& map) { (void)(original_ <= map); }
+  void test_op_le(map_t& map) { (void)(original_ <= map); }
 
-  void test_op_gt(test_map& map) { (void)(original_ > map); }
+  void test_op_gt(map_t& map) { (void)(original_ > map); }
 
-  void test_op_ge(test_map& map) { (void)(original_ >= map); }
+  void test_op_ge(map_t& map) { (void)(original_ >= map); }
 
   void measure(const std::string& func_name,
                void (MapBenchmarkTester::*func)(void)) {
@@ -171,11 +172,11 @@ class MapBenchmarkTester {
   }
 
   void measure(const std::string& func_name,
-               void (MapBenchmarkTester::*func)(test_map&)) {
+               void (MapBenchmarkTester::*func)(map_t&)) {
     Timer timer;
     print_func(func_name);
     for (int i = 0; i < kLoopCount; i++) {
-      test_map map(original_);
+      map_t map(original_);
       timer.start();
       (this->*func)(map);
       timer.stop();
@@ -184,14 +185,14 @@ class MapBenchmarkTester {
   }
 
  private:
-  typename test_map::key_type random_key(const test_map& map) {
+  typename map_t::key_type random_key(const map_t& map) {
     return random_itr(map)->first;
   }
 
-  test_vec vec1_;
-  test_vec vec2_;
-  const test_map original_;
-  typename test_map::value_type value_;
+  deque_t src_deq1_;
+  deque_t src_deq2_;
+  const map_t original_;
+  typename map_t::value_type value_;
 };
 
 #endif /* MAPBENCHMARKTESTER_HPP */

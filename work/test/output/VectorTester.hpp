@@ -19,12 +19,11 @@ class VectorTester {
  private:
   typedef T value_t;
   typedef NAMESPACE::vector< T > vector_t;
-  typedef typename vector_t::iterator vector_iter;
+  typedef typename vector_t::iterator iter_t;
   typedef typename std::deque< T > deque_t;
-  typedef typename deque_t::iterator deque_iter;
 
  public:
-  static const int kElemCount = 10000;
+  static const int kElemCount = 1000;
 
   VectorTester(const deque_t& deque)
       : src_deq_(deque),
@@ -277,7 +276,7 @@ class VectorTester {
     pout("insert_one");
 
     vector_t vec(original_);
-    vector_iter it = vec.begin();
+    iter_t it = vec.begin();
 
     it = vec.insert(it, value_);
     std::cout << *it << std::endl;
@@ -293,7 +292,7 @@ class VectorTester {
     pout("insert_fll");
 
     vector_t vec(original_);
-    vector_iter it = vec.begin() + 4;
+    iter_t it = vec.begin() + 4;
 
     vec.insert(it, 100, value_);
     print_info(vec);
@@ -303,7 +302,7 @@ class VectorTester {
     pout("insert_range");
 
     vector_t vec(original_);
-    vector_iter it = vec.begin() + 4;
+    iter_t it = vec.begin() + 4;
 
     vec.insert(it, src_deq_.begin(), src_deq_.end());
     print_info(vec);
@@ -319,7 +318,7 @@ class VectorTester {
     pout("erase_one");
     vector_t vec(original_);
 
-    vector_iter it = vec.begin() + 1;
+    iter_t it = vec.begin() + 1;
     it = vec.erase(it);
     std::cout << *it << std::endl;
     print_info(vec);
@@ -336,8 +335,8 @@ class VectorTester {
     pout("erase_range");
     vector_t vec(original_);
 
-    vector_iter it = vec.begin() + 1;
-    vector_iter ite = vec.begin() + 3;
+    iter_t it = vec.begin() + 1;
+    iter_t ite = vec.begin() + 3;
 
     it = vec.erase(it, ite);
     print_info(vec);
@@ -401,8 +400,8 @@ class VectorTester {
 
     vector_t first(5, value_);
     vector_t second(original_);
-    vector_iter first_it = first.begin();
-    vector_iter second_it = second.begin();
+    iter_t first_it = first.begin();
+    iter_t second_it = second.begin();
 
     first.swap(second);
     print_info(first);

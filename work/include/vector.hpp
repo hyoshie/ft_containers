@@ -109,6 +109,7 @@ class vector {
       clear();
       reserve(count);
       std::uninitialized_copy(first, last, first_);
+      last_ = first_ + count;
       // deallocate();
       // first_ = allocate(count);
       // last_ = first_;

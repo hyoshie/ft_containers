@@ -2,14 +2,15 @@
 #define SETBENCHMARKTESTER_HPP
 
 #if USE_STL
-#define ft std
+#define NAMSPACE std
 #include <set>
 #else
+#define NAMSPACE ft
 #include "set.hpp"
 #endif
 
+#include <deque>
 #include <string>
-#include <vector>
 
 #include "Timer.hpp"
 #include "print.hpp"
@@ -18,21 +19,21 @@
 template < typename Key >
 class SetBenchmarkTester {
  public:
-  typedef Key test_key;
-  typedef ft::set< Key > test_set;
-  typedef typename test_set::iterator test_iter;
-  typedef typename test_set::const_iterator test_citer;
-  typedef typename std::vector< Key > test_vec;
-  typedef typename test_vec::iterator test_vec_iter;
+  typedef Key key_t;
+  typedef NAMSPACE::set< Key > set_t;
+  typedef typename set_t::iterator iter_t;
+  typedef typename set_t::const_iterator citer_t;
+  typedef typename std::deque< Key > deque_t;
+  typedef typename deque_t::iterator deque_iter;
 
   static const int kLoopCount = 100;
   static const int kElemCount = 1000;
 
-  SetBenchmarkTester(test_vec vec1, test_vec vec2)
-      : vec1_(vec1),
-        vec2_(vec2),
-        original_(vec1.begin(), vec1.end()),
-        value_(vec2.front()) {}
+  SetBenchmarkTester(deque_t deq1, deque_t deq2)
+      : src_deq1_(deq1),
+        src_deq2_(deq2),
+        original_(deq1.begin(), deq1.end()),
+        value_(deq2.front()) {}
 
   void run() {
     measure("def_ctor", &SetBenchmarkTester::test_default_ctor);
@@ -70,13 +71,13 @@ class SetBenchmarkTester {
     measure("op_ge", &SetBenchmarkTester::test_op_ge);
   }
 
-  void test_default_ctor() { test_set default_vec; }
+  void test_default_ctor() { set_t default_vec; }
 
-  void test_range_ctor() { test_set set(vec2_.begin(), vec2_.end()); }
+  void test_range_ctor() { set_t set(src_deq2_.begin(), src_deq2_.end()); }
 
-  void test_copy_ctor() { test_set set(original_); }
+  void test_copy_ctor() { set_t set(original_); }
 
-  void test_op_assign(test_set& set) { set = original_; }
+  void test_op_assign(set_t& set) { set = original_; }
 
   void test_get_allocator() { original_.get_allocator(); }
 
@@ -96,27 +97,27 @@ class SetBenchmarkTester {
 
   void test_capacity() { original_.capacity(); }
 
-  void test_clear(test_set& set) { set.clear(); }
+  void test_clear(set_t& set) { set.clear(); }
 
-  void test_insert_one(test_set& set) { set.insert(value_); }
+  void test_insert_one(set_t& set) { set.insert(value_); }
 
-  void test_insert_hint(test_set& set) { set.insert(random_itr(set), value_); }
+  void test_insert_hint(set_t& set) { set.insert(random_itr(set), value_); }
 
-  void test_insert_range(test_set& set) {
-    test_vec_iter first = random_itr(vec2_);
-    test_vec_iter last = random_itr(vec2_, first);
+  void test_insert_range(set_t& set) {
+    deque_iter first = random_itr(src_deq2_);
+    deque_iter last = random_itr(src_deq2_, first);
     set.insert(first, last);
   }
 
-  void test_erase_one(test_set& set) { set.erase(random_itr(set)); }
+  void test_erase_one(set_t& set) { set.erase(random_itr(set)); }
 
-  void test_erase_range(test_set& set) {
-    test_iter first = random_itr(set);
-    test_iter last = random_itr(set, first);
+  void test_erase_range(set_t& set) {
+    iter_t first = random_itr(set);
+    iter_t last = random_itr(set, first);
     set.erase(first, last);
   }
 
-  void test_erase_key(test_set& set) { set.erase(random_key(set)); }
+  void test_erase_key(set_t& set) { set.erase(random_key(set)); }
 
   void test_count() { original_.count(random_key(original_)); }
 
@@ -132,27 +133,27 @@ class SetBenchmarkTester {
 
   void test_value_comp() { original_.value_comp(); }
 
-  void test_swap(test_set& set) {
-    test_set v;
+  void test_swap(set_t& set) {
+    set_t v;
     set.swap(v);
   }
 
-  void test_std_swap(test_set& set) {
-    test_set v;
+  void test_std_swap(set_t& set) {
+    set_t v;
     std::swap(set, v);
   }
 
-  void test_op_eq(test_set& set) { (void)(original_ == set); }
+  void test_op_eq(set_t& set) { (void)(original_ == set); }
 
-  void test_op_ne(test_set& set) { (void)(original_ != set); }
+  void test_op_ne(set_t& set) { (void)(original_ != set); }
 
-  void test_op_lt(test_set& set) { (void)(original_ < set); }
+  void test_op_lt(set_t& set) { (void)(original_ < set); }
 
-  void test_op_le(test_set& set) { (void)(original_ <= set); }
+  void test_op_le(set_t& set) { (void)(original_ <= set); }
 
-  void test_op_gt(test_set& set) { (void)(original_ > set); }
+  void test_op_gt(set_t& set) { (void)(original_ > set); }
 
-  void test_op_ge(test_set& set) { (void)(original_ >= set); }
+  void test_op_ge(set_t& set) { (void)(original_ >= set); }
 
   void measure(const std::string& func_name,
                void (SetBenchmarkTester::*func)(void)) {
@@ -167,11 +168,11 @@ class SetBenchmarkTester {
   }
 
   void measure(const std::string& func_name,
-               void (SetBenchmarkTester::*func)(test_set&)) {
+               void (SetBenchmarkTester::*func)(set_t&)) {
     Timer timer;
     print_func(func_name);
     for (int i = 0; i < kLoopCount; i++) {
-      test_set set(original_);
+      set_t set(original_);
       timer.start();
       (this->*func)(set);
       timer.stop();
@@ -180,14 +181,14 @@ class SetBenchmarkTester {
   }
 
  private:
-  typename test_set::key_type random_key(const test_set& set) {
+  typename set_t::key_type random_key(const set_t& set) {
     return *random_itr(set);
   }
 
-  test_vec vec1_;
-  test_vec vec2_;
-  const test_set original_;
-  typename test_set::value_type value_;
+  deque_t src_deq1_;
+  deque_t src_deq2_;
+  const set_t original_;
+  typename set_t::value_type value_;
 };
 
 #endif /* SETBENCHMARKTESTER_HPP */

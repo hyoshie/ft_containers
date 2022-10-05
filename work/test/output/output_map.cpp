@@ -1,16 +1,9 @@
+#include <algorithm>
+#include <deque>
 #include <iostream>
 
 #include "Fixed.hpp"
 #include "MapTester.hpp"
-
-#if USE_STL
-#define NAMESPACE std
-#else
-#define NAMESPACE ft
-#endif
-
-#include <algorithm>
-#include <deque>
 
 typedef NAMESPACE::pair< int, char > pair_ic_t;
 typedef NAMESPACE::pair< Fixed, short > pair_fs_t;
