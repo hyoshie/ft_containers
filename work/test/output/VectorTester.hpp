@@ -24,7 +24,7 @@ class VectorTester {
   typedef typename deque_t::iterator deque_iter;
 
  public:
-  static const int kElemCount = 1000;
+  static const int kElemCount = 10000;
 
   VectorTester(const deque_t& deque)
       : src_deq_(deque),

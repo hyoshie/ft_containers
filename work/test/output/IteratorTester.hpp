@@ -120,7 +120,7 @@ class IteratorTester {
   template < typename Iter >
   void test_output_iter(Iter it) {
     pout("output_iter");
-    Iter copy(it);
+    // Iter copy(it);
 
     std::cout << *++it << std::endl;
     std::cout << *it++ << std::endl;

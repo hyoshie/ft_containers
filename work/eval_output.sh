@@ -10,7 +10,7 @@ STL_LOG=${LOGDIR}/output_stl.txt
 ./$2  > ${STL_LOG}
 diff ${FT_LOG} ${STL_LOG}
 if [ $? == 0 ]; then
-	echo -e "\e[32mOK:)\e[m"
+	printf  "\033[32mOK:)\033[m\n"
 else
-	echo -e "\e[33mOH MY GOD:()\e[m"
+	printf  "\033[33mNG:(\033[m\n"
 fi

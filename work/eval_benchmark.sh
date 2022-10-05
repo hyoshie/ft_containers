@@ -16,16 +16,22 @@ make_log() {
 }
 
 validate_ratio(){
+	over_flag=0;
 	while read line ; do
 		ratio=$(echo $line | cut -d "]" -f 2 | cut -d "[" -f 1)
 		result=$(echo "$ratio > 20" | bc)
 		if [ $result -eq 1 ]; then
-			echo -e "\e[33mOver 20 times, OH MY GOD:()\e[m"
-			# cat $RESULT_LOG
-			# exit 1
+			over_flag=1;
 		fi
 	done  < $RESULT_LOG
-	echo -e "\e[32mPerformance is OK:)\e[m"
+
+	cat $RESULT_LOG
+	if [ $over_flag -eq 0 ]; then
+		printf  "\033[32mGood Performance:)\033[m\n"
+	else
+		printf  "\033[33mOver 20 times, OH MY GOD:()\033[m\n"
+	fi
+
 }
 
 
@@ -34,4 +40,3 @@ validate_ratio(){
 # -----main script-----
 make_log $1 $2
 validate_ratio
-cat $RESULT_LOG
