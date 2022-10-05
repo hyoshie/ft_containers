@@ -11,13 +11,13 @@
 
 namespace ft {
 
-// テンプレートクラスの性的メンバ変数はcppファイルに記述する必要がある
+// テンプレートクラスの静的メンバ変数はcppファイルに記述する必要がある
 // 作りたくないので暫定で外に出す
 // https://qiita.com/hmito/items/9d928322ca978319da59
 
-static const int red = 0;
-static const int black = 1;
-static const int doubleblack = 2;
+static const char red = 0;
+static const char black = 1;
+static const char doubleblack = 2;
 
 template < typename T >
 struct rb_tree_node {
@@ -177,11 +177,6 @@ struct rb_tree_const_iterator
 
   virtual ~rb_tree_const_iterator() {}
 
-  // いつ使う？標準ライブラリにあった
-  // iterator m_const_cast() const {
-  //   return iterator(const_cast< typename iterator::node_ptr >(current_));
-  // }
-
   reference operator*() const { return current_->item; }
 
   pointer operator->() const { return &current_->item; }
@@ -294,16 +289,6 @@ class rb_tree {
   const_reverse_iterator rend() const {
     return const_reverse_iterator(begin());
   }
-
-  // map側で対応, mapped_type作ってないので
-  // // 要素アクセス
-  // T& operator[](const Key& search_key) {
-  //   iterator it = lower_bound(search_key);
-  //   // 要素が見つからない場合
-  //   if (it == end() || comp_func_(search_key, it->first))
-  //     it = insert(it, value_type(search_key, mapped_type()));
-  //   return it->second;
-  // }
 
   // 容量
   bool empty() const { return (count_ == 0); }
@@ -770,7 +755,6 @@ class rb_tree {
 
   // node->parentの左の子がdoubleblack、右の子がblackのケース
   node_ptr remove_fixup_case2(node_ptr node) {
-    // print_node(node->parent->parent);
     node_ptr node1 = node->parent;
     node_ptr node2 = node1->right;
 
