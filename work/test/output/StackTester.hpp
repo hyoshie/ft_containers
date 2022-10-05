@@ -11,6 +11,8 @@
 
 #include <iostream>
 
+#include "output_util.hpp"
+
 template < typename Container >
 class StackTester {
  private:
@@ -124,13 +126,6 @@ class StackTester {
   }
 
  private:
-  template < typename U >
-  void pout(U stack) {
-    static int no;
-    std::cout << std::endl;
-    std::cout << "--- [" << ++no << "]:" << stack << " ---" << std::endl;
-  }
-
   template < typename Stack >
   void print_info(Stack& stack) {
     std::cout << "size:" << stack.size() << std::endl;

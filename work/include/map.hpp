@@ -35,9 +35,9 @@ class map {
   // メンバクラス
   class value_compare
       : public std::binary_function< value_type, value_type, bool > {
-    // protected:
-    // friendが使えないため
-   public:
+    friend class map< Key, T, Compare, Allocator >;
+
+   protected:
     Compare comp;
     value_compare(Compare c) : comp(c) {}
 

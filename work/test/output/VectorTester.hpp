@@ -12,6 +12,8 @@
 #include <deque>
 #include <iostream>
 
+#include "IteratorTester.hpp"
+
 template < typename T >
 class VectorTester {
  private:
@@ -31,7 +33,9 @@ class VectorTester {
 
   void run() {
     std::cout << std::boolalpha;
+
     test_ctor();
+    test_iter();
     test_op_equal();
     test_assign();
     test_get_allocator();
@@ -53,14 +57,14 @@ class VectorTester {
     test_capacity();
     // 変更
     test_clear();
-    //   test_insert();
-    //   test_erase();
+    test_insert();
+    test_erase();
     test_push_back();
     test_pop_back();
     test_resize();
+    test_swap();
     // 非メンバ関数
     test_op_compare();
-    // test_swap();
   }
 
   void test_ctor() {
@@ -78,6 +82,13 @@ class VectorTester {
     print_info(fill_vec);
     print_info(iter_vec);
     print_info(copy_vec);
+  }
+
+  void test_iter() {
+    pout("iter");
+
+    IteratorTester< vector_t > tester(original_);
+    tester.run();
   }
 
   void test_op_equal() {
@@ -262,6 +273,95 @@ class VectorTester {
     print_info(vec);
   }
 
+  void test_insert_one() {
+    pout("insert_one");
+
+    vector_t vec(original_);
+    vector_iter it = vec.begin();
+
+    it = vec.insert(it, value_);
+    std::cout << *it << std::endl;
+    print_info(vec);
+
+    it = vec.begin() + 4;
+    it = vec.insert(it, value_);
+    std::cout << *it << std::endl;
+    print_info(vec);
+  }
+
+  void test_insert_fill() {
+    pout("insert_fll");
+
+    vector_t vec(original_);
+    vector_iter it = vec.begin() + 4;
+
+    vec.insert(it, 100, value_);
+    print_info(vec);
+  }
+
+  void test_insert_range() {
+    pout("insert_range");
+
+    vector_t vec(original_);
+    vector_iter it = vec.begin() + 4;
+
+    vec.insert(it, src_deq_.begin(), src_deq_.end());
+    print_info(vec);
+  }
+
+  void test_insert() {
+    test_insert_one();
+    test_insert_fill();
+    test_insert_range();
+  }
+
+  void test_erase_one() {
+    pout("erase_one");
+    vector_t vec(original_);
+
+    vector_iter it = vec.begin() + 1;
+    it = vec.erase(it);
+    std::cout << *it << std::endl;
+    print_info(vec);
+
+    // pos が最後の要素を参照する場合は、 end() イテレータが返されます。
+    it = --vec.end();
+    std::cout << *it << std::endl;
+    it = vec.erase(it);
+    print_info(vec);
+    std::cout << (it == vec.end()) << std::endl;
+  }
+
+  void test_erase_range() {
+    pout("erase_range");
+    vector_t vec(original_);
+
+    vector_iter it = vec.begin() + 1;
+    vector_iter ite = vec.begin() + 3;
+
+    it = vec.erase(it, ite);
+    print_info(vec);
+    std::cout << *it << std::endl;
+
+    // 削除前に last==end() であった場合は、更新後の end()
+    // イテレータが返されます
+    ite = vec.end();
+    it = vec.erase(it, ite);
+    print_info(vec);
+    std::cout << (*it != *ite) << std::endl << (*it == *vec.end()) << std::endl;
+
+    // [first, last) が空範囲の場合は、 last が返されます。
+    it = vec.begin();
+    it = vec.erase(it, it);
+    print_info(vec);
+    std::cout << (it == vec.begin()) << std::endl;
+  }
+
+  void test_erase() {
+    test_erase_one();
+    test_erase_range();
+  }
+
   void test_push_back() {
     pout("push_back");
 
@@ -294,6 +394,27 @@ class VectorTester {
     //   guacamoleだとokなので一旦コメントアウト
     // vec.resize(6);
     // print_info(vec);
+  }
+
+  void test_swap() {
+    pout("swap");
+
+    vector_t first(5, value_);
+    vector_t second(original_);
+    vector_iter first_it = first.begin();
+    vector_iter second_it = second.begin();
+
+    first.swap(second);
+    print_info(first);
+    print_info(second);
+    std::cout << *first_it << std::endl;
+    std::cout << *second_it << std::endl;
+
+    std::swap(first, second);
+    print_info(first);
+    print_info(second);
+    std::cout << *first_it << std::endl;
+    std::cout << *second_it << std::endl;
   }
 
   void test_op_compare() {
@@ -330,12 +451,12 @@ class VectorTester {
   }
 
  private:
-  template < typename U >
-  void pout(U vec) {
-    static int no;
-    std::cout << std::endl;
-    std::cout << "--- [" << ++no << "]:" << vec << " ---" << std::endl;
-  }
+  // template < typename U >
+  // void pout(U vec) {
+  //   static int no;
+  //   std::cout << std::endl;
+  //   std::cout << "--- [" << ++no << "]:" << vec << " ---" << std::endl;
+  // }
 
   template < typename Vec >
   void print_info(Vec& vec) {

@@ -199,7 +199,7 @@ template < class Iter >
 reverse_iterator< Iter > operator+(
     typename reverse_iterator< Iter >::difference_type n,
     const reverse_iterator< Iter >& it) {
-  reverse_iterator< Iter >(it.base() - n);
+  return reverse_iterator< Iter >(it.base() - n);
 }
 
 template < class Iterator >

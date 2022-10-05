@@ -2,13 +2,16 @@
 #define PAIRTESTER_HPP
 
 #if USE_STL
-#define ft std
+#define NAMESPACE std
 #include <utility>
 #else
+#define NAMESPACE ft
 #include "pair.hpp"
 #endif
 
 #include <iostream>
+
+#include "output_util.hpp"
 
 template < typename T1, typename T2, typename Cont1, typename Cont2 >
 class PairTester {
@@ -67,13 +70,6 @@ class PairTester {
   }
 
  private:
-  template < typename U >
-  void pout(U p) {
-    static int no;
-    std::cout << std::endl;
-    std::cout << "--- [" << ++no << "]:" << p << " ---" << std::endl;
-  }
-
   template < typename Pair >
   void print_info(Pair &p) {
     std::cout << "{ " << p.first << ", " << p.second << "}" << std::endl;
