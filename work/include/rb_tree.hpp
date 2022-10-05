@@ -240,17 +240,17 @@ class rb_tree {
   typedef ft::reverse_iterator< const_iterator > const_reverse_iterator;
 
   // メンバ関数
-  rb_tree() : comp_func_(key_compare()), node_alloc_(node_allocator()) {
+  rb_tree() : comp_(key_compare()), node_alloc_(node_allocator()) {
     initialize();
   }
 
   explicit rb_tree(const Compare& comp, const Allocator& alloc)
-      : comp_func_(comp), node_alloc_(node_allocator(alloc)) {
+      : comp_(comp), node_alloc_(node_allocator(alloc)) {
     initialize();
   }
 
   rb_tree(const rb_tree& other)
-      : comp_func_(other.comp_func_), node_alloc_(other.node_alloc_) {
+      : comp_(other.comp_), node_alloc_(other.node_alloc_) {
     initialize();
     insert(other.begin(), other.end());
   }
@@ -264,7 +264,7 @@ class rb_tree {
   rb_tree& operator=(const rb_tree& other) {
     if (this != &other) {
       clear();
-      comp_func_ = other.comp_func_;
+      comp_ = other.comp_;
       node_alloc_ = other.node_alloc_;
       insert(other.begin(), other.end());
     }
@@ -309,14 +309,8 @@ class rb_tree {
   }
 
   ft::pair< iterator, bool > insert(const value_type& value) {
-    node_ptr parent = find_last(key(value));
-    if (parent != nil_ && key(parent) == key(value)) {
-      return ft::make_pair(iterator(parent, nil_), false);
-    }
-    node_ptr new_node = create_node(value);
-    add_child(parent, new_node);
-    add_fixup(new_node);
-    return ft::make_pair(iterator(new_node, nil_), true);
+    node_ptr insert_pos = find_insert_pos(key(value));
+    return insert_node(insert_pos, value);
   }
 
   // 時間があれば対応
@@ -347,13 +341,13 @@ class rb_tree {
     std::swap(most_left_, other.most_left_);
     std::swap(most_right_, other.most_right_);
     std::swap(nil_, other.nil_);
-    std::swap(comp_func_, other.comp_func_);
+    std::swap(comp_, other.comp_);
     std::swap(node_alloc_, other.node_alloc_);
     std::swap(count_, other.count_);
   }
 
   // 検索
-  size_type count(const Key& key) const { return (find_equal(key) != nil_); }
+  size_type count(const Key& key) const { return (find(key) != end()); }
 
   iterator find(const Key& key) {
     node_ptr node = find_equal(key);
@@ -396,12 +390,12 @@ class rb_tree {
   void verify() {
     // print();
     // 0の対数が-infになってた
-    if (size() != 0) {
-      assert(height(root()) <= 2 * log2(size()));
-    }
+    // if (size() != 0) {
+    //   assert(height(root()) <= 2 * log2(size()));
+    // }
     std::cout << "size  :" << size() << std::endl;
     std::cout << "height:" << height(root()) << std::endl;
-    std::cout << "log2(size):" << log2(size()) << std::endl;
+    // std::cout << "log2(size):" << log2(size()) << std::endl;
     std::cout << "result:" << verify(root()) << std::endl;
   }
 
@@ -524,16 +518,16 @@ class rb_tree {
   }
 
   // add, remove, findのヘルパー
-  node_ptr find_last(const key_type& search_key) {
+
+  node_ptr find_insert_pos(const key_type& given_key) {
     node_ptr current = root();
     node_ptr prev = nil_;
     while (current != nil_) {
       prev = current;
-      if (search_key == key(current)) {
+      if (given_key == key(current)) {
         return current;  // x.item はすでに木に含まれている
       }
-      bool comp = comp_func_(search_key, key(current));
-      if (comp) {
+      if (comp_(given_key, key(current))) {
         current = current->left;
       } else {
         current = current->right;
@@ -542,14 +536,30 @@ class rb_tree {
     return prev;
   }
 
-  node_ptr find_equal(const key_type& search_key) const {
+  // node_ptr find_insert_pos(const key_type& given_key) {
+  //   node_ptr current = root();
+  //   node_ptr prev = nil_;
+  //   while (current != nil_) {
+  //     prev = current;
+  //     if (given_key == key(current)) {
+  //       return current;  // x.item はすでに木に含まれている
+  //     }
+  //     if (comp_(given_key, key(current))) {
+  //       current = current->left;
+  //     } else {
+  //       current = current->right;
+  //     }
+  //   }
+  //   return prev;
+  // }
+
+  node_ptr find_equal(const key_type& given_key) const {
     node_ptr current = root();
     while (current != nil_) {
-      if (search_key == key(current)) {
+      if (given_key == key(current)) {
         return current;  // x.item はすでに木に含まれている
       }
-      bool comp = comp_func_(search_key, key(current));
-      if (comp) {
+      if (comp_(given_key, key(current))) {
         current = current->left;
       } else {
         current = current->right;
@@ -558,15 +568,12 @@ class rb_tree {
     return nil_;
   }
 
-  node_ptr find_lower_bound(const key_type& search_key) const {
+  node_ptr find_lower_bound(const key_type& given_key) const {
     node_ptr current = root();
     node_ptr prev = header_;  //見つからない場合end()を返すため
     while (current != nil_) {
-      if (search_key == key(current)) {
-        return current;
-      }
-      bool comp = comp_func_(search_key, key(current));
-      if (comp) {
+      // given_key以上なら現在のノードをprevに保存
+      if (!comp_(key(current), given_key)) {
         prev = current;
         current = current->left;
       } else {
@@ -576,43 +583,47 @@ class rb_tree {
     return prev;
   }
 
-  node_ptr find_upper_bound(const key_type& search_key) const {
+  node_ptr find_upper_bound(const key_type& given_key) const {
     node_ptr current = root();
     node_ptr prev = header_;  //見つからない場合end()を返すため
     while (current != nil_) {
-      if (search_key == key(current)) {
-        current = current->right;
+      // given_keyより大きいなら現在のノードをprevに保存
+      if (comp_(given_key, key(current))) {
+        prev = current;
+        current = current->left;
       } else {
-        bool comp = comp_func_(search_key, key(current));
-        if (comp) {
-          prev = current;
-          current = current->left;
-        } else {
-          current = current->right;
-        }
+        current = current->right;
       }
     }
     return prev;
   }
 
-  bool add_child(node_ptr parent, node_ptr to_insert) {
-    if (parent == nil_) {
+  bool add_child(node_ptr insert_pos, node_ptr to_insert) {
+    if (insert_pos == nil_) {
       connect_root_to_header(to_insert);
     } else {
-      if (key(to_insert) == key(parent)) {
-        return false;  // to_insert.item はすでに木に含まれている
-      }
-      bool comp = comp_func_(key(to_insert), key(parent));
-      if (comp) {
-        parent->left = to_insert;
+      if (comp_(key(to_insert), key(insert_pos))) {
+        insert_pos->left = to_insert;
       } else {
-        parent->right = to_insert;
+        insert_pos->right = to_insert;
       }
-      to_insert->parent = parent;
+      to_insert->parent = insert_pos;
     }
     count_++;
     update_ends();
     return true;
+  }
+
+  // insert用のヘルパー戻り値が変なのはそのせい
+  ft::pair< iterator, bool > insert_node(node_ptr insert_pos,
+                                         const value_type& value) {
+    if (insert_pos != nil_ && key(insert_pos) == key(value)) {
+      return ft::make_pair(iterator(insert_pos, nil_), false);
+    }
+    node_ptr to_insert = create_node(value);
+    add_child(insert_pos, to_insert);
+    add_fixup(to_insert);
+    return ft::make_pair(iterator(to_insert, nil_), true);
   }
 
   void connect_parent_to_new_child(node_ptr new_child, node_ptr old_child) {
@@ -685,26 +696,15 @@ class rb_tree {
     }
   }
 
-  bool remove(const key_type& search_key) {
-    node_ptr to_remove = find_last(search_key);
-    if (to_remove != nil_ && search_key == key(to_remove)) {
+  bool remove(const key_type& given_key) {
+    node_ptr to_remove = find_equal(given_key);
+    if (to_remove != nil_) {
       remove(to_remove);
       return true;
     }
     return false;
   }
 
-  void print_3node(node_ptr to_delete, node_ptr to_swap,
-                   node_ptr to_fix_color) {
-    std::cerr << "[\x1b[33mTO_DELETE\x1b[39m]" << std::endl;
-    print_node(to_delete);
-    std::cerr << "[\x1b[33mTO_SWAP\x1b[39m]" << std::endl;
-    print_node(to_swap);
-    std::cerr << "[\x1b[33mTO_FIX_COLOR\x1b[39m]" << std::endl;
-    print_node(to_fix_color);
-  }
-
-  // to_swap色の変更を始めるノード
   void remove(node_ptr to_delete) {
     node_ptr to_fix_color;
     node_ptr to_swap = to_delete->right;
@@ -1046,7 +1046,7 @@ class rb_tree {
   node_ptr most_left_;
   node_ptr most_right_;
   node_ptr nil_;
-  key_compare comp_func_;
+  key_compare comp_;
   node_allocator node_alloc_;
   size_type count_;
 };
