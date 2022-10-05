@@ -8,4 +8,5 @@ int main() {
   test_vector();
   test_stack();
   test_map();
+  test_set();
 }
