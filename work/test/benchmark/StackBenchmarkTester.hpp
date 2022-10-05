@@ -63,17 +63,17 @@ class StackBenchmarkTester {
 
   void test_pop(test_stack& stack) { stack.pop(); }
 
-  void test_op_eq(test_stack& stack) { original_ == stack; }
+  void test_op_eq(test_stack& stack) { (void)(original_ == stack); }
 
-  void test_op_ne(test_stack& stack) { original_ != stack; }
+  void test_op_ne(test_stack& stack) { (void)(original_ != stack); }
 
-  void test_op_lt(test_stack& stack) { original_ < stack; }
+  void test_op_lt(test_stack& stack) { (void)(original_ < stack); }
 
-  void test_op_le(test_stack& stack) { original_ <= stack; }
+  void test_op_le(test_stack& stack) { (void)(original_ <= stack); }
 
-  void test_op_gt(test_stack& stack) { original_ > stack; }
+  void test_op_gt(test_stack& stack) { (void)(original_ > stack); }
 
-  void test_op_ge(test_stack& stack) { original_ >= stack; }
+  void test_op_ge(test_stack& stack) { (void)(original_ >= stack); }
 
   void measure(const std::string& func_name,
                void (StackBenchmarkTester::*func)(void)) {

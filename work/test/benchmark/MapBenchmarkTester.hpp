@@ -146,17 +146,17 @@ class MapBenchmarkTester {
     std::swap(map, v);
   }
 
-  void test_op_eq(test_map& map) { original_ == map; }
+  void test_op_eq(test_map& map) { (void)(original_ == map); }
 
-  void test_op_ne(test_map& map) { original_ != map; }
+  void test_op_ne(test_map& map) { (void)(original_ != map); }
 
-  void test_op_lt(test_map& map) { original_ < map; }
+  void test_op_lt(test_map& map) { (void)(original_ < map); }
 
-  void test_op_le(test_map& map) { original_ <= map; }
+  void test_op_le(test_map& map) { (void)(original_ <= map); }
 
-  void test_op_gt(test_map& map) { original_ > map; }
+  void test_op_gt(test_map& map) { (void)(original_ > map); }
 
-  void test_op_ge(test_map& map) { original_ >= map; }
+  void test_op_ge(test_map& map) { (void)(original_ >= map); }
 
   void measure(const std::string& func_name,
                void (MapBenchmarkTester::*func)(void)) {

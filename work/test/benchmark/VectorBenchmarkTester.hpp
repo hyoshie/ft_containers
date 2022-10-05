@@ -155,17 +155,17 @@ class VectorBenchmarkTester {
     std::swap(vec, v);
   }
 
-  void test_op_eq(test_vec& vec) { original_ == vec; }
+  void test_op_eq(test_vec& vec) { (void)(original_ == vec); }
 
-  void test_op_ne(test_vec& vec) { original_ != vec; }
+  void test_op_ne(test_vec& vec) { (void)(original_ != vec); }
 
-  void test_op_lt(test_vec& vec) { original_ < vec; }
+  void test_op_lt(test_vec& vec) { (void)(original_ < vec); }
 
-  void test_op_le(test_vec& vec) { original_ <= vec; }
+  void test_op_le(test_vec& vec) { (void)(original_ <= vec); }
 
-  void test_op_gt(test_vec& vec) { original_ > vec; }
+  void test_op_gt(test_vec& vec) { (void)(original_ > vec); }
 
-  void test_op_ge(test_vec& vec) { original_ >= vec; }
+  void test_op_ge(test_vec& vec) { (void)(original_ >= vec); }
 
   void measure(const std::string& func_name,
                void (VectorBenchmarkTester::*func)(void)) {
