@@ -109,6 +109,8 @@ struct rb_tree_iterator
 
   virtual ~rb_tree_iterator() {}
 
+  node_ptr base() const { return current_; }
+
   reference operator*() const { return current_->item; }
 
   pointer operator->() const { return &current_->item; }
@@ -176,6 +178,8 @@ struct rb_tree_const_iterator
       : current_(it.current_), nil_(it.nil_) {}
 
   virtual ~rb_tree_const_iterator() {}
+
+  node_ptr base() const { return current_; }
 
   reference operator*() const { return current_->item; }
 
@@ -315,8 +319,10 @@ class rb_tree {
 
   // 時間があれば対応
   iterator insert(iterator hint, const value_type& value) {
-    (void)hint;
-    return insert(value).first;
+    // (void)hint;
+    // return insert(value).first;
+    node_ptr insert_pos = find_insert_pos(hint.base(), key(value));
+    return insert_node(insert_pos, value).first;
   }
 
   template < class InputIt >
@@ -536,22 +542,58 @@ class rb_tree {
     return prev;
   }
 
-  // node_ptr find_insert_pos(const key_type& given_key) {
-  //   node_ptr current = root();
-  //   node_ptr prev = nil_;
-  //   while (current != nil_) {
-  //     prev = current;
-  //     if (given_key == key(current)) {
-  //       return current;  // x.item はすでに木に含まれている
-  //     }
-  //     if (comp_(given_key, key(current))) {
-  //       current = current->left;
-  //     } else {
-  //       current = current->right;
-  //     }
-  //   }
-  //   return prev;
-  // }
+  node_ptr find_insert_pos(node_ptr hint, const key_type& given_key) {
+    // hintがend()を指している時
+    if (hint == header_) {
+      if (size() > 0 && !comp_(given_key, key(most_right_))) {
+        return most_right_;
+      } else {
+        return find_insert_pos(given_key);
+      }
+    }
+    if (comp_(given_key, key(hint))) {
+      // key < hint
+      if (hint == most_left_) {
+        return most_left_;
+      }
+      node_ptr prev_node = prev(hint, nil_);
+      if (comp_(key(prev_node), given_key)) {
+        // prev < key < hint
+        if (prev_node->right == nil_) {
+          // prev->right != hint
+          return prev_node;
+        } else {
+          // prev->right == hint
+          return hint;
+        }
+      } else {
+        // key <= prev, 検索し直す
+        return find_insert_pos(given_key);
+      }
+    } else {
+      // hint <= key
+      if (hint == most_right_) {
+        return most_right_;
+      }
+      node_ptr next_node = next(hint, nil_);
+      if (comp_(given_key, key(next_node))) {
+        // hint < key < next
+        if (hint->right == nil_) {
+          // hint->right != next
+          return hint;
+        } else {
+          // hint->right == next
+          return next_node;
+        }
+      } else {
+        // next <= key, 検索し直す
+        return find_insert_pos(given_key);
+      }
+    }
+    // 通らない予定
+    // assert(0);
+    return find_insert_pos(given_key);
+  }
 
   node_ptr find_equal(const key_type& given_key) const {
     node_ptr current = root();
