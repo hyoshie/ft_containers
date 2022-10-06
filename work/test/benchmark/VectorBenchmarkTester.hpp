@@ -78,7 +78,10 @@ class VectorBenchmarkTester {
 
   void test_copy_ctor() { vector_t vec(original_); }
 
-  void test_op_assign(vector_t& vec) { vec = original_; }
+  void test_op_assign() {
+    vector_t vec(random_size(original_));
+    vec = original_;
+  }
 
   void test_assign_fill(vector_t& vec) { vec.assign(random_size(vec), value_); }
 
