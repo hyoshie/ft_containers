@@ -313,10 +313,10 @@ class vector {
   }
 
   void swap(vector& other) {
-    swap_data(first_, other.first_);
-    swap_data(last_, other.last_);
-    swap_data(reserved_last_, other.reserved_last_);
-    swap_data(alloc_, other.alloc_);
+    std::swap(first_, other.first_);
+    std::swap(last_, other.last_);
+    std::swap(reserved_last_, other.reserved_last_);
+    std::swap(alloc_, other.alloc_);
   }
 
  private:
@@ -377,13 +377,6 @@ class vector {
       prev_cap = cap;
     }
     reserve(cap);
-  }
-
-  template < typename U >
-  void swap_data(U& lhs, U& rhs) {
-    U tmp = lhs;
-    lhs = rhs;
-    rhs = tmp;
   }
 
   pointer first_;
