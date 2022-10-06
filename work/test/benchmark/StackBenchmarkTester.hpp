@@ -20,7 +20,7 @@ class StackBenchmarkTester {
   typedef NAMESPACE::stack< T, Container > stack_t;
 
   static const int kLoopCount = 100;
-  static const int kElemCount = 1000;
+  static const int kElemCount = 10000;
 
   StackBenchmarkTester(const Container& c)
       : src_(c), original_(create_stack()), value_(original_.top()) {}
@@ -76,7 +76,7 @@ class StackBenchmarkTester {
   void measure(const std::string& func_name,
                void (StackBenchmarkTester::*func)(void)) {
     Timer timer;
-    print_func(func_name);
+    print_func("sta " + func_name);
     for (int i = 0; i < kLoopCount; i++) {
       timer.start();
       (this->*func)();
@@ -89,7 +89,7 @@ class StackBenchmarkTester {
   void measure(const std::string& func_name,
                void (StackBenchmarkTester::*func)(stack_t&)) {
     Timer timer;
-    print_func(func_name);
+    print_func("sta " + func_name);
     for (int i = 0; i < kLoopCount; i++) {
       stack_t stack(original_);
       stack.pop();

@@ -158,7 +158,7 @@ class SetBenchmarkTester {
   void measure(const std::string& func_name,
                void (SetBenchmarkTester::*func)(void)) {
     Timer timer;
-    print_func(func_name);
+    print_func("set " + func_name);
     for (int i = 0; i < kLoopCount; i++) {
       timer.start();
       (this->*func)();
@@ -170,7 +170,7 @@ class SetBenchmarkTester {
   void measure(const std::string& func_name,
                void (SetBenchmarkTester::*func)(set_t&)) {
     Timer timer;
-    print_func(func_name);
+    print_func("set " + func_name);
     for (int i = 0; i < kLoopCount; i++) {
       set_t set(original_);
       timer.start();

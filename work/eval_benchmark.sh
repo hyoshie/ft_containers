@@ -12,7 +12,7 @@ make_log() {
 	./$1 > $FT_LOG
 	./$2 > $STL_LOG
 	paste $FT_LOG $STL_LOG  > $TMP_LOG
-	awk '{ratio = $3/$6} {printf "%13s [ratio]%5.2f [ft]%6.4f [stl]%6.4f\n", $1, ratio, $3, $6}' $TMP_LOG  > $RESULT_LOG
+	awk '{ratio = $4/$8} {printf "%s%13s [ratio]%5.2f [ft]%6.4f [stl]%6.4f\n", $1, $2,  ratio, $4, $8}' $TMP_LOG  > $RESULT_LOG
 }
 
 validate_ratio(){

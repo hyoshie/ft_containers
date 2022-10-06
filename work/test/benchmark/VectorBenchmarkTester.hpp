@@ -25,7 +25,7 @@ class VectorBenchmarkTester {
   typedef typename deque_t::iterator deque_iter;
 
   static const int kLoopCount = 100;
-  static const int kElemCount = 1000;
+  static const int kElemCount = 10000;
 
   VectorBenchmarkTester(const std::deque< T >& deq)
       : src_deq_(deq), original_(deq.begin(), deq.end()) {}
@@ -172,7 +172,7 @@ class VectorBenchmarkTester {
   void measure(const std::string& func_name,
                void (VectorBenchmarkTester::*func)(void)) {
     Timer timer;
-    print_func(func_name);
+    print_func("vec " + func_name);
     for (int i = 0; i < kLoopCount; i++) {
       timer.start();
       (this->*func)();
@@ -184,7 +184,7 @@ class VectorBenchmarkTester {
   void measure(const std::string& func_name,
                void (VectorBenchmarkTester::*func)(vector_t&)) {
     Timer timer;
-    print_func(func_name);
+    print_func("vec " + func_name);
     for (int i = 0; i < kLoopCount; i++) {
       vector_t vec(original_);
       timer.start();

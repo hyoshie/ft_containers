@@ -28,7 +28,7 @@ class MapBenchmarkTester {
   typedef typename deque_t::iterator deque_iter;
 
   static const int kLoopCount = 100;
-  static const int kElemCount = 1000;
+  static const int kElemCount = 10000;
 
   MapBenchmarkTester(deque_t deq1, deque_t deq2)
       : src_deq1_(deq1),
@@ -162,7 +162,7 @@ class MapBenchmarkTester {
   void measure(const std::string& func_name,
                void (MapBenchmarkTester::*func)(void)) {
     Timer timer;
-    print_func(func_name);
+    print_func("map " + func_name);
     for (int i = 0; i < kLoopCount; i++) {
       timer.start();
       (this->*func)();
@@ -174,7 +174,7 @@ class MapBenchmarkTester {
   void measure(const std::string& func_name,
                void (MapBenchmarkTester::*func)(map_t&)) {
     Timer timer;
-    print_func(func_name);
+    print_func("map " + func_name);
     for (int i = 0; i < kLoopCount; i++) {
       map_t map(original_);
       timer.start();
