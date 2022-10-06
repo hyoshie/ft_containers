@@ -414,6 +414,12 @@ class VectorTester {
     print_info(second);
     std::cout << *first_it << std::endl;
     std::cout << *second_it << std::endl;
+
+    NAMESPACE::swap(first, second);
+    print_info(first);
+    print_info(second);
+    std::cout << *first_it << std::endl;
+    std::cout << *second_it << std::endl;
   }
 
   void test_op_compare() {

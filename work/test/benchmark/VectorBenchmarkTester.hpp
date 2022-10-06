@@ -2,9 +2,10 @@
 #define VECTORBENCHMARKTESTER_HPP
 
 #if USE_STL
-#define ft std
+#define NAMESPACE std
 #include <vector>
 #else
+#define NAMESPACE ft
 #include "vector.hpp"
 #endif
 
@@ -18,7 +19,7 @@
 template < typename T >
 class VectorBenchmarkTester {
  public:
-  typedef ft::vector< T > vector_t;
+  typedef NAMESPACE::vector< T > vector_t;
   typedef typename vector_t::iterator iter_t;
   typedef typename vector_t::const_iterator citer_t;
   typedef std::deque< T > deque_t;
@@ -61,6 +62,7 @@ class VectorBenchmarkTester {
     measure("pop_back", &VectorBenchmarkTester::test_pop_back);
     measure("resize", &VectorBenchmarkTester::test_resize);
     measure("swap", &VectorBenchmarkTester::test_swap);
+    measure("non_m_swap", &VectorBenchmarkTester::test_non_m_swap);
     measure("std::swap", &VectorBenchmarkTester::test_std_swap);
     measure("op_eq", &VectorBenchmarkTester::test_op_eq);
     measure("op_ne", &VectorBenchmarkTester::test_op_ne);
@@ -150,6 +152,11 @@ class VectorBenchmarkTester {
   void test_swap(vector_t& vec) {
     vector_t v;
     vec.swap(v);
+  }
+
+  void test_non_m_swap(vector_t& vec) {
+    vector_t v;
+    NAMESPACE::swap(vec, v);
   }
 
   void test_std_swap(vector_t& vec) {

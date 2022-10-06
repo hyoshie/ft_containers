@@ -279,6 +279,10 @@ class SetTester {
     std::swap(set, added);
     print_basic_info(set);
     print_basic_info(added);
+
+    NAMESPACE::swap(set, added);
+    print_basic_info(set);
+    print_basic_info(added);
   }
 
   void test_count() {

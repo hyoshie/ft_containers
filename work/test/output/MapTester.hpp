@@ -291,6 +291,10 @@ class MapTester {
     std::swap(map, added);
     print_basic_info(map);
     print_basic_info(added);
+
+    NAMESPACE::swap(map, added);
+    print_basic_info(map);
+    print_basic_info(added);
   }
 
   void test_count() {

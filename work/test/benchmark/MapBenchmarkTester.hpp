@@ -64,6 +64,7 @@ class MapBenchmarkTester {
     measure("key_comp", &MapBenchmarkTester::test_key_comp);
     measure("value_comp", &MapBenchmarkTester::test_value_comp);
     measure("swap", &MapBenchmarkTester::test_swap);
+    measure("non_m_swap", &MapBenchmarkTester::test_non_m_swap);
     measure("std::swap", &MapBenchmarkTester::test_std_swap);
     measure("op_eq", &MapBenchmarkTester::test_op_eq);
     measure("op_ne", &MapBenchmarkTester::test_op_ne);
@@ -138,13 +139,18 @@ class MapBenchmarkTester {
   void test_value_comp() { original_.value_comp(); }
 
   void test_swap(map_t& map) {
-    map_t v;
-    map.swap(v);
+    map_t m;
+    map.swap(m);
+  }
+
+  void test_non_m_swap(map_t& map) {
+    map_t m;
+    NAMESPACE::swap(map, m);
   }
 
   void test_std_swap(map_t& map) {
-    map_t v;
-    std::swap(map, v);
+    map_t m;
+    std::swap(map, m);
   }
 
   void test_op_eq(map_t& map) { (void)(original_ == map); }

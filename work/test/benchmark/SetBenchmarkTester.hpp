@@ -62,6 +62,7 @@ class SetBenchmarkTester {
     measure("key_comp", &SetBenchmarkTester::test_key_comp);
     measure("value_comp", &SetBenchmarkTester::test_value_comp);
     measure("swap", &SetBenchmarkTester::test_swap);
+    measure("non_m_swap", &SetBenchmarkTester::test_non_m_swap);
     measure("std::swap", &SetBenchmarkTester::test_std_swap);
     measure("op_eq", &SetBenchmarkTester::test_op_eq);
     measure("op_ne", &SetBenchmarkTester::test_op_ne);
@@ -134,13 +135,18 @@ class SetBenchmarkTester {
   void test_value_comp() { original_.value_comp(); }
 
   void test_swap(set_t& set) {
-    set_t v;
-    set.swap(v);
+    set_t s;
+    set.swap(s);
+  }
+
+  void test_non_m_swap(set_t& set) {
+    set_t s;
+    NAMSPACE::swap(set, s);
   }
 
   void test_std_swap(set_t& set) {
-    set_t v;
-    std::swap(set, v);
+    set_t s;
+    std::swap(set, s);
   }
 
   void test_op_eq(set_t& set) { (void)(original_ == set); }
