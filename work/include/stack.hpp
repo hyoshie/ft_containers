@@ -15,8 +15,8 @@ class stack {
   typedef typename Container::const_reference const_reference;
 
   // コンストラクタ
-  explicit stack(const Container& cont = Container()) : c_(cont) {}
-  stack(const stack& other) : c_(other.c_) {}
+  explicit stack(const Container& cont = Container()) : c(cont) {}
+  stack(const stack& other) : c(other.c) {}
 
   // デストラクタ
   ~stack() {}
@@ -25,23 +25,23 @@ class stack {
     if (this == &other) {
       return *this;
     }
-    c_ = other.c_;
+    c = other.c;
     return *this;
   }
 
   // 要素アクセス
-  reference top() { return c_.back(); }
-  const_reference top() const { return c_.back(); }
+  reference top() { return c.back(); }
+  const_reference top() const { return c.back(); }
 
   // 容量
-  bool empty() const { return c_.empty(); }
+  bool empty() const { return c.empty(); }
 
-  size_type size() const { return c_.size(); }
+  size_type size() const { return c.size(); }
 
   // 変更
-  void push(const value_type& value) { c_.push_back(value); }
+  void push(const value_type& value) { c.push_back(value); }
 
-  void pop() { c_.pop_back(); }
+  void pop() { c.pop_back(); }
 
   template < class T1, class Container1 >
   friend bool operator==(const ft::stack< T1, Container1 >& lhs,
@@ -52,13 +52,13 @@ class stack {
                         const ft::stack< T1, Container1 >& rhs);
 
  protected:
-  Container c_;
+  Container c;
 };
 
 template < class T, class Container >
 bool operator==(const ft::stack< T, Container >& lhs,
                 const ft::stack< T, Container >& rhs) {
-  return lhs.c_ == rhs.c_;
+  return lhs.c == rhs.c;
 }
 
 template < class T, class Container >
@@ -70,7 +70,7 @@ bool operator!=(const ft::stack< T, Container >& lhs,
 template < class T, class Container >
 bool operator<(const ft::stack< T, Container >& lhs,
                const ft::stack< T, Container >& rhs) {
-  return lhs.c_ < rhs.c_;
+  return lhs.c < rhs.c;
 }
 
 template < class T, class Container >

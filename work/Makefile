@@ -12,7 +12,6 @@ CXXFLAGS = -Wall \
 		   -Wshadow \
 		   -std=c++98 \
 		   -pedantic \
-		   -g \
 		   $(INCS) \
 		   $(NULL)
 
@@ -101,6 +100,11 @@ bench: $(BENCHMARK_FT) $(BENCHMARK_STL) $(LOGDIR)
 leak: $(NAME_FT) $(BENCHMARK_FT)
 	./$(NAME_FT) > /dev/null
 	./$(BENCHMARK_FT) > /dev/null
+
+.PHONY: given
+given:
+	$(CXX) $(CXXFLAGS) test/given_main.cpp -o given_test
+	./given_test 42
 
 .PHONY: ft
 ft: $(NAME_FT)
