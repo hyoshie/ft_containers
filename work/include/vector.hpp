@@ -77,7 +77,25 @@ class vector {
     if (this == &rhs) {
       return *this;
     }
-    assign(rhs.begin(), rhs.end());
+    if (size() == rhs.size()) {
+      std::copy(rhs.begin(), rhs.end(), begin());
+    } else {
+      if (capacity() >= rhs.size()) {
+        destroy_until(rend());
+        for (const_iterator src_iter = rhs.begin(),
+                            src_end = rhs.begin() + rhs.size();
+             src_iter != src_end; ++src_iter, ++last_) {
+          construct(last_, *src_iter);
+        }
+      } else {
+        destroy_until(rend());
+        reserve(rhs.size());
+        for (const_iterator src_iter = rhs.begin(), src_end = rhs.end();
+             src_iter != src_end; ++src_iter, ++last_) {
+          construct(last_, *src_iter);
+        }
+      }
+    }
     return *this;
   }
 
@@ -107,31 +125,19 @@ class vector {
     size_type count = std::distance(first, last);
     if (count > capacity()) {
       clear();
-      reserve(count);
-      std::uninitialized_copy(first, last, first_);
-      last_ = first_ + count;
-      // deallocate();
-      // first_ = allocate(count);
-      // last_ = first_;
-      // reserved_last_ = first_ + count;
-      // for (; last_ != reserved_last_; ++last_, ++first) {
-      //   construct(last_, *first);
-      // }
-    } else {
-      // std::cerr << "[\x1b[32mPASS\x1b[39m]"<<std::endl;
-      pointer new_last = first_ + count;
-      if (last_ < new_last) {
-        construct_range(last_, new_last);
-      } else if (last_ > new_last) {
-        destroy_range(new_last, last_);
+      deallocate();
+      first_ = allocate(count);
+      last_ = first_;
+      reserved_last_ = first_ + count;
+      for (; last_ != reserved_last_; ++last_, ++first) {
+        construct(last_, *first);
       }
-      std::copy(first, last, first_);
-      last_ = new_last;
-      // clear();
-      // last_ = first_;
-      // for (size_type i = 0; i < count; ++i, ++last_, ++first) {
-      //   construct(last_, *first);
-      // }
+    } else {
+      clear();
+      last_ = first_;
+      for (size_type i = 0; i < count; ++i, ++last_, ++first) {
+        construct(last_, *first);
+      }
     }
   }
 
@@ -321,12 +327,6 @@ class vector {
   void construct(pointer ptr) { alloc_.construct(ptr, T()); }
 
   void construct(pointer ptr, const T& value) { alloc_.construct(ptr, value); }
-
-  void construct_range(pointer first, pointer last) {
-    for (; first != last; ++first) {
-      construct(first);
-    }
-  }
 
   void destroy(pointer ptr) { alloc_.destroy(ptr); }
 
