@@ -97,6 +97,11 @@ run: $(NAME_FT) $(NAME_STL) $(LOGDIR)
 bench: $(BENCHMARK_FT) $(BENCHMARK_STL) $(LOGDIR)
 	./eval_benchmark.sh $(BENCHMARK_FT) $(BENCHMARK_STL)
 
+.PHONY: leak
+leak: $(NAME_FT) $(BENCHMARK_FT)
+	./$(NAME_FT) > /dev/null
+	./$(BENCHMARK_FT) > /dev/null
+
 .PHONY: ft
 ft: $(NAME_FT)
 	./$(NAME_FT)
