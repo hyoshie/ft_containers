@@ -61,10 +61,7 @@ class set {
     return *this;
   }
 
-  allocator_type get_allocator() const {
-    print();
-    return tree_.get_allocator();
-  }
+  allocator_type get_allocator() const { return tree_.get_allocator(); }
 
   // イテレータ
   iterator begin() { return tree_.begin(); }

@@ -406,13 +406,11 @@ class rb_tree {
   }
 
   void print() const {
-    value_type left_item = most_left_->item;
-    value_type right_item = most_right_->item;
+    // value_type left_item = most_left_->item;
+    // value_type right_item = most_right_->item;
     std::cerr << "------------------------------" << std::endl;
-    std::cerr << "most_left :(" << left_item.first << ", " << left_item.second
-              << ")" << std::endl;
-    std::cerr << "most_right:(" << right_item.first << ", " << right_item.second
-              << ")" << std::endl;
+    std::cerr << "most_left :" << key(most_left_) << std::endl;
+    std::cerr << "most_right:(" << key(most_right_) << std::endl;
     print_graph(root(), 0);
     std::cerr << "------------------------------" << std::endl;
   }
@@ -420,8 +418,7 @@ class rb_tree {
   void print_with_itr() const {
     std::cerr << "[\x1b[32mPRINT_WITH_ITR\x1b[39m]" << std::endl;
     for (const_iterator it = begin(); it != end(); it++) {
-      std::cerr << "(" << it.current_ << "):" << it->first << ", " << it->second
-                << std::endl;
+      std::cerr << "(" << it.current_ << "):" << *it << std::endl;
       std::cerr << "(" << it.current_->parent << "):parent" << std::endl;
       std::cerr << "(" << it.current_->left << "):left" << std::endl;
       std::cerr << "(" << it.current_->right << "):right" << std::endl;
@@ -1031,8 +1028,7 @@ class rb_tree {
           "\x1b[35m"
           "???";
     }
-    std::cerr << "+(" << color_prefix << node->item.first << ", "
-              << node->item.second << "\x1b[39m"
+    std::cerr << "+(" << color_prefix << node->item << "\x1b[39m"
               << ")" << std::endl;
 
     print_graph(node->right, depth + 1);
@@ -1040,8 +1036,7 @@ class rb_tree {
 
   void print_itr(iterator iter) const {
     std::cerr << "[\x1b[32mITERATOR\x1b[39m]" << std::endl;
-    std::cerr << "(" << iter.current_ << "):" << iter->first << ", "
-              << iter->second << std::endl;
+    std::cerr << "(" << iter.current_ << "):" << *iter << std::endl;
     std::cerr << "(" << iter.current_->parent << "):parent" << std::endl;
     std::cerr << "(" << iter.current_->left << "):left" << std::endl;
     std::cerr << "(" << iter.current_->right << "):right" << std::endl;
@@ -1051,8 +1046,7 @@ class rb_tree {
 
   void print_node(node_ptr node) const {
     std::cerr << "---------------------------------------------" << std::endl;
-    std::cerr << "(" << node << "):" << node->item.first << ", "
-              << node->item.second << std::endl;
+    std::cerr << "(" << node << "):" << node->item << std::endl;
     std::cerr << "(" << node->parent << "):parent" << std::endl;
     std::cerr << "(" << node->left << "):left" << std::endl;
     std::cerr << "(" << node->right << "):right" << std::endl;

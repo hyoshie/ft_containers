@@ -41,14 +41,12 @@ class SetTester {
     test_ctor();
     test_iter();
     test_op_assign();
-    // print_graphを仕込んでいるので一旦コメントアウト
-    // test_get_allocator();
+    test_get_allocator();
     test_begin_and_end();
     test_rbegin_and_rend();
     test_empty();
     test_size();
-    // 環境依存なのでテストしない
-    // test_max_size();
+    test_max_size();
     test_clear();
     test_insert();
     test_erase();
@@ -61,8 +59,6 @@ class SetTester {
     test_key_comp();
     test_value_comp();
     test_op_compare();
-    // // 木を表示
-    // print_graph();
   }
 
   void test_default_ctor() {
@@ -156,7 +152,7 @@ class SetTester {
   }
 
   void test_max_size() {
-    pout("size");
+    pout("max_size");
     const set_t c_set(original_);
 
     std::cout << original_.max_size() << std::endl;
@@ -376,13 +372,6 @@ class SetTester {
     citer_t c_not_found = original_.upper_bound(key);
 
     std::cout << (c_not_found == original_.end()) << std::endl;
-  }
-
-  void print_graph() {
-    pout("get_allocator");
-    std::allocator< key_t > alloc;
-    std::cout << std::boolalpha << (alloc == original_.get_allocator())
-              << std::endl;
   }
 
   void test_key_comp() {

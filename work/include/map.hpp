@@ -78,10 +78,7 @@ class map {
     return *this;
   }
 
-  allocator_type get_allocator() const {
-    print();
-    return tree_.get_allocator();
-  }
+  allocator_type get_allocator() const { return tree_.get_allocator(); }
 
   // 要素アクセス
   T& operator[](const Key& key) {
